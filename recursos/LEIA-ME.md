@@ -22,54 +22,100 @@ Exemplo: `recursos/fontes/titulo.ttf`. Confira se a fonte tem acentos (Â, ã, �
 
 ## 2. Personagem — `recursos/personagem/`
 
-| Arquivo | Formato |
+O site aceita **três formatos**. Use só um deles.
+
+### Formato A · Folha empacotada + coordenadas (o da sua folha atual)
+
+| Arquivo | O que é |
 |---|---|
-| `personagem.png` (ou `.webp`) | folha de sprites com fundo transparente |
+| `personagem.png` (ou `.webp`) | a folha empacotada, do jeito que está (quadros de tamanhos diferentes, alguns girados) |
+| `personagem.json` | as coordenadas de cada quadro, no formato **JSON do TexturePacker** (Hash ou Array) ou **JSON do Aseprite** |
 
-**Como a folha precisa ser montada (sem configuração):**
+- O site lê `frame`, `rotated` (quadro girado 90°), `trimmed` / `spriteSourceSize` / `sourceSize` (quadro recortado) e `pivot` (ponto que pisa no chão).
+- **Sem `personagem.json`, uma folha empacotada não é usada** (a Oficina mostra ✕ e a Lume continua no lugar).
+- O `personagem.json` não vem pronto: ele é gerado por um programa de atlas (TexturePacker, Free Texture Packer, Aseprite…). Para uma folha que já está empacotada, primeiro separe os quadros com uma ferramenta de "sprite unpacker / extract sprites" e depois reempacote, ou use o Formato C.
 
-- **7 linhas**, uma animação por linha, nesta ordem:
+**Como o site sabe qual quadro é de qual animação** (escolha um):
 
-  | Linha | Animação | Quadros sugeridos |
-  |---|---|---|
-  | 1 | parado | 1 a 6 |
-  | 2 | correr | 6 a 8 |
-  | 3 | pular (subindo) | 2 a 3 |
-  | 4 | cair (descendo) | 2 a 3 |
-  | 5 | golpe | 3 a 5 |
-  | 6 | avanço (dash) | 2 |
-  | 7 | dano | 1 a 2 |
-
-- **Quadros quadrados e todos do mesmo tamanho.** O lado do quadro é calculado como `altura da imagem ÷ 7`.
-  Ex.: quadros de 128 px → imagem com 896 px de altura; largura = 128 × (maior número de quadros de uma linha).
-- Os quadros de cada linha começam na **esquerda** e ficam colados. Quadros vazios no fim da linha são ignorados
-  (o site conta sozinho quantos quadros cada linha tem). Uma linha toda vazia usa a animação "parado".
-- Personagem olhando para a **direita**.
-- **Pés encostados na borda de baixo do quadro, no centro.** É esse ponto que pisa no chão.
-- Deixe 2 a 4 px de folga nas laterais de cada quadro.
-- GIF animado não serve: precisa ser a grade em PNG.
-
-**Opcional:** `personagem.json`, só se a folha fugir do padrão:
+1. **Pelo nome do quadro.** Nomeie os quadros com o nome da animação + número: `parado-01`, `correr-03`, `golpe-cima-02`, `efeito-golpe-01`… (hífen, sublinhado ou nada antes do número; extensão é ignorada).
+2. **Pelas tags do Aseprite** (`meta.frameTags`), com os nomes da tabela abaixo.
+3. **Por uma lista no próprio `personagem.json`**, quando os nomes não seguem o padrão:
 
 ```json
 {
-  "quadro": [64, 80],
+  "frames": { "...": "gerado pelo programa de atlas" },
+  "meta":   { "...": "gerado pelo programa de atlas" },
+
+  "animacoes": {
+    "parado": ["idle_0", "idle_1", "idle_2"],
+    "correr": "run_",
+    "golpe":  { "quadros": ["slash_0", "slash_1", "slash_2"], "fps": 20 },
+    "pouso":  { "prefixo": "land", "repetir": false }
+  },
   "tamanho": 1,
+  "altura_ref": 128,
+  "fps": { "correr": 14 },
   "olha_esquerda": false,
   "pixel": false,
   "contorno": false,
-  "lanterna": true,
-  "fps": { "parado": 6, "correr": 12, "pular": 8, "cair": 8, "golpe": 18, "avanco": 12, "dano": 8 },
-  "animacoes": { "golpe": [4, 5, 20] }
+  "lanterna": true
 }
 ```
 
-- `quadro`: largura e altura do quadro em px (para quadros que não são quadrados).
-- `tamanho`: 1 = cerca de 84 px de altura numa tela de 1280 px.
-- `pixel`: `true` para pixel art (não borra).
-- `contorno`: `true` desenha a linha de tinta tremida em volta, como no resto do site.
-- `lanterna`: brilho de luz perto do personagem.
-- `animacoes`: `[linha, quadros, fps]`, com a linha contando a partir de **0**. Use para reaproveitar linhas.
+- Lista de nomes → esses quadros, nessa ordem. Texto → todos os quadros que começam com ele, em ordem numérica.
+- `altura_ref`: altura (px) que corresponde a `tamanho` 1 (~84 px numa tela de 1280). Padrão: altura do 1º quadro de `parado`.
+
+### Formato B · Grade (7 linhas)
+
+Igual a antes: `personagem.png` com 7 linhas na ordem parado, correr, pular, cair, golpe, avanço, dano;
+quadros quadrados (lado = altura ÷ 7); quadros vazios no fim da linha são ignorados.
+Opcional `personagem.json` com `"quadro": [largura, altura]` e `"animacoes": { "golpe": [linha, quadros, fps] }` (linha a partir de 0).
+
+### Formato C · Quadros soltos numerados (o mais simples)
+
+Um PNG por quadro, com o nome da animação + número de 2 dígitos, começando em `01`:
+
+```
+personagem/parado-01.png  parado-02.png  parado-03.png
+personagem/correr-01.png  …  correr-08.png
+personagem/golpe-cima-01.png …
+personagem/efeito-golpe-01.png …
+```
+
+Salve todos os quadros com o **mesmo tamanho de tela** e o personagem **com os pés na borda de baixo, no centro**.
+Opcional `personagem.json` com `tamanho`, `altura_ref`, `fps`, `olha_esquerda`, `pixel`, `contorno`, `lanterna`.
+
+### Animações que o site usa
+
+Só `parado` é obrigatória. As que faltarem usam a da coluna "se faltar".
+
+| Nome | Quando toca | Repete? | Se faltar |
+|---|---|---|---|
+| `parado` | sem andar | sim | — |
+| `correr` | andando | sim | parado |
+| `pular` | subindo no ar | sim | parado |
+| `cair` | descendo no ar | sim | pular |
+| `golpe` | ataque para frente | não | parado |
+| `golpe-cima` | ataque para cima (W + golpe) | não | golpe |
+| `golpe-baixo` | ataque para baixo no ar (S + golpe) | não | golpe |
+| `avanco` | avanço rápido | sim | correr |
+| `dano` | ao ser atingido | não | parado |
+| `morte` | ao perder todas as chamas | não | dano |
+| `salto-duplo` | segundo pulo no ar | não | pular |
+| `pouso` | ao tocar o chão e ao se preparar para pular | não | parado |
+| `olhar-cima` | parado segurando W | sim | parado |
+| `olhar-baixo` | parado segurando S | sim | parado |
+
+**Efeitos (opcionais, desenhados centralizados):** substituem os efeitos de luz do site.
+
+| Nome | Onde aparece |
+|---|---|
+| `efeito-golpe` | arco do golpe, à frente do personagem |
+| `efeito-golpe-cima` / `efeito-golpe-baixo` | arcos para cima e para baixo (se faltarem, o `efeito-golpe` é girado) |
+| `efeito-salto-duplo` | no segundo pulo |
+| `efeito-avanco` | no início do avanço |
+
+Regras de desenho para qualquer formato: personagem olhando para a **direita**; pés na base do quadro (ou use `pivot`); efeitos apontando para a **direita**.
 
 ## 3. Inimigos — `recursos/inimigos/`
 

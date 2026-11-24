@@ -83,10 +83,10 @@ function fillPlayerForm(cfg){if(!cfg)return;$('pFw').value=cfg.fw;$('pFh').value
 function enemyCfg(){const fr=+$('eFr').value||1,fps=+$('eFps').value||8;return{fw:+$('eFw').value||48,fh:+$('eFh').value||32,scale:+$('eSc').value||1,flip:$('eFlip').checked,pixel:$('ePix').checked,ink:$('eInk').checked,anims:{parado:{row:0,frames:fr,fps}}}}
 function fillEnemyForm(k){const e=ASSETS.enemy[k],cfg=e&&e.cfg;if(!cfg)return;$('eFw').value=cfg.fw;$('eFh').value=cfg.fh;$('eSc').value=cfg.scale;$('eFr').value=cfg.anims.parado.frames;$('eFps').value=cfg.anims.parado.fps;$('eFlip').checked=!!cfg.flip;$('ePix').checked=!!cfg.pixel;$('eInk').checked=cfg.ink!==false}
 $('pImg').onchange=async e=>{const f=e.target.files[0];if(!f)return;pending.player={blob:f,img:await blobImg(f)};const im=pending.player.img;if(im.width&&+$('pFh').value>im.height)$('pFh').value=im.height;toast('Folha carregada. Ajuste os quadros e aplique.')};
-$('pApply').onclick=async()=>{const src=pending.player||ASSETS.player;if(!src){toast('Escolha uma folha de sprites primeiro.');return}const cfg=playerCfg();ASSETS.player={img:src.img,blob:src.blob,cfg};await IDB.put('player',{blob:src.blob,cfg});pending.player=null;toast('Personagem aplicado.')};
+$('pApply').onclick=async()=>{const src=pending.player||(ASSETS.player&&ASSETS.player.kind==='grade'?ASSETS.player:null);if(!src){toast('Escolha uma folha em grade primeiro.');return}const cfg=playerCfg();ASSETS.player={...gridSprite(src.img,cfg),blob:src.blob};await IDB.put('player',{blob:src.blob,cfg});pending.player=null;toast('Personagem aplicado.')};
 $('eKind').onchange=()=>fillEnemyForm($('eKind').value);
 $('eImg').onchange=async e=>{const f=e.target.files[0];if(!f)return;pending.enemy={blob:f,img:await blobImg(f)};toast('Folha carregada. Ajuste e aplique.')};
-$('eApply').onclick=async()=>{const k=$('eKind').value,src=pending.enemy||ASSETS.enemy[k];if(!src){toast('Escolha uma folha para esta criatura.');return}const cfg=enemyCfg();ASSETS.enemy[k]={img:src.img,blob:src.blob,cfg};await IDB.put('enemy:'+k,{blob:src.blob,cfg});pending.enemy=null;toast('Criatura aplicada.')};
+$('eApply').onclick=async()=>{const k=$('eKind').value,src=pending.enemy||ASSETS.enemy[k];if(!src){toast('Escolha uma folha para esta criatura.');return}const cfg=enemyCfg();ASSETS.enemy[k]={...gridSprite(src.img,cfg),blob:src.blob};await IDB.put('enemy:'+k,{blob:src.blob,cfg});pending.enemy=null;toast('Criatura aplicada.')};
 $('eReset').onclick=async()=>{const k=$('eKind').value;delete ASSETS.enemy[k];await IDB.del('enemy:'+k);toast('Desenho original restaurado.')};
 $('bImg').onchange=async e=>{const f=e.target.files[0];if(!f)return;pending.bg={blob:f,img:await blobImg(f)};toast('Imagem carregada. Escolha o modo e aplique.')};
 $('bReg').onchange=()=>{const b=ASSETS.bg[$('bReg').value];if(b){$('bFit').value=b.cfg.encaixe;$('bMode').value=b.cfg.modo;$('bOp').value=Math.round(b.cfg.opacidade*100);$('bDirt').checked=b.cfg.sujeira!==false}};
@@ -118,11 +118,11 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closePanels);
 document.querySelectorAll('[data-guide]').forEach(b=>b.onclick=()=>openGuide(b.dataset.guide));
 $('guide').addEventListener('click',e=>{if(e.target===$('guide'))closePanels()});
 function previewLoop(){if($('shop').hidden)return;const t=performance.now()/1000;
-  const pc=$('pPrev').getContext('2d');pc.clearRect(0,0,360,150);const src=pending.player||ASSETS.player;
-  if(src){const cfg=playerCfg(),i=Math.floor(t/1.6)%ANIMS.length,[k,n]=ANIMS[i];drawSheet(pc,{img:src.img,cfg},k,t%1.6,180,138,1,110/(cfg.scale||1)*(cfg.scale||1),0);pc.fillStyle='#e8e0cf';pc.font='14px serif';pc.fillText(n,10,20)}
+  const pc=$('pPrev').getContext('2d');pc.clearRect(0,0,360,150);const ps=pending.player?gridSprite(pending.player.img,playerCfg()):ASSETS.player;
+  if(ps){const keys=Object.keys(ps.anims),k=keys[Math.floor(t/1.6)%keys.length],fxk=k.startsWith('efeito');drawSprite(pc,ps,k,t%1.6,180,fxk?78:138,1,110,0,fxk);pc.fillStyle='#e8e0cf';pc.font='14px serif';pc.fillText(k.replace(/_/g,' ')+' · '+ps.anims[k].frames.length+' quadro(s)',10,20)}
   else{drawLume(pc,180,140,1.6,1,t*8,true,0,0,t,'#ffd896',1,0);pc.fillStyle='#b4ad9f';pc.font='italic 14px serif';pc.fillText('Lume (original). Carregue uma folha para ver a prévia.',10,20)}
   const ec=$('ePrev').getContext('2d');ec.clearRect(0,0,360,110);const k=$('eKind').value,es=pending.enemy||ASSETS.enemy[k];
-  if(es)drawSheet(ec,{img:es.img,cfg:enemyCfg()},'parado',t,180,100,1,64,0);else{ec.fillStyle='#b4ad9f';ec.font='italic 14px serif';ec.fillText('Desenho original em uso.',10,20)}
+  if(es)drawSprite(ec,pending.enemy?gridSprite(es.img,enemyCfg()):es,'parado',t,180,100,1,64,0);else{ec.fillStyle='#b4ad9f';ec.font='italic 14px serif';ec.fillText('Desenho original em uso.',10,20)}
   requestAnimationFrame(previewLoop)}
 
 /* guide */
@@ -215,16 +215,16 @@ pasta:['Pasta recursos',`<h4>Colocar arquivos sem configurar nada</h4>
 <p>Publicado (GitHub Pages) ou rodando no seu computador, o site procura arquivos com nomes fixos dentro da pasta <code>recursos/</code>. Coloque o arquivo com o nome certo e recarregue a página. A seção "Pasta recursos/" da Oficina mostra o que foi encontrado e o que falta.</p>
 <div class="tw"><table><tr><th>Pasta</th><th>Nomes dos arquivos</th><th>Formatos</th></tr>
 <tr><td>fontes/</td><td>titulo, texto</td><td>.woff2 .woff .ttf .otf</td></tr>
-<tr><td>personagem/</td><td>personagem</td><td>.png .webp (7 linhas)</td></tr>
+<tr><td>personagem/</td><td>personagem (+ personagem.json) ou parado-01, correr-01…</td><td>.png .webp</td></tr>
 <tr><td>inimigos/</td><td>besouro, mosca, saltador, aranha, sentinela, pendente, agua-viva</td><td>.png .webp (1 linha)</td></tr>
 <tr><td>fundos/</td><td>cinzaraiz, galerias, sendas, brejo, cidadela, minas, ninho, fosso</td><td>.jpg .png .webp</td></tr>
 <tr><td>sons/</td><td>pulo, salto-duplo, pouso, passo, golpe, acerto, dano, coleta, avanco, morte, inimigo-morre</td><td>.ogg .mp3 .wav</td></tr>
 <tr><td>musicas/</td><td>cinzaraiz até fosso (uma por região), extra-1 até extra-5</td><td>.mp3 .ogg .m4a</td></tr></table></div>
-<h4>Folha do personagem, sem configuração</h4>
-<ul><li>7 linhas, nesta ordem: parado, correr, pular, cair, golpe, avanço, dano.</li>
-<li>Quadros quadrados: o lado do quadro é a altura da imagem dividida por 7.</li>
-<li>O número de quadros de cada linha é detectado sozinho. Quadros vazios no fim da linha são ignorados, e uma linha vazia usa a animação "parado".</li>
-<li>Personagem olhando para a direita, pés encostados na base do quadro, no centro.</li></ul>
+<h4>Personagem: três formatos</h4>
+<ul><li><b>Folha empacotada + coordenadas:</b> <code>personagem.png</code> com <code>personagem.json</code> no formato JSON do TexturePacker ou do Aseprite. Quadros girados, recortados e com pivô são lidos. Sem o JSON, uma folha empacotada não é usada.</li>
+<li><b>Grade:</b> <code>personagem.png</code> com 7 linhas (parado, correr, pular, cair, golpe, avanço, dano), quadros quadrados.</li>
+<li><b>Quadros soltos:</b> <code>parado-01.png</code>, <code>parado-02.png</code>, <code>correr-01.png</code>… todos com o mesmo tamanho de tela.</li></ul>
+<p>Nomes de animação: parado, correr, pular, cair, golpe, golpe-cima, golpe-baixo, avanco, dano, morte, salto-duplo, pouso, olhar-cima, olhar-baixo. Efeitos opcionais: efeito-golpe, efeito-golpe-cima, efeito-golpe-baixo, efeito-salto-duplo, efeito-avanco. Só <b>parado</b> é obrigatória; as outras usam uma parecida se faltarem. Detalhes em <code>recursos/LEIA-ME.md</code>.</p>
 <h4>Inimigos, sem configuração</h4>
 <ul><li>Uma linha só, quadros quadrados: o lado do quadro é a altura da imagem. O número de quadros também é detectado.</li></ul>
 <h4>Ajustes opcionais</h4>
@@ -266,8 +266,8 @@ async function loadSaved(){if(!await IDB.open())return;const all=await IDB.all()
   for(const[k,v]of all){try{
     if(k==='font:display'||k==='font:body')await applyFont(k.slice(5),v.blob);
     else if(k==='gfont:display'||k==='gfont:body')await applyFont(k.slice(6),null,v.name);
-    else if(k==='player'){ASSETS.player={img:await blobImg(v.blob),blob:v.blob,cfg:v.cfg};fillPlayerForm(v.cfg)}
-    else if(k.startsWith('enemy:'))ASSETS.enemy[k.slice(6)]={img:await blobImg(v.blob),blob:v.blob,cfg:v.cfg};
+    else if(k==='player'){ASSETS.player={...gridSprite(await blobImg(v.blob),v.cfg),blob:v.blob};fillPlayerForm(v.cfg)}
+    else if(k.startsWith('enemy:'))ASSETS.enemy[k.slice(6)]={...gridSprite(await blobImg(v.blob),v.cfg),blob:v.blob};
     else if(k.startsWith('bg:')){const i=+k.slice(3);ASSETS.bg[i]={img:await blobImg(v.blob),blob:v.blob,cfg:v.cfg};rerenderSection(i)}
     else if(k.startsWith('sfx:'))ASSETS.sfx[k.slice(4)]=await decodeAudio(v.blob);
     else if(k.startsWith('music:'))addUserTrack(v.blob,v.title,v.region,k)}catch(e){console.warn('Velumbra: não carreguei',k,e)}}
