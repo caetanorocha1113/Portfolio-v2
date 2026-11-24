@@ -1,0 +1,103 @@
+{
+  "modo": "fileiras",
+  "tamanho": 1,
+  "juntar": 4,
+  "animacoes": {
+    "parado": {
+      "fileira": 1,
+      "de": 1,
+      "quantidade": 8
+    },
+    "correr": {
+      "fileira": 2,
+      "de": 1,
+      "quantidade": 12
+    },
+    "pular": {
+      "fileira": 3,
+      "de": 1,
+      "quantidade": 4
+    },
+    "cair": {
+      "fileira": 3,
+      "de": 5,
+      "quantidade": 3
+    },
+    "golpe": {
+      "fileira": 4,
+      "de": 1,
+      "quantidade": 6
+    },
+    "golpe-cima": {
+      "fileira": 4,
+      "de": 7,
+      "quantidade": 6
+    },
+    "golpe-baixo": {
+      "fileira": 5,
+      "de": 1,
+      "quantidade": 6
+    },
+    "avanco": {
+      "fileira": 5,
+      "de": 7,
+      "quantidade": 5
+    },
+    "dano": {
+      "fileira": 6,
+      "de": 1,
+      "quantidade": 4
+    },
+    "morte": {
+      "fileira": 6,
+      "de": 5,
+      "quantidade": 8
+    },
+    "salto-duplo": {
+      "fileira": 3,
+      "de": 10,
+      "quantidade": 4
+    },
+    "pouso": {
+      "fileira": 3,
+      "de": 8,
+      "quantidade": 2
+    },
+    "olhar-cima": {
+      "fileira": 1,
+      "de": 9,
+      "quantidade": 2
+    },
+    "olhar-baixo": {
+      "fileira": 1,
+      "de": 11,
+      "quantidade": 2
+    },
+    "efeito-golpe": {
+      "fileira": 7,
+      "de": 1,
+      "quantidade": 4
+    },
+    "efeito-golpe-cima": {
+      "fileira": 7,
+      "de": 5,
+      "quantidade": 4
+    },
+    "efeito-golpe-baixo": {
+      "fileira": 7,
+      "de": 9,
+      "quantidade": 4
+    },
+    "efeito-salto-duplo": {
+      "fileira": 8,
+      "de": 1,
+      "quantidade": 4
+    },
+    "efeito-avanco": {
+      "fileira": 8,
+      "de": 5,
+      "quantidade": 4
+    }
+  }
+}
+```[cite: 1]
