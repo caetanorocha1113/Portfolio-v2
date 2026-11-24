@@ -85,6 +85,7 @@
   <details open><summary>Pasta recursos/</summary>
     <p class="note">Arquivos colocados em <code>recursos/</code> carregam sozinhos ao abrir o site. ✓ encontrado · ainda não colocado · ✕ com problema. A lista está no <button type="button" class="lnk" data-guide="pasta">Guia</button>.</p>
     <ul class="flist" id="folderList"><li class="off">Procurando arquivos…</li></ul>
+    <div class="btns"><button type="button" id="detOpen">Ver numeração da folha</button><button type="button" class="ghost" id="detCopy">Copiar modelo do JSON</button></div>
   </details>
 
   <details><summary>Fontes</summary>
@@ -139,6 +140,14 @@
     <div class="confirm" id="resetConfirm" hidden><span>Tem certeza? Isso não pode ser desfeito.</span><button type="button" class="danger" id="resetYes">Apagar</button><button type="button" class="ghost" id="resetNo">Cancelar</button></div>
   </details>
 </aside>
+
+<div class="modal" id="detModal" hidden>
+  <div class="panel detp" role="dialog" aria-modal="true" aria-labelledby="detT">
+    <header><h3 id="detT">Numeração da folha</h3><button type="button" class="x" data-close="det" aria-label="Fechar numeração">×</button></header>
+    <p class="note" id="detInfo"></p>
+    <div class="detwrap"><canvas id="detCv" aria-label="Folha do personagem com fileiras e quadros numerados"></canvas></div>
+  </div>
+</div>
 
 <div class="modal" id="guide" hidden>
   <div class="panel guide" role="dialog" aria-modal="true" aria-labelledby="guideT">

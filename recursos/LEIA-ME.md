@@ -22,7 +22,7 @@ Exemplo: `recursos/fontes/titulo.ttf`. Confira se a fonte tem acentos (Â, ã, �
 
 ## 2. Personagem — `recursos/personagem/`
 
-O site aceita **três formatos**. Use só um deles.
+O site aceita **quatro formatos**. Use só um deles.
 
 ### Formato A · Folha empacotada + coordenadas (o da sua folha atual)
 
@@ -65,11 +65,29 @@ O site aceita **três formatos**. Use só um deles.
 - Lista de nomes → esses quadros, nessa ordem. Texto → todos os quadros que começam com ele, em ordem numérica.
 - `altura_ref`: altura (px) que corresponde a `tamanho` 1 (~84 px numa tela de 1280). Padrão: altura do 1º quadro de `parado`.
 
-### Formato B · Grade (7 linhas)
+### Formato B · Grade (qualquer número de linhas)
 
-Igual a antes: `personagem.png` com 7 linhas na ordem parado, correr, pular, cair, golpe, avanço, dano;
-quadros quadrados (lado = altura ÷ 7); quadros vazios no fim da linha são ignorados.
-Opcional `personagem.json` com `"quadro": [largura, altura]` e `"animacoes": { "golpe": [linha, quadros, fps] }` (linha a partir de 0).
+Para folhas com **células de tamanho fixo** (cada quadro dentro da sua célula, sem invadir a vizinha).
+
+- **Sem `personagem.json`:** 7 linhas na ordem parado, correr, pular, cair, golpe, avanço, dano, quadros quadrados (lado = altura ÷ 7).
+- **Com `personagem.json`:** quantas linhas quiser, em qualquer ordem, e todas as animações da tabela abaixo:
+
+```json
+{
+  "quadro": [96, 96],
+  "animacoes": {
+    "parado":      [1, 9],
+    "correr":      [2, 12, 14],
+    "golpe":       [5, 6, 20, 1],
+    "golpe-cima":  [5, 5, 20, 7]
+  }
+}
+```
+
+Cada animação é `[linha, quadros, fps, coluna]`, **contando a partir de 1**; `fps` e `coluna` são opcionais.
+No exemplo, `golpe` usa os quadros 1–6 da linha 5 e `golpe-cima` usa os quadros 7–11 da mesma linha.
+
+Se alguma figura atravessar a borda das células, o site recusa a grade (✕ na Oficina) e sugere o Formato D.
 
 ### Formato C · Quadros soltos numerados (o mais simples)
 
@@ -84,6 +102,47 @@ personagem/efeito-golpe-01.png …
 
 Salve todos os quadros com o **mesmo tamanho de tela** e o personagem **com os pés na borda de baixo, no centro**.
 Opcional `personagem.json` com `tamanho`, `altura_ref`, `fps`, `olha_esquerda`, `pixel`, `contorno`, `lanterna`.
+
+### Formato D · Fileiras (folha organizada em fileiras, espaçamento livre)
+
+Para folhas em que os quadros estão **em fileiras, mas com espaçamentos e tamanhos diferentes**. O site encontra cada figura sozinho pelo fundo transparente e numera: fileiras de cima para baixo, quadros da esquerda para a direita.
+
+1. Coloque a folha em `personagem/personagem.png` (fundo **transparente**).
+2. Crie `personagem/personagem.json` com `"modo": "fileiras"`. O botão **Copiar modelo do JSON** (Oficina → Pasta recursos/) copia um modelo com todas as animações.
+3. Abra **Oficina → Pasta recursos/ → Ver numeração da folha**. Cada figura aparece com a etiqueta `fileira·quadro`.
+4. Preencha no JSON qual fileira e quais quadros formam cada animação:
+
+```json
+{
+  "modo": "fileiras",
+  "tamanho": 1,
+  "juntar": 4,
+  "animacoes": {
+    "parado":       { "fileira": 1, "de": 1, "quantidade": 9 },
+    "correr":       { "fileira": 2, "de": 1, "quantidade": 12, "fps": 14 },
+    "golpe":        [4, 1, 5],
+    "salto-duplo":  { "quadros": [[6, 3], [6, 4], [7, 1]] },
+    "pouso":        { "fileira": 3, "de": 8, "quantidade": 4, "inverter": true }
+  }
+}
+```
+
+- `fileira`, `de` (primeiro quadro) e `quantidade` contam **a partir de 1**. A forma curta é `[fileira, de, quantidade, fps]`.
+- `quadros`: lista de `[fileira, quadro]` para montar uma animação com quadros de fileiras diferentes.
+- `inverter: true` toca os quadros de trás para frente. `repetir: false/true` força tocar uma vez ou em loop.
+- Animações com `fileira: 0` ou `quantidade: 0` são ignoradas (é assim que o modelo vem).
+- Quadros que não aparecem em nenhuma animação (ícones, objetos soltos) são simplesmente ignorados.
+- O ponto que pisa no chão é calculado sozinho: o centro da parte de baixo de cada figura.
+
+**Se a numeração sair errada:**
+
+| Problema | Ajuste no JSON |
+|---|---|
+| Uma figura se partiu em duas (ex.: uma espada separada do corpo) | aumente `"juntar"` (padrão 4 px) |
+| Duas figuras vizinhas viraram uma só | diminua `"juntar"` (pode ser 0) |
+| Poeira ou pontinhos viraram "quadros" | aumente `"minimo"` (padrão 40 pixels) |
+| Bordas semitransparentes somem ou sobram | ajuste `"limiar"` (padrão 16, de 0 a 255) |
+| Personagem grande ou pequeno demais | `"tamanho"` ou `"altura_ref"` |
 
 ### Animações que o site usa
 

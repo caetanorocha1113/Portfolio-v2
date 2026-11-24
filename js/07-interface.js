@@ -74,12 +74,12 @@ function rerenderSection(i){if(drawn[i])renderSection(i)}
 const ANIMS=[['parado','Parado',0,1,6],['correr','Correr',1,6,12],['pular','Pular',2,2,8],['cair','Cair',3,2,8],['golpe','Golpe',4,4,16],['avanco','Avanço',5,2,12],['dano','Dano',6,1,6]];
 const EKINDS=[['crawler','Besouro rastejante'],['flyer','Mosca voadora'],['hopper','Saltador de cogumelo'],['spider','Aranha do ninho'],['sentinel','Sentinela da cidadela'],['dropper','Criatura que desce do teto'],['jelly','Água-viva de luz']];
 const SFXN=[['pulo','Pulo'],['salto_duplo','Salto duplo (asas)'],['pouso','Pouso'],['passo','Passo'],['golpe','Golpe da lanterna'],['acerto','Acerto no inimigo'],['dano','Lume leva dano'],['coleta','Coletar fragmento'],['avanco','Avanço'],['morte','Queda ou derrota'],['inimigo_morre','Inimigo derrotado']];
-$('pAnims').innerHTML=ANIMS.map(([k,n,r,f,fps])=>`<tr><td>${n}</td><td><input type="number" id="pa-r-${k}" value="${r}" min="0" aria-label="Linha de ${n}"></td><td><input type="number" id="pa-f-${k}" value="${f}" min="1" aria-label="Quadros de ${n}"></td><td><input type="number" id="pa-s-${k}" value="${fps}" min="1" aria-label="FPS de ${n}"></td></tr>`).join('');
+$('pAnims').innerHTML=ANIMS.map(([k,n,r,f,fps])=>`<tr><td>${n}</td><td><input type="number" id="pa-r-${k}" value="${r+1}" min="1" aria-label="Linha de ${n}"></td><td><input type="number" id="pa-f-${k}" value="${f}" min="1" aria-label="Quadros de ${n}"></td><td><input type="number" id="pa-s-${k}" value="${fps}" min="1" aria-label="FPS de ${n}"></td></tr>`).join('');
 $('eKind').innerHTML=EKINDS.map(([k,n])=>`<option value="${k}">${n}</option>`).join('');
 $('bReg').innerHTML=secs.map((s,i)=>`<option value="${i}">${roman[i]} · ${s.dataset.name}</option>`).join('');
 const pending={};
-function playerCfg(){const anims={};ANIMS.forEach(([k])=>anims[k]={row:+$('pa-r-'+k).value||0,frames:+$('pa-f-'+k).value||1,fps:+$('pa-s-'+k).value||8});return{fw:+$('pFw').value||64,fh:+$('pFh').value||64,scale:+$('pSc').value||1,flip:$('pFlip').checked,pixel:$('pPix').checked,ink:$('pInk').checked,glow:$('pGlow').checked,anims}}
-function fillPlayerForm(cfg){if(!cfg)return;$('pFw').value=cfg.fw;$('pFh').value=cfg.fh;$('pSc').value=cfg.scale;$('pFlip').checked=!!cfg.flip;$('pPix').checked=!!cfg.pixel;$('pInk').checked=cfg.ink!==false;$('pGlow').checked=cfg.glow!==false;ANIMS.forEach(([k])=>{const a=cfg.anims&&cfg.anims[k];if(a){$('pa-r-'+k).value=a.row;$('pa-f-'+k).value=a.frames;$('pa-s-'+k).value=a.fps}})}
+function playerCfg(){const anims={};ANIMS.forEach(([k])=>anims[k]={row:Math.max(1,+$('pa-r-'+k).value||1)-1,frames:+$('pa-f-'+k).value||1,fps:+$('pa-s-'+k).value||8});return{fw:+$('pFw').value||64,fh:+$('pFh').value||64,scale:+$('pSc').value||1,flip:$('pFlip').checked,pixel:$('pPix').checked,ink:$('pInk').checked,glow:$('pGlow').checked,anims}}
+function fillPlayerForm(cfg){if(!cfg)return;$('pFw').value=cfg.fw;$('pFh').value=cfg.fh;$('pSc').value=cfg.scale;$('pFlip').checked=!!cfg.flip;$('pPix').checked=!!cfg.pixel;$('pInk').checked=cfg.ink!==false;$('pGlow').checked=cfg.glow!==false;ANIMS.forEach(([k])=>{const a=cfg.anims&&cfg.anims[k];if(a){$('pa-r-'+k).value=a.row+1;$('pa-f-'+k).value=a.frames;$('pa-s-'+k).value=a.fps}})}
 function enemyCfg(){const fr=+$('eFr').value||1,fps=+$('eFps').value||8;return{fw:+$('eFw').value||48,fh:+$('eFh').value||32,scale:+$('eSc').value||1,flip:$('eFlip').checked,pixel:$('ePix').checked,ink:$('eInk').checked,anims:{parado:{row:0,frames:fr,fps}}}}
 function fillEnemyForm(k){const e=ASSETS.enemy[k],cfg=e&&e.cfg;if(!cfg)return;$('eFw').value=cfg.fw;$('eFh').value=cfg.fh;$('eSc').value=cfg.scale;$('eFr').value=cfg.anims.parado.frames;$('eFps').value=cfg.anims.parado.fps;$('eFlip').checked=!!cfg.flip;$('ePix').checked=!!cfg.pixel;$('eInk').checked=cfg.ink!==false}
 $('pImg').onchange=async e=>{const f=e.target.files[0];if(!f)return;pending.player={blob:f,img:await blobImg(f)};const im=pending.player.img;if(im.width&&+$('pFh').value>im.height)$('pFh').value=im.height;toast('Folha carregada. Ajuste os quadros e aplique.')};
@@ -112,7 +112,7 @@ $('resetYes').onclick=async()=>{await IDB.clear();ASSETS.player=null;ASSETS.enem
 /* panels */
 function openShop(){$('shop').hidden=false;paused=true;previewLoop()}
 function openGuide(tab){$('guide').hidden=false;paused=true;showTab(tab||'comeco');$('guide').querySelector('.x').focus()}
-function closePanels(){$('shop').hidden=true;$('guide').hidden=true;$('plistbox').hidden=true;$('plist').setAttribute('aria-expanded','false');paused=false}
+function closePanels(){$('shop').hidden=true;$('guide').hidden=true;$('detModal').hidden=true;$('plistbox').hidden=true;$('plist').setAttribute('aria-expanded','false');paused=false}
 $('openShop').onclick=()=>$('shop').hidden?openShop():closePanels();$('openGuide').onclick=()=>openGuide();
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closePanels);
 document.querySelectorAll('[data-guide]').forEach(b=>b.onclick=()=>openGuide(b.dataset.guide));
@@ -124,6 +124,18 @@ function previewLoop(){if($('shop').hidden)return;const t=performance.now()/1000
   const ec=$('ePrev').getContext('2d');ec.clearRect(0,0,360,110);const k=$('eKind').value,es=pending.enemy||ASSETS.enemy[k];
   if(es)drawSprite(ec,pending.enemy?gridSprite(es.img,enemyCfg()):es,'parado',t,180,100,1,64,0);else{ec.fillStyle='#b4ad9f';ec.font='italic 14px serif';ec.fillText('Desenho original em uso.',10,20)}
   requestAnimationFrame(previewLoop)}
+
+/* sheet numbering viewer: shows how the site split the character sheet into rows and frames */
+$('detOpen').onclick=()=>{if(!SHEET){toast('Coloque recursos/personagem/personagem.png e recarregue a página.');return}
+  $('detModal').hidden=false;paused=true;$('detInfo').textContent='Procurando as figuras da folha…';
+  setTimeout(()=>{const js=SHEET.json||{};if(!SHEET.det)SHEET.det=detectSprites(SHEET.img,{limiar:js.limiar,juntar:js.juntar,minimo:js.minimo});const det=SHEET.det,img=SHEET.img;
+    const sc=Math.min(1,1600/img.width),cv=$('detCv'),x=cv.getContext('2d');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);x.drawImage(img,0,0,cv.width,cv.height);
+    const fs=Math.max(10,Math.round(11*Math.max(sc,.6)));x.font=`600 ${fs}px ui-monospace,Menlo,Consolas,monospace`;x.textBaseline='top';
+    det.rows.forEach((row,r)=>{const hue=(r*67)%360,col=`hsl(${hue} 85% 60%)`;row.forEach((b,i)=>{const bx=b.x0*sc,by=b.y0*sc,bw=(b.x1-b.x0+1)*sc,bh=(b.y1-b.y0+1)*sc;x.strokeStyle=col;x.lineWidth=1.5;x.strokeRect(bx,by,bw,bh);
+      const t=`${r+1}·${i+1}`,tw=x.measureText(t).width+4;x.fillStyle='rgba(0,0,0,.78)';x.fillRect(bx,by,tw,fs+3);x.fillStyle=col;x.fillText(t,bx+2,by+1)})});
+    $('detInfo').textContent=det.rows.length?`${det.rows.length} fileiras encontradas. Cada etiqueta é "fileira·quadro", contando a partir de 1. `+det.rows.map((r,i)=>`F${i+1}: ${r.length}`).join(' · ')+'. Se duas figuras ficaram juntas ou uma se partiu, ajuste "juntar" no personagem.json.':'Nenhuma figura encontrada. A folha precisa ter fundo transparente.'},30)};
+$('detCopy').onclick=async()=>{const anims={};[...ANIM_KEYS,...FX_KEYS].forEach(k=>anims[k.replace(/_/g,'-')]={fileira:0,de:1,quantidade:0});
+  const txt=JSON.stringify({modo:'fileiras',tamanho:1,juntar:4,animacoes:anims},null,2);try{await navigator.clipboard.writeText(txt);toast('Modelo copiado. Cole em recursos/personagem/personagem.json e preencha os números.')}catch(e){console.info(txt);toast('Não consegui copiar. O modelo está no console (F12).')}};
 
 /* guide */
 const GUIDE={
@@ -152,7 +164,7 @@ fontes:['Fontes',`<h4>Onde cada fonte aparece</h4>
 <ul><li>Confira se a fonte tem acentos: teste com "Âmbar", "Cidadela" e "Não".</li><li>Fontes decorativas ficam melhores só nos títulos. No texto, prefira uma serifada fácil de ler.</li></ul>`],
 personagem:['Personagem',`<h4>A folha de sprites</h4>
 <p>Uma única imagem PNG com fundo transparente, dividida numa grade de quadros do mesmo tamanho. Cada <b>linha</b> é uma animação e cada <b>coluna</b> é um quadro dela, da esquerda para a direita.</p>
-<div class="sheet" aria-hidden="true"><b>0 parado</b><span>1</span><span></span><span></span><span></span><span></span><span></span><b>1 correr</b><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><b>2 pular</b><span>1</span><span>2</span><span></span><span></span><span></span><span></span><b>3 cair</b><span>1</span><span>2</span><span></span><span></span><span></span><span></span><b>4 golpe</b><span>1</span><span>2</span><span>3</span><span>4</span><span></span><span></span><b>5 avanço</b><span>1</span><span>2</span><span></span><span></span><span></span><span></span><b>6 dano</b><span>1</span><span></span><span></span><span></span><span></span><span></span></div>
+<div class="sheet" aria-hidden="true"><b>1 parado</b><span>1</span><span></span><span></span><span></span><span></span><span></span><b>2 correr</b><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><b>3 pular</b><span>1</span><span>2</span><span></span><span></span><span></span><span></span><b>4 cair</b><span>1</span><span>2</span><span></span><span></span><span></span><span></span><b>5 golpe</b><span>1</span><span>2</span><span>3</span><span>4</span><span></span><span></span><b>6 avanço</b><span>1</span><span>2</span><span></span><span></span><span></span><span></span><b>7 dano</b><span>1</span><span></span><span></span><span></span><span></span><span></span></div>
 <div class="tw"><table><tr><th>Animação</th><th>Quando toca</th><th>Sugestão</th></tr>
 <tr><td>Parado</td><td>sem andar</td><td>1 a 6 quadros, 6 fps</td></tr><tr><td>Correr</td><td>andando no chão</td><td>6 a 8 quadros, 12 fps</td></tr>
 <tr><td>Pular</td><td>subindo no ar</td><td>2 a 3 quadros, 8 fps</td></tr><tr><td>Cair</td><td>descendo no ar</td><td>2 a 3 quadros, 8 fps</td></tr>
@@ -220,10 +232,12 @@ pasta:['Pasta recursos',`<h4>Colocar arquivos sem configurar nada</h4>
 <tr><td>fundos/</td><td>cinzaraiz, galerias, sendas, brejo, cidadela, minas, ninho, fosso</td><td>.jpg .png .webp</td></tr>
 <tr><td>sons/</td><td>pulo, salto-duplo, pouso, passo, golpe, acerto, dano, coleta, avanco, morte, inimigo-morre</td><td>.ogg .mp3 .wav</td></tr>
 <tr><td>musicas/</td><td>cinzaraiz até fosso (uma por região), extra-1 até extra-5</td><td>.mp3 .ogg .m4a</td></tr></table></div>
-<h4>Personagem: três formatos</h4>
-<ul><li><b>Folha empacotada + coordenadas:</b> <code>personagem.png</code> com <code>personagem.json</code> no formato JSON do TexturePacker ou do Aseprite. Quadros girados, recortados e com pivô são lidos. Sem o JSON, uma folha empacotada não é usada.</li>
-<li><b>Grade:</b> <code>personagem.png</code> com 7 linhas (parado, correr, pular, cair, golpe, avanço, dano), quadros quadrados.</li>
-<li><b>Quadros soltos:</b> <code>parado-01.png</code>, <code>parado-02.png</code>, <code>correr-01.png</code>… todos com o mesmo tamanho de tela.</li></ul>
+<h4>Personagem: quatro formatos</h4>
+<ul><li><b>Folha empacotada + coordenadas:</b> <code>personagem.png</code> com <code>personagem.json</code> no formato JSON do TexturePacker ou do Aseprite (quadros girados, recortados e com pivô funcionam).</li>
+<li><b>Fileiras:</b> folha com quadros em fileiras, mas com espaçamento livre. O site encontra cada figura sozinho. No <code>personagem.json</code> use <code>"modo": "fileiras"</code> e diga qual fileira é cada animação. O botão "Ver numeração da folha", na Oficina, mostra os números.</li>
+<li><b>Grade:</b> células de tamanho fixo. Sem JSON são 7 linhas; com <code>"quadro"</code> e <code>"animacoes"</code> no JSON, quantas linhas quiser.</li>
+<li><b>Quadros soltos:</b> <code>parado-01.png</code>, <code>correr-01.png</code>… todos com o mesmo tamanho de tela.</li></ul>
+<p>Nos JSONs, fileiras, linhas e quadros contam a partir de 1.</p>
 <p>Nomes de animação: parado, correr, pular, cair, golpe, golpe-cima, golpe-baixo, avanco, dano, morte, salto-duplo, pouso, olhar-cima, olhar-baixo. Efeitos opcionais: efeito-golpe, efeito-golpe-cima, efeito-golpe-baixo, efeito-salto-duplo, efeito-avanco. Só <b>parado</b> é obrigatória; as outras usam uma parecida se faltarem. Detalhes em <code>recursos/LEIA-ME.md</code>.</p>
 <h4>Inimigos, sem configuração</h4>
 <ul><li>Uma linha só, quadros quadrados: o lado do quadro é a altura da imagem. O número de quadros também é detectado.</li></ul>
