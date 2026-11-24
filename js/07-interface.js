@@ -15,11 +15,15 @@ const KEYMAP={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Arrow
 const typing=e=>e.target&&e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]');
 addEventListener('keydown',e=>{if(typing(e))return;audioWake(e);
   if(e.code==='Escape'){closePanels();return}
+  if((e.code==='KeyI'||e.code==='Tab')&&!e.repeat){e.preventDefault();$('powModal').hidden?openPoderes():closePanels();return}
   if(MODE!=='play'||paused)return;
   if(KEYMAP[e.code]){inp[KEYMAP[e.code]]=1;e.preventDefault()}
   if(e.code==='Space'||e.code==='KeyZ'){if(!e.repeat)jumpQ=.13;inp.jump=1;e.preventDefault()}
   if((e.code==='KeyJ'||e.code==='KeyX')&&!e.repeat){atkQ=.12;e.preventDefault()}
   if((e.code==='KeyK'||e.code==='KeyC'||e.code==='ShiftLeft'||e.code==='ShiftRight')&&!e.repeat){dashQ=.1;e.preventDefault()}
+  if(e.code==='KeyF'&&!e.repeat){poderQ=.12;e.preventDefault()}
+  if(e.code==='KeyH'&&!e.repeat){acenderQ=.12;e.preventDefault()}
+  if(e.code==='KeyL'&&!e.repeat){corridaQ=.12;e.preventDefault()}
   if(['PageDown','PageUp','Home','End'].includes(e.code))e.preventDefault()});
 addEventListener('keyup',e=>{if(KEYMAP[e.code])inp[KEYMAP[e.code]]=0;if(e.code==='Space'||e.code==='KeyZ')inp.jump=0});
 addEventListener('blur',()=>{for(const k in inp)inp[k]=0});
@@ -27,7 +31,7 @@ addEventListener('pointerdown',audioWake);
 addEventListener('wheel',e=>{if(MODE==='play'&&!e.target.closest('.panel,.pbar,.modal'))e.preventDefault()},{passive:false});
 addEventListener('touchmove',e=>{if(MODE==='play'&&!e.target.closest('.panel,.pbar,.modal'))e.preventDefault()},{passive:false});
 document.querySelectorAll('#pad [data-k]').forEach(b=>{const k=b.dataset.k;
-  const on=e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}audioWake(e);if(k==='jump'){jumpQ=.13;inp.jump=1}else if(k==='atk')atkQ=.12;else if(k==='dash')dashQ=.1;else inp[k]=1;b.classList.add('on')};
+  const on=e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}audioWake(e);if(k==='jump'){jumpQ=.13;inp.jump=1}else if(k==='atk')atkQ=.12;else if(k==='dash')dashQ=.1;else if(k==='pod')poderQ=.12;else if(k==='acd')acenderQ=.12;else inp[k]=1;b.classList.add('on')};
   const off=()=>{if(k in inp)inp[k]=0;b.classList.remove('on')};
   b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('lostpointercapture',off)});
 
@@ -112,7 +116,7 @@ $('resetYes').onclick=async()=>{await IDB.clear();ASSETS.player=null;ASSETS.enem
 /* panels */
 function openShop(){$('shop').hidden=false;paused=true;previewLoop()}
 function openGuide(tab){$('guide').hidden=false;paused=true;showTab(tab||'comeco');$('guide').querySelector('.x').focus()}
-function closePanels(){$('shop').hidden=true;$('guide').hidden=true;$('detModal').hidden=true;$('plistbox').hidden=true;$('plist').setAttribute('aria-expanded','false');paused=false}
+function closePanels(){$('shop').hidden=true;$('guide').hidden=true;$('detModal').hidden=true;$('powModal').hidden=true;$('plistbox').hidden=true;$('plist').setAttribute('aria-expanded','false');paused=false}
 $('openShop').onclick=()=>$('shop').hidden?openShop():closePanels();$('openGuide').onclick=()=>openGuide();
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closePanels);
 document.querySelectorAll('[data-guide]').forEach(b=>b.onclick=()=>openGuide(b.dataset.guide));
@@ -126,16 +130,25 @@ function previewLoop(){if($('shop').hidden)return;const t=performance.now()/1000
   requestAnimationFrame(previewLoop)}
 
 /* sheet numbering viewer: shows how the site split the character sheet into rows and frames */
+let detMode='figuras';
+function detTemplate(mode){const anims={};[...ANIM_KEYS,...FX_KEYS].forEach(k=>anims[k.replace(/_/g,'-')]=mode==='figuras'?{quadros:[]}:{fileira:0,de:1,quantidade:0});
+  return JSON.stringify(mode==='figuras'?{modo:'figuras',tamanho:1,juntar:4,animacoes:anims}:{modo:'fileiras',tamanho:1,juntar:4,animacoes:anims},null,2)}
+async function copyTemplate(mode){const txt=detTemplate(mode);try{await navigator.clipboard.writeText(txt);toast(`Modelo do modo ${mode} copiado. Cole em recursos/personagem/personagem.json e preencha os números.`)}catch(e){console.info(txt);toast('Não consegui copiar. O modelo está no console (F12).')}}
+function drawDet(){const det=SHEET.det,img=SHEET.img,sc=Math.min(1,4096/img.width),cv=$('detCv'),x=cv.getContext('2d');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);x.drawImage(img,0,0,cv.width,cv.height);
+  const fs=11;x.font=`600 ${fs}px ui-monospace,Menlo,Consolas,monospace`;x.textBaseline='top';let n=0;
+  det.rows.forEach((row,r)=>{const col=`hsl(${(r*67)%360} 85% 60%)`;row.forEach((b,i)=>{n++;const bx=b.x0*sc,by=b.y0*sc,bw=(b.x1-b.x0+1)*sc,bh=(b.y1-b.y0+1)*sc;x.strokeStyle=col;x.lineWidth=1.5;x.strokeRect(bx,by,bw,bh);
+    const t=detMode==='figuras'?String(n):`${r+1}·${i+1}`,tw=x.measureText(t).width+4;x.fillStyle='rgba(0,0,0,.8)';x.fillRect(bx,by,tw,fs+3);x.fillStyle=col;x.fillText(t,bx+2,by+1)})});
+  document.querySelectorAll('[data-detmode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.detmode===detMode));
+  $('detInfo').textContent=!det.rows.length?'Nenhuma figura encontrada. A folha precisa ter fundo transparente.':detMode==='figuras'
+    ?`${n} figuras numeradas na ordem de leitura (de cima para baixo, da esquerda para a direita). No JSON do modo figuras, cada animação é uma lista desses números. Figuras deitadas pedem "girada". Se uma figura se partiu ou duas se juntaram, ajuste "juntar".`
+    :`${det.rows.length} fileiras encontradas. Cada etiqueta é "fileira·quadro", contando a partir de 1. `+det.rows.map((r,i)=>`F${i+1}: ${r.length}`).join(' · ')+'.'}
 $('detOpen').onclick=()=>{if(!SHEET){toast('Coloque recursos/personagem/personagem.png e recarregue a página.');return}
-  $('detModal').hidden=false;paused=true;$('detInfo').textContent='Procurando as figuras da folha…';
-  setTimeout(()=>{const js=SHEET.json||{};if(!SHEET.det)SHEET.det=detectSprites(SHEET.img,{limiar:js.limiar,juntar:js.juntar,minimo:js.minimo});const det=SHEET.det,img=SHEET.img;
-    const sc=Math.min(1,1600/img.width),cv=$('detCv'),x=cv.getContext('2d');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);x.drawImage(img,0,0,cv.width,cv.height);
-    const fs=Math.max(10,Math.round(11*Math.max(sc,.6)));x.font=`600 ${fs}px ui-monospace,Menlo,Consolas,monospace`;x.textBaseline='top';
-    det.rows.forEach((row,r)=>{const hue=(r*67)%360,col=`hsl(${hue} 85% 60%)`;row.forEach((b,i)=>{const bx=b.x0*sc,by=b.y0*sc,bw=(b.x1-b.x0+1)*sc,bh=(b.y1-b.y0+1)*sc;x.strokeStyle=col;x.lineWidth=1.5;x.strokeRect(bx,by,bw,bh);
-      const t=`${r+1}·${i+1}`,tw=x.measureText(t).width+4;x.fillStyle='rgba(0,0,0,.78)';x.fillRect(bx,by,tw,fs+3);x.fillStyle=col;x.fillText(t,bx+2,by+1)})});
-    $('detInfo').textContent=det.rows.length?`${det.rows.length} fileiras encontradas. Cada etiqueta é "fileira·quadro", contando a partir de 1. `+det.rows.map((r,i)=>`F${i+1}: ${r.length}`).join(' · ')+'. Se duas figuras ficaram juntas ou uma se partiu, ajuste "juntar" no personagem.json.':'Nenhuma figura encontrada. A folha precisa ter fundo transparente.'},30)};
-$('detCopy').onclick=async()=>{const anims={};[...ANIM_KEYS,...FX_KEYS].forEach(k=>anims[k.replace(/_/g,'-')]={fileira:0,de:1,quantidade:0});
-  const txt=JSON.stringify({modo:'fileiras',tamanho:1,juntar:4,animacoes:anims},null,2);try{await navigator.clipboard.writeText(txt);toast('Modelo copiado. Cole em recursos/personagem/personagem.json e preencha os números.')}catch(e){console.info(txt);toast('Não consegui copiar. O modelo está no console (F12).')}};
+  const js=SHEET.json||{};detMode=js.modo==='fileiras'||js.modo==='figuras'?js.modo:(SHEET.img.width>=2048?'figuras':'fileiras');
+  $('detModal').hidden=false;paused=true;$('detInfo').textContent='Procurando as figuras da folha… (folhas grandes levam alguns segundos)';
+  setTimeout(()=>{if(!SHEET.det)SHEET.det=detectSprites(SHEET.img,{limiar:js.limiar,juntar:js.juntar,minimo:js.minimo});drawDet()},40)};
+document.querySelectorAll('[data-detmode]').forEach(b=>b.onclick=()=>{detMode=b.dataset.detmode;if(SHEET&&SHEET.det)drawDet()});
+$('detCopy2').onclick=()=>copyTemplate(detMode);
+$('detCopy').onclick=()=>copyTemplate(SHEET&&SHEET.json&&SHEET.json.modo==='fileiras'?'fileiras':SHEET&&SHEET.img.width<2048&&!(SHEET.json&&SHEET.json.modo==='figuras')?'fileiras':'figuras');
 
 /* guide */
 const GUIDE={
@@ -232,12 +245,13 @@ pasta:['Pasta recursos',`<h4>Colocar arquivos sem configurar nada</h4>
 <tr><td>fundos/</td><td>cinzaraiz, galerias, sendas, brejo, cidadela, minas, ninho, fosso</td><td>.jpg .png .webp</td></tr>
 <tr><td>sons/</td><td>pulo, salto-duplo, pouso, passo, golpe, acerto, dano, coleta, avanco, morte, inimigo-morre</td><td>.ogg .mp3 .wav</td></tr>
 <tr><td>musicas/</td><td>cinzaraiz até fosso (uma por região), extra-1 até extra-5</td><td>.mp3 .ogg .m4a</td></tr></table></div>
-<h4>Personagem: quatro formatos</h4>
+<h4>Personagem: cinco formatos</h4>
 <ul><li><b>Folha empacotada + coordenadas:</b> <code>personagem.png</code> com <code>personagem.json</code> no formato JSON do TexturePacker ou do Aseprite (quadros girados, recortados e com pivô funcionam).</li>
 <li><b>Fileiras:</b> folha com quadros em fileiras, mas com espaçamento livre. O site encontra cada figura sozinho. No <code>personagem.json</code> use <code>"modo": "fileiras"</code> e diga qual fileira é cada animação. O botão "Ver numeração da folha", na Oficina, mostra os números.</li>
 <li><b>Grade:</b> células de tamanho fixo. Sem JSON são 7 linhas; com <code>"quadro"</code> e <code>"animacoes"</code> no JSON, quantas linhas quiser.</li>
-<li><b>Quadros soltos:</b> <code>parado-01.png</code>, <code>correr-01.png</code>… todos com o mesmo tamanho de tela.</li></ul>
-<p>Nos JSONs, fileiras, linhas e quadros contam a partir de 1.</p>
+<li><b>Quadros soltos:</b> <code>parado-01.png</code>, <code>correr-01.png</code>… todos com o mesmo tamanho de tela.</li>
+<li><b>Figuras numeradas:</b> qualquer folha, inclusive empacotada e com figuras deitadas. Use <code>"modo": "figuras"</code> e liste os números de cada animação. A opção <code>"girada"</code> põe as figuras deitadas em pé. Há um prompt pronto em <code>docs/PROMPT-personagem-json.md</code>.</li></ul>
+<p>Nos JSONs, fileiras, linhas, quadros e figuras contam a partir de 1. As animações dos poderes (parede, lancar, acender…) já podem entrar no JSON, mesmo com os poderes bloqueados.</p>
 <p>Nomes de animação: parado, correr, pular, cair, golpe, golpe-cima, golpe-baixo, avanco, dano, morte, salto-duplo, pouso, olhar-cima, olhar-baixo. Efeitos opcionais: efeito-golpe, efeito-golpe-cima, efeito-golpe-baixo, efeito-salto-duplo, efeito-avanco. Só <b>parado</b> é obrigatória; as outras usam uma parecida se faltarem. Detalhes em <code>recursos/LEIA-ME.md</code>.</p>
 <h4>Inimigos, sem configuração</h4>
 <ul><li>Uma linha só, quadros quadrados: o lado do quadro é a altura da imagem. O número de quadros também é detectado.</li></ul>

@@ -129,6 +129,7 @@ const SYN={
  coleta:(t,v)=>{tone(t,'sine',1320,1330,.25,.07*v,true);tone(t+.06,'sine',1980,1990,.3,.05*v,true)},
  avanco:(t,v)=>nz(t,.22,3000,'bandpass',.16*v,500),
  morte:(t,v)=>{tone(t,'triangle',500,60,1.1,.15*v,true);nz(t,.6,400,'lowpass',.14*v)},
+ trava:(t,v)=>{tone(t,'square',140,95,.14,.05*v)},
  inimigo_morre:(t,v)=>{tone(t,'square',320,40,.25,.09*v);nz(t,.18,1500,'bandpass',.2*v)}
 };
 function sfx(name,v=1){const C=AU.C;if(!C||C.state!=='running')return;if(MODE==='auto')v*=.55;const buf=ASSETS.sfx[name];

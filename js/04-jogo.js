@@ -58,11 +58,15 @@ function drawHole(c,i,w,h,u){const gr=GROUNDS[i];if(!gr)return;const r=rng(777+i
 /* ---------- custom assets (filled by the recursos/ folder and by the workshop) ---------- */
 const ASSETS={player:null,enemy:{},bg:{},sfx:{}};
 /* sprite sets: one structure for grid sheets, packed atlases (TexturePacker / Aseprite JSON) and numbered frame files */
-const ANIM_KEYS=['parado','correr','pular','cair','golpe','golpe_cima','golpe_baixo','avanco','dano','morte','salto_duplo','pouso','olhar_cima','olhar_baixo'];
-const FX_KEYS=['efeito_golpe','efeito_golpe_cima','efeito_golpe_baixo','efeito_salto_duplo','efeito_avanco'];
-const FPS_DEF={parado:6,correr:12,pular:8,cair:8,golpe:18,golpe_cima:18,golpe_baixo:18,avanco:14,dano:8,morte:8,salto_duplo:14,pouso:16,olhar_cima:6,olhar_baixo:6,efeito_golpe:24,efeito_golpe_cima:24,efeito_golpe_baixo:24,efeito_salto_duplo:18,efeito_avanco:20};
-const ANIM_ONCE={golpe:1,golpe_cima:1,golpe_baixo:1,dano:1,morte:1,salto_duplo:1,pouso:1,efeito_golpe:1,efeito_golpe_cima:1,efeito_golpe_baixo:1,efeito_salto_duplo:1,efeito_avanco:1};
-const ANIM_FALLBACK={golpe_cima:'golpe',golpe_baixo:'golpe',salto_duplo:'pular',pouso:'parado',morte:'dano',olhar_cima:'parado',olhar_baixo:'parado',dano:'parado',golpe:'parado',avanco:'correr',cair:'pular',pular:'parado',correr:'parado'};
+const ANIM_KEYS=['parado','correr','pular','cair','golpe','golpe_cima','golpe_baixo','avanco','dano','morte','salto_duplo','pouso','olhar_cima','olhar_baixo',
+  'parede','salto_parede','lancar','acender','carregar','disparo','mergulho','clarao','passo_nevoa'];
+const FX_KEYS=['efeito_golpe','efeito_golpe_cima','efeito_golpe_baixo','efeito_salto_duplo','efeito_avanco',
+  'efeito_faisca','efeito_mergulho','efeito_clarao','efeito_acender','efeito_disparo','efeito_passo_nevoa'];
+const FPS_DEF={parado:6,correr:12,pular:8,cair:8,golpe:18,golpe_cima:18,golpe_baixo:18,avanco:14,dano:8,morte:8,salto_duplo:14,pouso:16,olhar_cima:6,olhar_baixo:6,efeito_golpe:24,efeito_golpe_cima:24,efeito_golpe_baixo:24,efeito_salto_duplo:18,efeito_avanco:20,
+  parede:8,salto_parede:14,lancar:16,acender:10,carregar:12,disparo:14,mergulho:12,clarao:16,passo_nevoa:16,efeito_faisca:16,efeito_mergulho:18,efeito_clarao:18,efeito_acender:12,efeito_disparo:16,efeito_passo_nevoa:18};
+const ANIM_ONCE={golpe:1,golpe_cima:1,golpe_baixo:1,dano:1,morte:1,salto_duplo:1,pouso:1,efeito_golpe:1,efeito_golpe_cima:1,efeito_golpe_baixo:1,efeito_salto_duplo:1,efeito_avanco:1,salto_parede:1,lancar:1,clarao:1,efeito_mergulho:1,efeito_clarao:1,efeito_passo_nevoa:1};
+const ANIM_FALLBACK={golpe_cima:'golpe',golpe_baixo:'golpe',salto_duplo:'pular',pouso:'parado',morte:'dano',olhar_cima:'parado',olhar_baixo:'parado',dano:'parado',golpe:'parado',avanco:'correr',cair:'pular',pular:'parado',correr:'parado',
+  parede:'cair',salto_parede:'pular',lancar:'golpe',acender:'parado',carregar:'parado',disparo:'avanco',mergulho:'cair',clarao:'golpe_cima',passo_nevoa:'avanco'};
 const normKey=s=>String(s).toLowerCase().replace(/\.[a-z0-9]+$/,'').trim();
 const animKey=s=>normKey(s).replace(/[-\s]+/g,'_');
 const trailNum=s=>{const m=String(s).match(/(\d+)\D*$/);return m?+m[1]:-1};
@@ -93,9 +97,25 @@ function detectSprites(img,opt={}){const W=img.width,H=img.height,c=document.cre
     if(b.y0<=a.y1+g&&b.y1>=a.y0-g){a.x0=Math.min(a.x0,b.x0);a.y0=Math.min(a.y0,b.y0);a.x1=Math.max(a.x1,b.x1);a.y1=Math.max(a.y1,b.y1);a.n+=b.n;boxes[j]=null;merged=true}}}boxes=boxes.filter(Boolean)}
   const minN=opt.minimo==null?40:+opt.minimo;boxes=boxes.filter(b=>b.n>=minN);if(!boxes.length)return{rows:[],W,H};
   const hs=boxes.map(b=>b.y1-b.y0+1).sort((a,b)=>a-b),hm=hs[hs.length>>1];
-  for(const b of boxes){b.cy=(b.y0+b.y1)/2;const h=b.y1-b.y0+1,yA=b.y1-Math.max(2,Math.round(h*.2));let sx=0,cn=0;for(let yy=yA;yy<=b.y1;yy++)for(let xx=b.x0;xx<=b.x1;xx++)if(m[yy*W+xx]){sx+=xx;cn++}b.fx=cn?sx/cn:(b.x0+b.x1)/2}
+  for(const b of boxes){b.cy=(b.y0+b.y1)/2;const h=b.y1-b.y0+1,w=b.x1-b.x0+1,yA=b.y1-Math.max(2,Math.round(h*.2)),xL=b.x0+Math.max(2,Math.round(w*.2)),xR=b.x1-Math.max(2,Math.round(w*.2));let sx=0,cn=0,sl=0,cl=0,sr=0,cr=0;
+    for(let yy=b.y0;yy<=b.y1;yy++)for(let xx=b.x0;xx<=b.x1;xx++)if(m[yy*W+xx]){if(yy>=yA){sx+=xx;cn++}if(xx<=xL){sl+=yy;cl++}if(xx>=xR){sr+=yy;cr++}}
+    b.fx=cn?sx/cn:(b.x0+b.x1)/2;b.fyL=cl?sl/cl:(b.y0+b.y1)/2;b.fyR=cr?sr/cr:(b.y0+b.y1)/2}
   const rows=[];boxes.sort((a,b)=>a.cy-b.cy);for(const b of boxes){const r=rows.find(r=>Math.abs(r.cy-b.cy)<hm*.5);if(r){r.items.push(b);r.cy=r.items.reduce((s,q)=>s+q.cy,0)/r.items.length}else rows.push({cy:b.cy,items:[b]})}
   rows.sort((a,b)=>a.cy-b.cy);return{rows:rows.map(r=>r.items.sort((a,b)=>a.x0-b.x0)),W,H}}
+/* any layout (packed sheets included): every figure gets a number in reading order; animacoes {nome:[n,...]} or {nome:{quadros:[n|[n,"horario"]...], de, ate, girada, fps}} */
+function figureFrame(b,rot){const sw=b.x1-b.x0+1,sh=b.y1-b.y0+1;
+  if(rot===1){const tw=sh,th=sw;return frameOf({sx:b.x0,sy:b.y0,sw,sh,tw,th,w:tw,h:th,px:(b.fyL-b.y0+.5)/tw,py:1,rot:1})}
+  if(rot===-1){const tw=sh,th=sw;return frameOf({sx:b.x0,sy:b.y0,sw,sh,tw,th,w:tw,h:th,px:(tw-1-(b.fyR-b.y0)+.5)/tw,py:1,rot:-1})}
+  return frameOf({sx:b.x0,sy:b.y0,sw,sh,tw:sw,th:sh,w:sw,h:sh,px:(b.fx-b.x0+.5)/sw,py:1})}
+const rotOf=v=>v==='horario'||v===90||v===true?1:v==='anti-horario'||v===-90?-1:0;
+function figurasSprite(img,det,cfg){const all=det.rows.flat(),N=all.length,anims={},warn=[];
+  for(const[k0,v]of Object.entries(cfg.animacoes||{})){const k=animKey(k0),o=Array.isArray(v)?{quadros:v}:v||{},base=rotOf(o.girada);let ids=[];
+    if(Array.isArray(o.quadros))ids=o.quadros;else if(o.de){const a=+o.de,z=+(o.ate||o.de);for(let n=a;a<=z?n<=z:n>=z;n+=a<=z?1:-1)ids.push(n)}
+    if(!ids.length)continue;const fr=[],miss=[];
+    for(const it of ids){const n=Array.isArray(it)?+it[0]:+it,r=Array.isArray(it)&&it.length>1?rotOf(it[1]):base,b=all[n-1];if(!b){miss.push(n);continue}fr.push(figureFrame(b,r))}
+    if(miss.length)warn.push(`${k0}: as figuras ${miss.join(', ')} não existem (a folha tem ${N})`);
+    if(o.inverter)fr.reverse();if(fr.length)anims[k]={frames:fr,fps:+o.fps||(cfg.fps&&+cfg.fps[k])||FPS_DEF[k]||10,loop:o.repetir}}
+  const spr=finishSprite({kind:'figuras',img,cfg,anims,det,warn,count:N});if(!cfg.altura_ref&&anims.parado){const hs=anims.parado.frames.map(f=>f.h).sort((a,b)=>a-b);spr.refH=hs[hs.length>>1]}return spr}
 /* irregular sheet: animacoes {nome:{fileira, de, quantidade, fps}} or {nome:[fileira, de, quantidade, fps]} or {nome:{quadros:[[fileira,quadro],...]}}, counted from 1 */
 function rowsSprite(img,det,cfg){const anims={},warn=[],R=det.rows.length,fr=b=>{const w=b.x1-b.x0+1,h=b.y1-b.y0+1;return frameOf({sx:b.x0,sy:b.y0,sw:w,sh:h,tw:w,th:h,w,h,px:(b.fx-b.x0+.5)/w,py:1})};
   for(const[k0,v]of Object.entries(cfg.animacoes||{})){const k=animKey(k0),o=Array.isArray(v)?{fileira:v[0],de:v[1],quantidade:v[2],fps:v[3]}:v||{};let list=[];
@@ -125,7 +145,8 @@ function drawSprite(c,spr,anim,t,x,y,face,hRef,flash,center){const A=center?spr.
   const n=A.frames.length,once=A.loop===false||(A.loop==null&&ANIM_ONCE[anim]),i=once?Math.min(n-1,Math.floor(t*A.fps)):Math.floor(t*A.fps)%n,f=A.frames[i],cfg=spr.cfg||{},s=hRef*(+cfg.scale||1)/spr.refH,img=f.img||spr.img;
   const px=center&&!f.pivot?.5:f.px,py=center&&!f.pivot?.5:f.py,ox=f.ox-px*f.w,oy=f.oy-py*f.h;
   c.save();c.imageSmoothingEnabled=!cfg.pixel;c.translate(x,y);c.scale(face*(cfg.flip?-1:1)*s,s);if(flash>0)c.filter=`brightness(${1+flash*2.5})`;
-  if(f.rot){c.translate(ox,oy+f.th);c.rotate(-Math.PI/2);c.drawImage(img,f.sx,f.sy,f.sw,f.sh,0,0,f.th,f.tw)}else c.drawImage(img,f.sx,f.sy,f.sw,f.sh,ox,oy,f.tw,f.th);
+  if(f.rot===-1){c.translate(ox+f.tw,oy);c.rotate(Math.PI/2);c.drawImage(img,f.sx,f.sy,f.sw,f.sh,0,0,f.th,f.tw)}
+  else if(f.rot){c.translate(ox,oy+f.th);c.rotate(-Math.PI/2);c.drawImage(img,f.sx,f.sy,f.sw,f.sh,0,0,f.th,f.tw)}else c.drawImage(img,f.sx,f.sy,f.sw,f.sh,ox,oy,f.tw,f.th);
   c.restore();return[x+face*f.w*s*.3,y-f.h*s*.45]}
 /* sprite effects (slash, wings, dash) when the player's set has them */
 const sfxSprites=[];
@@ -182,8 +203,8 @@ function updateAuto(dt){const vh=FH,s=SC;
 }
 
 /* ---------- Jogar: full platformer ---------- */
-const PL={landT:0,x:0,y:0,vx:0,vy:0,on:null,face:1,coy:0,jumps:0,dash:0,dashCD:0,atk:0,atkCD:0,atkDir:0,inv:0,hp:5,max:5,frags:0,cp:0,dead:0,abyss:0,sq:1,ph:0,flut:0,F:0,stepT:0,trailT:0};
-const inp={left:0,right:0,up:0,down:0,jump:0};let jumpQ=0,atkQ=0,dashQ=0;
+const PL={luz:0,landT:0,x:0,y:0,vx:0,vy:0,on:null,face:1,coy:0,jumps:0,dash:0,dashCD:0,atk:0,atkCD:0,atkDir:0,inv:0,hp:5,max:5,frags:0,cp:0,dead:0,abyss:0,sq:1,ph:0,flut:0,F:0,stepT:0,trailT:0};
+const inp={left:0,right:0,up:0,down:0,jump:0};let jumpQ=0,atkQ=0,dashQ=0,poderQ=0,acenderQ=0,corridaQ=0;
 function spawnAt(i){const x=LANDX[i];PL.x=x;PL.y=groundPage(i,x)??(GROUNDS[i].top+GROUNDS[i].h*.8);PL.vx=PL.vy=0;PL.on={t:'g',i};PL.cp=i;PL.dash=0;PL.abyss=0}
 function teleportTo(i){spawnAt(i);PL.inv=1;camY=PL.y-FH*.62;window.scrollTo({top:Math.max(0,camY),behavior:'instant'})}
 function setMode(m){if(m===MODE)return;MODE=m;document.documentElement.classList.toggle('playing',m==='play');
@@ -196,19 +217,24 @@ function dropFrags(x,y,n){for(let k=0;k<n;k++)frags.push({x,y,vx:(Math.random()-
 function playerAttack(){const f=PL.face,d=PL.atkDir;let box;
   if(d<0)box={x:PL.x,y:PL.y-88*K,hw:36*K,hh:44*K};else if(d>0)box={x:PL.x,y:PL.y+28*K,hw:32*K,hh:40*K};else box={x:PL.x+f*40*K,y:PL.y-32*K,hw:36*K,hh:32*K};
   heroAnimName='';if(!spawnFx(d<0?'efeito_golpe_cima':d>0?'efeito_golpe_baixo':'efeito_golpe',PL.x+(d===0?f*40*K:0),PL.y-32*K+(d<0?-50*K:d>0?44*K:0),f,d<0?-Math.PI/2*f:d>0?Math.PI/2*f:0))slashes.push({x:PL.x,y:PL.y,f,d,t:0});let hit=false;
-  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-box.x)<b.hw+box.hw&&Math.abs(b.y-box.y)<b.hh+box.hh){hit=true;e.hp--;e.fl=1;const kd=d===0?f:(e.x>PL.x?1:-1);e.kb+=kd*70*K;if(e.k==='flyer')e.ox+=kd*90*K;burst(b.x,b.y,LC[e.sec],14,240);sfx('acerto');
+  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-box.x)<b.hw+box.hw&&Math.abs(b.y-box.y)<b.hh+box.hh){hit=true;e.hp--;e.fl=1;PL.luz=Math.min(LUZ_MAX,PL.luz+LUZ_POR_ACERTO);const kd=d===0?f:(e.x>PL.x?1:-1);e.kb+=kd*70*K;if(e.k==='flyer')e.ox+=kd*90*K;burst(b.x,b.y,LC[e.sec],14,240);sfx('acerto');
     if(e.hp<=0){e.dead=22;e.lx=null;e.ox=e.oy=0;burst(b.x,b.y,'#ffffff',26,340);sfx('inimigo_morre');dropFrags(b.x,b.y,3+(Math.random()*3|0))}}}
   if(hit){hitstop=.06;shake.t=.14;shake.a=4;if(d>0){PL.vy=-760*K;PL.jumps=0}else if(d===0)PL.vx-=f*160*K}}
 function updatePlay(dt){const k=K,W=FW;
-  PL.inv=Math.max(0,PL.inv-dt);PL.landT=Math.max(0,PL.landT-dt);PL.dashCD-=dt;PL.atkCD-=dt;PL.atk=Math.max(0,PL.atk-dt);PL.coy-=dt;jumpQ-=dt;atkQ-=dt;dashQ-=dt;PL.flut=Math.max(0,PL.flut-dt*2.5);PL.sq+=(1-PL.sq)*Math.min(1,dt*12);
+  PL.inv=Math.max(0,PL.inv-dt);PL.landT=Math.max(0,PL.landT-dt);PL.dashCD-=dt;PL.atkCD-=dt;PL.atk=Math.max(0,PL.atk-dt);PL.coy-=dt;jumpQ-=dt;atkQ-=dt;dashQ-=dt;poderQ-=dt;acenderQ-=dt;corridaQ-=dt;PL.flut=Math.max(0,PL.flut-dt*2.5);PL.sq+=(1-PL.sq)*Math.min(1,dt*12);
   if(PL.dead>0){PL.dead-=dt;if(PL.dead<=0){spawnAt(PL.cp);PL.hp=PL.max;PL.inv=1.5;hudGame();toast('Lume desperta no último chão firme.')}return}
   if(PL.abyss>0){PL.abyss-=dt;PL.y+=50*k*dt;if(PL.abyss<=0){spawnAt(GROUNDS.length-1);PL.inv=1}return}
   const dir=(inp.right?1:0)-(inp.left?1:0);
+  if(dashQ>0&&!temPoder('avanco')){dashQ=0;poderBloqueado('avanco')}
   if(dashQ>0&&PL.dashCD<=0){PL.dash=.17;PL.dashCD=.55;dashQ=0;if(dir)PL.face=dir;sfx('avanco');spawnFx('efeito_avanco',PL.x,PL.y-30*K,PL.face)}
   if(PL.dash>0){PL.dash-=dt;PL.vx=PL.face*780*k;PL.vy=0;PL.trailT-=dt;if(PL.trailT<=0){PL.trailT=.025;trails.push({x:PL.x,y:PL.y,a:.7})}}
   else{const tgt=dir*320*k,acc=(PL.on?3000:2000)*k;PL.vx=PL.vx<tgt?Math.min(tgt,PL.vx+acc*dt):Math.max(tgt,PL.vx-acc*dt);if(dir&&PL.atk<=0)PL.face=dir;PL.vy=Math.min(PL.vy+2300*k*(PL.vy<0&&!inp.jump?2.1:1)*dt,1250*k)}
   if(jumpQ>0){if(PL.on||PL.coy>0){PL.vy=-980*k;PL.on=null;PL.coy=0;jumpQ=0;PL.sq=1.25;sfx('pulo');burst(PL.x,PL.y,'#cfc6b4',6,60)}
-    else if(PL.jumps<1&&PL.dash<=0){PL.vy=-840*k;PL.jumps=1;jumpQ=0;PL.flut=1;heroAnimName='';spawnFx('efeito_salto_duplo',PL.x,PL.y-30*k,PL.face);PL.sq=1.15;sfx('salto_duplo');burst(PL.x,PL.y-24*k,'#d9cfe6',12,160)}}
+    else if(PL.jumps<1&&PL.dash<=0&&temPoder('salto_duplo')){PL.vy=-840*k;PL.jumps=1;jumpQ=0;PL.flut=1;heroAnimName='';spawnFx('efeito_salto_duplo',PL.x,PL.y-30*k,PL.face);PL.sq=1.15;sfx('salto_duplo');burst(PL.x,PL.y-24*k,'#d9cfe6',12,160)}}
+  if(jumpQ>.11&&!PL.on&&PL.coy<=0&&PL.jumps<1&&!temPoder('salto_duplo')){jumpQ=0;poderBloqueado('salto_duplo')}
+  if(poderQ>0){poderQ=0;usarPoder(inp.down&&!PL.on?'queda':inp.up?'clarao':'faisca')}
+  if(acenderQ>0){acenderQ=0;usarPoder('reacender')}
+  if(corridaQ>0){corridaQ=0;usarPoder('corrida')}
   if(atkQ>0&&PL.atkCD<=0){atkQ=0;PL.atk=.22;PL.atkCD=.32;PL.atkDir=inp.up?-1:(inp.down&&!PL.on?1:0);sfx('golpe');playerAttack()}
   let nx=clamp(PL.x+PL.vx*dt,10,W-10);
   for(const gr of GROUNDS){const hl=gr.hole;if(!hl||PL.x<hl.x0||PL.x>hl.x1)continue;const ey=gr.top+Math.min(gr.G(hl.x0),gr.G(hl.x1));if(PL.y>ey+6&&PL.y<ey+SPACING*.85)nx=clamp(nx,hl.x0+9*k,hl.x1-9*k)}
@@ -257,7 +283,7 @@ function drawWorld(dt,ox,oy){const lc=LC[Math.max(0,lastIdx)],ws=SC*.82,late=[];
     else[lx,ly]=drawLume(ac,H.x,Y,SC,H.face,H.ph,H.mv,H.F,H.atk,T,lc,H.sq,H.flut)}
   inkComposite();
   fc.save();fc.translate(ox,oy);late.forEach(f=>f());fc.restore();
-  if(onScreen&&!H.hide&&glowOn){const dark=weights[6]||0;dotAt(lc,lx,ly,(120+dark*260)*K,.35+dark*.15);dotAt(lc,lx,ly,14*SC,.9);if(!ASSETS.player)dotAt('#ffbf5e',H.x+H.face*2.3*SC,Y-33.5*SC,9*SC,.5)}
+  if(onScreen&&!H.hide&&glowOn){const dark=weights[6]||0;dotAt(lc,lx,ly,(120+dark*260*(MODE==='play'&&temPoder('pavio')?2:1))*K,.35+dark*.15);dotAt(lc,lx,ly,14*SC,.9);if(!ASSETS.player)dotAt('#ffbf5e',H.x+H.face*2.3*SC,Y-33.5*SC,9*SC,.5)}
   for(let k=sfxSprites.length-1;k>=0;k--){const e=sfxSprites[k];e.t+=dt;if(!ASSETS.player||e.t>e.len+.02){sfxSprites.splice(k,1);continue}fc.save();fc.translate(ox+e.x,oy+e.y-scrollY);fc.rotate(e.rot);drawSprite(fc,ASSETS.player,e.a,e.t,0,0,e.face,84*K,0,true);fc.restore()}
   for(let k=slashes.length-1;k>=0;k--){const s=slashes[k];s.t+=dt;if(s.t>.18){slashes.splice(k,1);continue}drawSlash(s,lc)}
   for(let k=trails.length-1;k>=0;k--){const t=trails[k];t.a-=dt*3;if(t.a<=0){trails.splice(k,1);continue}dotAt('#cdbfd8',t.x,t.y-scrollY-28*K,34*K,t.a*.5)}

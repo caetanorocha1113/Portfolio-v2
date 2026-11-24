@@ -17,6 +17,7 @@
 <script defer src="js/06-loop.js"></script>
 <script defer src="js/07-interface.js"></script>
 <script defer src="js/08-pasta-recursos.js"></script>
+<script defer src="js/08b-poderes.js"></script>
 <script defer src="js/09-inicio.js"></script>
 </head>
 <body>
@@ -27,6 +28,7 @@
     <button type="button" id="mAuto" aria-pressed="true" title="O site rola normalmente e Lume joga sozinha">Passeio</button>
     <button type="button" id="mPlay" aria-pressed="false" title="Você controla Lume com teclado ou toque">Jogar</button>
   </div>
+  <button type="button" class="tbtn" id="openPow" aria-haspopup="dialog">Poderes</button>
   <button type="button" class="tbtn" id="openShop" aria-haspopup="dialog">Oficina</button>
   <button type="button" class="tbtn" id="openGuide" aria-haspopup="dialog">Guia</button>
 </div>
@@ -40,6 +42,8 @@
     <div><dt>Espaço / Z</dt><dd>pular, de novo no ar para bater as asas</dd></div>
     <div><dt>J / X</dt><dd>golpe de lanterna (+ W para cima, + S no ar para baixo e quicar)</dd></div>
     <div><dt>K / C / Shift</dt><dd>avanço rápido, sem levar dano</dd></div>
+    <div><dt>F / H / L</dt><dd>poderes de luz, reacender e corrida (bloqueados até serem construídos)</dd></div>
+    <div><dt>I / Tab</dt><dd>ver os poderes</dd></div>
     <div><dt>Mapa à direita</dt><dd>salta para o início de cada região</dd></div>
   </dl>
   <p class="hint-n">Desça pelas fendas no chão. Derrote criaturas para soltar fragmentos de luz.</p>
@@ -50,7 +54,7 @@
   <div class="pad-l"><button type="button" data-k="left">◀</button><button type="button" data-k="right">▶</button></div>
   <div class="pad-r">
     <div class="pad-aim"><button type="button" data-k="up">▲</button><button type="button" data-k="down">▼</button></div>
-    <button type="button" data-k="dash" class="sm">»</button><button type="button" data-k="atk">✦</button><button type="button" data-k="jump" class="big">⤒</button>
+    <button type="button" data-k="acd" class="sm" aria-label="Reacender">◉</button><button type="button" data-k="pod" class="sm" aria-label="Poder de luz">✧</button><button type="button" data-k="dash" class="sm">»</button><button type="button" data-k="atk">✦</button><button type="button" data-k="jump" class="big">⤒</button>
   </div>
 </div>
 
@@ -141,9 +145,18 @@
   </details>
 </aside>
 
+<div class="modal" id="powModal" hidden>
+  <div class="panel powp" role="dialog" aria-modal="true" aria-labelledby="powT">
+    <header><h3 id="powT">Poderes</h3><button type="button" class="x" data-close="pow" aria-label="Fechar poderes">×</button></header>
+    <p class="note" id="powInfo"></p>
+    <div class="powgrid" id="powGrid"></div>
+  </div>
+</div>
+
 <div class="modal" id="detModal" hidden>
   <div class="panel detp" role="dialog" aria-modal="true" aria-labelledby="detT">
     <header><h3 id="detT">Numeração da folha</h3><button type="button" class="x" data-close="det" aria-label="Fechar numeração">×</button></header>
+    <div class="btns"><button type="button" class="ghost" data-detmode="figuras">Numerar figuras</button><button type="button" class="ghost" data-detmode="fileiras">Numerar por fileiras</button><button type="button" id="detCopy2">Copiar modelo deste modo</button></div>
     <p class="note" id="detInfo"></p>
     <div class="detwrap"><canvas id="detCv" aria-label="Folha do personagem com fileiras e quadros numerados"></canvas></div>
   </div>

@@ -12,7 +12,7 @@ function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;const 
   const d=cur<depths.length-1?lerp(depths[cur],depths[cur+1],curF):depths[cur]+curF*420;
   hudDepth.textContent=(d<1?'0':'−'+Math.round(d).toLocaleString('pt-BR'))+' m';
   if(cur!==lastIdx){lastIdx=cur;musicRegion(cur);maxIdx=Math.max(maxIdx,cur);hudRegion.textContent=roman[cur]+' · '+secs[cur].dataset.name;mapEls.forEach((a,i)=>a.classList.toggle('on',i===cur));pipEls.forEach((p,i)=>p.classList.toggle('on',i<=maxIdx))}
-  const light=1-clamp(d/3260,0,1)*.82;vfillEl.setAttribute('y',(17+(1-light)*30).toFixed(1));
+  const light=MODE==='play'?PL.luz/LUZ_MAX:1-clamp(d/3260,0,1)*.82;vfillEl.setAttribute('y',(17+(1-light)*30).toFixed(1));
   // particles
   fc.setTransform(FD,0,0,FD,0,0);fc.globalCompositeOperation='source-over';fc.globalAlpha=1;fc.clearRect(0,0,FW,FH);
   pools.forEach((list,i)=>{const a=weights[i];if(a<.01)return;list.forEach(({type,arr})=>{const D=FX[type];fc.globalCompositeOperation=D.glow?'lighter':'source-over';

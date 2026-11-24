@@ -6,6 +6,7 @@ Cada seção é uma região, com paleta, clima e iluminação próprios.
 - **Passeio**: o site rola normalmente e Lume, a mariposa da lanterna, joga sozinha.
 - **Jogar**: plataforma completa, com teclado ou toque.
 - Trilha sonora original gerada por código, com player (tocar, pausar, avançar, voltar, volume, lista).
+- **Poderes**: habilidades originais de Lume (avanço, salto duplo, garras, corrida, faísca, mergulho, clarão, reacender…), liberadas aos poucos conforme forem construídas. Lista e estado em `js/08b-poderes.js`; painel no site pela tecla I.
 - **Oficina**: troca fontes, sprites, fundos, sons e músicas pelo navegador.
 - **Pasta `recursos/`**: coloque arquivos com os nomes certos e eles carregam sozinhos. Lista completa em [`recursos/LEIA-ME.md`](recursos/LEIA-ME.md).
 
@@ -31,7 +32,9 @@ Abra http://localhost:8000.
 | `js/06-loop.js` | laço de animação e parallax |
 | `js/07-interface.js` | player, modos, controles, Oficina, Guia |
 | `js/08-pasta-recursos.js` | carregamento automático da pasta `recursos/` |
+| `js/08b-poderes.js` | lista de poderes, estado (liberado/bloqueado), luz da lanterna e painel |
 | `js/09-inicio.js` | inicialização |
 | `recursos/` | seus arquivos (fontes, sprites, fundos, sons, músicas) |
+| `docs/PROMPT-personagem-json.md` | prompt para montar o `personagem.json` com ajuda de uma IA |
 
 Os scripts são clássicos (não módulos) e compartilham o escopo global, na ordem numérica.

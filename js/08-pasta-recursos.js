@@ -36,6 +36,11 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
         const spr=atlasSprite(img,js,opts);
         if(!Object.keys(spr.anims).length)return note('Personagem',img0.file,false,`${spr.count} quadros lidos, mas nenhum nome bate com as animações da lista`);
         ASSETS.player=Object.assign(spr,{blob:img0.blob});return note('Personagem',img0.file+' + personagem.json',true,`folha empacotada, ${spr.count} quadros · ${resumo(spr)}`)}
+      if(js.modo==='figuras'){/* any layout, packed sheets included: numbered figures, optional rotation */
+        if(!img)return note('Personagem','personagem/personagem.png',false,'o personagem.json pede o modo figuras, mas a imagem não foi encontrada');
+        const det=detectSprites(img,{limiar:js.limiar,juntar:js.juntar,minimo:js.minimo});SHEET.det=det;const spr=figurasSprite(img,det,opts);
+        if(!Object.keys(spr.anims).length)return note('Personagem',img0.file+' + personagem.json',false,`${spr.count} figuras encontradas, mas nenhuma animação foi indicada em "animacoes". Use "Ver numeração da folha"`);
+        ASSETS.player=Object.assign(spr,{blob:img0.blob});(spr.warn||[]).forEach(w=>note('Personagem','personagem.json',false,w));return note('Personagem',img0.file+' + personagem.json',true,`figuras: ${spr.count} encontradas · ${resumo(spr)}`)}
       if(js.modo==='fileiras'){/* irregular sheet in rows: figures found by transparency */
         if(!img)return note('Personagem','personagem/personagem.png',false,'o personagem.json pede o modo fileiras, mas a imagem não foi encontrada');
         const det=detectSprites(img,{limiar:js.limiar,juntar:js.juntar,minimo:js.minimo});SHEET.det=det;const spr=rowsSprite(img,det,opts),cont=det.rows.map((r,i)=>`F${i+1}: ${r.length}`).join(' · ');

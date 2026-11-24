@@ -22,7 +22,7 @@ Exemplo: `recursos/fontes/titulo.ttf`. Confira se a fonte tem acentos (Â, ã, �
 
 ## 2. Personagem — `recursos/personagem/`
 
-O site aceita **quatro formatos**. Use só um deles.
+O site aceita **cinco formatos**. Use só um deles. Para uma folha empacotada **sem** arquivo de coordenadas, use o **Formato E**.
 
 ### Formato A · Folha empacotada + coordenadas (o da sua folha atual)
 
@@ -145,6 +145,33 @@ Para folhas em que os quadros estão **em fileiras, mas com espaçamentos e tama
 | Bordas semitransparentes somem ou sobram | ajuste `"limiar"` (padrão 16, de 0 a 255) |
 | Personagem grande ou pequeno demais | `"tamanho"` ou `"altura_ref"` |
 
+### Formato E · Figuras numeradas (qualquer folha, inclusive empacotada)
+
+Para folhas em que os quadros estão em **qualquer lugar**, com tamanhos diferentes e alguns **deitados**. O site encontra cada figura pelo fundo transparente e dá um número a cada uma, em ordem de leitura.
+
+1. `personagem.png` com fundo transparente + `personagem.json` com `"modo": "figuras"`.
+2. **Oficina → Pasta recursos/ → Ver numeração da folha → Numerar figuras** mostra o número de cada figura.
+3. Cada animação é uma lista desses números, na ordem em que deve tocar:
+
+```json
+{
+  "modo": "figuras",
+  "juntar": 4,
+  "animacoes": {
+    "parado": [1, 2, 3, 4],
+    "correr": { "quadros": [7, 8, 9, 10, 11, 12], "fps": 14 },
+    "pular":  { "de": 15, "ate": 17 },
+    "golpe-cima": { "quadros": [[25, "horario"], [26, "horario"]] },
+    "lancar": { "quadros": [48, 49, 50], "girada": "anti-horario" }
+  }
+}
+```
+
+- `"girada": "horario"` para figuras deitadas com a cabeça apontando para a **direita** na folha; `"anti-horario"` para a cabeça apontando para a **esquerda**. Pode valer para a animação inteira ou para uma figura só: `[25, "horario"]`.
+- `de` / `ate`: faixa contínua de números.
+- Os números dependem de `juntar`, `minimo` e `limiar`: ajuste esses valores **antes** de montar as listas.
+- Há um prompt pronto para pedir a uma IA que monte esse JSON a partir da imagem numerada: [`docs/PROMPT-personagem-json.md`](../docs/PROMPT-personagem-json.md).
+
 ### Animações que o site usa
 
 Só `parado` é obrigatória. As que faltarem usam a da coluna "se faltar".
@@ -166,6 +193,20 @@ Só `parado` é obrigatória. As que faltarem usam a da coluna "se faltar".
 | `olhar-cima` | parado segurando W | sim | parado |
 | `olhar-baixo` | parado segurando S | sim | parado |
 
+**Animações dos poderes** (os poderes são liberados aos poucos; as animações podem entrar no JSON antes):
+
+| Nome | Poder | Quando toca | Se faltar |
+|---|---|---|---|
+| `parede` | Garras de Raiz | agarrado na parede | cair |
+| `salto-parede` | Garras de Raiz | saltando da parede | pular |
+| `carregar` | Corrida de Âmbar | carregando a corrida | parado |
+| `disparo` | Corrida de Âmbar | durante a corrida longa | avanco |
+| `passo-nevoa` | Passo de Névoa | avanço que atravessa criaturas | avanco |
+| `lancar` | Faísca da Lanterna | lançando a faísca | golpe |
+| `mergulho` | Queda de Cinza | mergulhando para baixo | cair |
+| `clarao` | Clarão | explosão para cima | golpe-cima |
+| `acender` | Reacender | concentrando luz para se curar | parado |
+
 **Efeitos (opcionais, desenhados centralizados):** substituem os efeitos de luz do site.
 
 | Nome | Onde aparece |
@@ -174,6 +215,12 @@ Só `parado` é obrigatória. As que faltarem usam a da coluna "se faltar".
 | `efeito-golpe-cima` / `efeito-golpe-baixo` | arcos para cima e para baixo (se faltarem, o `efeito-golpe` é girado) |
 | `efeito-salto-duplo` | no segundo pulo |
 | `efeito-avanco` | no início do avanço |
+| `efeito-faisca` | a faísca voando |
+| `efeito-mergulho` | o impacto do mergulho no chão |
+| `efeito-clarao` | a explosão para cima |
+| `efeito-acender` | o brilho da cura |
+| `efeito-disparo` | o rastro da corrida longa |
+| `efeito-passo-nevoa` | o rastro de névoa |
 
 Regras de desenho para qualquer formato: personagem olhando para a **direita**; pés na base do quadro (ou use `pivot`); efeitos apontando para a **direita**.
 
