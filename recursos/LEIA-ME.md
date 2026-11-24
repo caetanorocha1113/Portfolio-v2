@@ -127,6 +127,7 @@ Para folhas em que os quadros estão **em fileiras, mas com espaçamentos e tama
 }
 ```
 
+- O arquivo precisa conter **só o JSON**: sem ``` nem textos copiados de chat. Se sobrar algo, o site ignora e avisa na Oficina; se o JSON estiver quebrado, a Oficina mostra a linha do erro.
 - `fileira`, `de` (primeiro quadro) e `quantidade` contam **a partir de 1**. A forma curta é `[fileira, de, quantidade, fps]`.
 - `quadros`: lista de `[fileira, quadro]` para montar uma animação com quadros de fileiras diferentes.
 - `inverter: true` toca os quadros de trás para frente. `repetir: false/true` força tocar uma vez ou em loop.

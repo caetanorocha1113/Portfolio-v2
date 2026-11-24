@@ -97,12 +97,12 @@ function detectSprites(img,opt={}){const W=img.width,H=img.height,c=document.cre
   const rows=[];boxes.sort((a,b)=>a.cy-b.cy);for(const b of boxes){const r=rows.find(r=>Math.abs(r.cy-b.cy)<hm*.5);if(r){r.items.push(b);r.cy=r.items.reduce((s,q)=>s+q.cy,0)/r.items.length}else rows.push({cy:b.cy,items:[b]})}
   rows.sort((a,b)=>a.cy-b.cy);return{rows:rows.map(r=>r.items.sort((a,b)=>a.x0-b.x0)),W,H}}
 /* irregular sheet: animacoes {nome:{fileira, de, quantidade, fps}} or {nome:[fileira, de, quantidade, fps]} or {nome:{quadros:[[fileira,quadro],...]}}, counted from 1 */
-function rowsSprite(img,det,cfg){const anims={},fr=b=>{const w=b.x1-b.x0+1,h=b.y1-b.y0+1;return frameOf({sx:b.x0,sy:b.y0,sw:w,sh:h,tw:w,th:h,w,h,px:(b.fx-b.x0+.5)/w,py:1})};
+function rowsSprite(img,det,cfg){const anims={},warn=[],R=det.rows.length,fr=b=>{const w=b.x1-b.x0+1,h=b.y1-b.y0+1;return frameOf({sx:b.x0,sy:b.y0,sw:w,sh:h,tw:w,th:h,w,h,px:(b.fx-b.x0+.5)/w,py:1})};
   for(const[k0,v]of Object.entries(cfg.animacoes||{})){const k=animKey(k0),o=Array.isArray(v)?{fileira:v[0],de:v[1],quantidade:v[2],fps:v[3]}:v||{};let list=[];
-    if(Array.isArray(o.quadros))list=o.quadros.map(([r,i])=>det.rows[r-1]&&det.rows[r-1][i-1]).filter(Boolean);
-    else{const row=det.rows[(+o.fileira||1)-1]||[],from=Math.max(1,+o.de||1)-1,n=o.quantidade==null?row.length-from:+o.quantidade;list=row.slice(from,from+n)}
+    const nm=k0;if(Array.isArray(o.quadros)){list=o.quadros.map(([r,i])=>det.rows[r-1]&&det.rows[r-1][i-1]);const miss=o.quadros.filter((q,n)=>!list[n]).map(q=>q.join('·'));if(miss.length)warn.push(`${nm}: os quadros ${miss.join(', ')} não existem`);list=list.filter(Boolean)}
+    else{if(+o.fileira===0||+o.quantidade===0)continue;const fi=+o.fileira||1,row=det.rows[fi-1];if(!row){warn.push(`${nm}: a fileira ${fi} não existe (a folha tem ${R})`);continue}const from=Math.max(1,+o.de||1)-1,n=o.quantidade==null?row.length-from:+o.quantidade;list=row.slice(from,from+n);if(from+n>row.length)warn.push(`${nm}: pede os quadros ${from+1}–${from+n} da fileira ${fi}, mas ela tem ${row.length}${list.length?'; usei '+list.length:''}`)}
     if(o.inverter)list.reverse();if(list.length)anims[k]={frames:list.map(fr),fps:+o.fps||(cfg.fps&&+cfg.fps[k])||FPS_DEF[k]||10,loop:o.repetir}}
-  const spr=finishSprite({kind:'fileiras',img,cfg,anims,det});if(!cfg.altura_ref&&anims.parado){const hs=anims.parado.frames.map(f=>f.h).sort((a,b)=>a-b);spr.refH=hs[hs.length>>1]}return spr}
+  const spr=finishSprite({kind:'fileiras',img,cfg,anims,det,warn});if(!cfg.altura_ref&&anims.parado){const hs=anims.parado.frames.map(f=>f.h).sort((a,b)=>a-b);spr.refH=hs[hs.length>>1]}return spr}
 /* data: TexturePacker JSON (hash or array) or Aseprite JSON; cfg: our options (tamanho, animacoes, fps...) */
 function atlasSprite(img,data,cfg){const raw=Array.isArray(data.frames)?data.frames.map(f=>[f.filename||f.name,f]):Object.entries(data.frames||{}),frames={},order=[];
   for(const[name,d]of raw){const r=d.frame||d,rot=!!d.rotated,ss=d.spriteSourceSize||{x:0,y:0,w:r.w,h:r.h},src=d.sourceSize||{w:ss.w,h:ss.h},pv=d.pivot||d.anchor;const key=normKey(name);

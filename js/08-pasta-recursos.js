@@ -8,7 +8,14 @@ const EXT={fonte:['woff2','woff','ttf','otf'],sprite:['png','webp'],fundo:['jpg'
 const FOLDER=[];
 async function grab(path){try{const r=await fetch(RES+path,{cache:'no-cache'});if(!r.ok)return null;if((r.headers.get('content-type')||'').includes('text/html'))return null;const b=await r.blob();return b.size?b:null}catch(e){return null}}
 async function probe(base,exts){for(const e of exts){const b=await grab(base+'.'+e);if(b)return{blob:b,file:base+'.'+e}}return null}
-async function probeJSON(path){const b=await grab(path);if(!b)return null;try{return JSON.parse(await b.text())}catch(e){console.warn('Velumbra: JSON inválido em',RES+path);return null}}
+/* reads a JSON file; tolerates leftovers from copy-paste (``` fences, text before/after the braces) and reports real errors */
+const JSON_ISSUES=[];
+function lineCol(txt,pos){const pre=txt.slice(0,pos).split('\n');return`linha ${pre.length}, coluna ${pre[pre.length-1].length+1}`}
+async function probeJSON(path){const b=await grab(path);if(!b)return null;const txt=(await b.text()).replace(/^﻿/,'');
+  try{return JSON.parse(txt)}catch(e1){const a=txt.indexOf('{'),z=txt.lastIndexOf('}');
+    if(a>=0&&z>a){try{const v=JSON.parse(txt.slice(a,z+1));JSON_ISSUES.push({path,ok:true,msg:'havia texto fora das chaves { } (por exemplo ``` de um chat); foi ignorado, mas vale apagar do arquivo'});return v}catch(e2){
+      const m=String(e2.message).match(/position (\d+)/),where=m?lineCol(txt,a+ +m[1]):'';JSON_ISSUES.push({path,ok:false,msg:`JSON inválido${where?' ('+where+')':''}: ${e2.message}`});return null}}
+    JSON_ISSUES.push({path,ok:false,msg:'JSON inválido: não encontrei { }'});return null}}
 /* counts the non-empty frames in each row of a sprite sheet */
 function sheetScan(img,fw,fh){try{const W=img.width,H=img.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);
   const d=x.getImageData(0,0,W,H).data,cols=Math.max(1,Math.floor(W/fw)),rows=Math.max(1,Math.floor(H/fh)),out=[];
@@ -33,7 +40,7 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
         if(!img)return note('Personagem','personagem/personagem.png',false,'o personagem.json pede o modo fileiras, mas a imagem não foi encontrada');
         const det=detectSprites(img,{limiar:js.limiar,juntar:js.juntar,minimo:js.minimo});SHEET.det=det;const spr=rowsSprite(img,det,opts),cont=det.rows.map((r,i)=>`F${i+1}: ${r.length}`).join(' · ');
         if(!Object.keys(spr.anims).length)return note('Personagem',img0.file+' + personagem.json',false,`${det.rows.length} fileiras encontradas (${cont}), mas nenhuma animação foi indicada em "animacoes". Use "Ver numeração da folha"`);
-        ASSETS.player=Object.assign(spr,{blob:img0.blob});return note('Personagem',img0.file+' + personagem.json',true,`fileiras: ${det.rows.length} encontradas · ${resumo(spr)}`)}
+        ASSETS.player=Object.assign(spr,{blob:img0.blob});(spr.warn||[]).forEach(w=>note('Personagem','personagem.json',false,w));return note('Personagem',img0.file+' + personagem.json',true,`fileiras: ${det.rows.length} encontradas (${cont}) · ${resumo(spr)}`)}
       const keys=[...ANIM_KEYS,...FX_KEYS],fname=k=>'personagem/'+k.replace(/_/g,'-')+'-',
         first=await Promise.all(keys.map(async k=>[k,await probe(fname(k)+'01',EXT.sprite)]));
       if(first.some(([,f])=>f)){/* numbered frame files */
@@ -61,7 +68,10 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
     try{ASSETS.sfx[k]=await decodeAudio(f.blob);note('Sons',f.file,true)}catch(e){note('Sons',f.file,false,'não consegui ler o áudio')}})());
   jobs.push((async()=>{const tit=await probeJSON('musicas/titulos.json')||{},list=[...REGION_FILES.map((n,i)=>[n,i]),...[1,2,3,4,5].map(n=>['extra-'+n,-1])],found=await Promise.all(list.map(async([n,i])=>[n,i,await probe('musicas/'+n,EXT.musica)]));
     for(const[n,i,f]of found){if(!f){if(i>=0)note('Músicas','musicas/'+n+'.mp3 (ou .ogg .m4a)',null);continue}addUserTrack(f.blob,tit[n]||(i>=0?secs[i].dataset.name+' (sua faixa)':n),i,'pasta:'+n);note('Músicas',f.file,true)}})());
-  await Promise.all(jobs);renderFolderStatus();sfxStatus();fillEnemyForm($('eKind').value);
+  await Promise.all(jobs);
+  const grp=p=>p.startsWith('personagem/')?'Personagem':p.startsWith('inimigos/')?'Inimigos':p.startsWith('fundos/')?'Fundos':p.startsWith('musicas/')?'Músicas':'Personagem';
+  for(const q of JSON_ISSUES)note(grp(q.path),q.path,q.ok?null:false,q.msg);
+  renderFolderStatus();sfxStatus();fillEnemyForm($('eKind').value);
   const ok=FOLDER.filter(x=>x.ok).length,bad=FOLDER.filter(x=>x.ok===false).length;console.info('Velumbra · pasta recursos/',FOLDER);
   if(ok||bad)toast(`Pasta recursos: ${ok} arquivo(s) carregado(s)`+(bad?`, ${bad} com problema (veja a Oficina).`:'.'))}
 function renderFolderStatus(){const ul=$('folderList');if(!ul)return;ul.innerHTML='';
