@@ -34,18 +34,32 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
     try{await applyFont(role,f.blob);note('Fontes',f.file,true)}catch(e){note('Fontes',f.file,false,'arquivo de fonte inválido')}})());
   jobs.push((async()=>{const js=await probeJSON('personagem/settings.json')||{},
     opts={scale:+js.scale||1,flip:!!js.faces_left,pixel:!!js.pixel,ink:!!js.outline,glow:!!js.glow,altura_ref:+js.ref_height||0,fps:js.fps,repetir:js.loop};
-    try{const lists={},vazios=[];
-      await Promise.all([...ANIM_KEYS,...FX_KEYS].map(async k=>{const dir='personagem/'+FOLDER_NAME[k]+'/';let pad=2,f=await probe(dir+'01',['png']);if(!f){pad=1;f=await probe(dir+'1',['png'])}
-        const arr=[];for(let i=1;f&&i<200;i++){const fr=await frameFromBlob(f.blob);if(fr)arr.push(fr);else vazios.push(f.file);f=await probe(dir+String(i+1).padStart(pad,'0'),['png'])}if(arr.length)lists[k]=arr}));
-      if(!Object.keys(lists).length)return note('Personagem','personagem/idle/1.png (uma pasta por animação)',null);
+    try{const lists={},vazios=[],customDirs=js.folders||{},customFiles=js.files||{};
+      await Promise.all([...ANIM_KEYS,...FX_KEYS].map(async k=>{
+        const fname=FOLDER_NAME[k];
+        if(Array.isArray(customFiles[fname])&&customFiles[fname].length){
+          const arr=[];
+          for(const rel of customFiles[fname]){
+            const b=await grab('personagem/'+rel);
+            if(!b){vazios.push('personagem/'+rel);continue}
+            const fr=await frameFromBlob(b);
+            if(fr)arr.push(fr);else vazios.push('personagem/'+rel);
+          }
+          if(arr.length)lists[k]=arr;
+          return;
+        }
+        const sub=customDirs[fname]||fname;
+        const dir='personagem/'+sub.replace(/^\/+|\/+$/g,'')+'/';
+        let pad=2,f=await probe(dir+'01',['png']);if(!f){pad=1;f=await probe(dir+'1',['png'])}
+        const arr=[];for(let i=1;f&&i<200;i++){const fr=await frameFromBlob(f.blob);if(fr)arr.push(fr);else vazios.push(f.file);f=await probe(dir+String(i+1).padStart(pad,'0'),['png'])}
+        if(arr.length)lists[k]=arr;
+      }));
+      if(!Object.keys(lists).length)return note('Personagem','personagem/idle/1.png (ou configure files em settings.json)',null);
       if(!lists.parado)note('Personagem','personagem/idle/',false,'a pasta idle (parado) está vazia; enquanto isso, o 1º quadro de outra animação fica parado no lugar');
-      vazios.forEach(v=>note('Personagem',v,false,'imagem vazia (sem nenhum pixel visível)'));
+      vazios.forEach(v=>note('Personagem',v,false,'imagem vazia ou não encontrada'));
       const spr=framesSprite(lists,opts);ASSETS.player=spr;
-      note('Personagem','personagem/<pasta>/',true,Object.keys(lists).map(k=>FOLDER_NAME[k]+' '+lists[k].length).join(', ')+(js.faces_left?' · virado com faces_left':''))}
+      note('Personagem','personagem/settings.json',true,Object.keys(lists).map(k=>FOLDER_NAME[k]+' '+lists[k].length).join(', ')+(js.faces_left?' · virado com faces_left':''))}
     catch(e){console.warn(e);note('Personagem','personagem/',false,'não consegui ler os quadros')}})());
-  for(const[file,k]of ENEMY_FILES)jobs.push((async()=>{const f=await probe('inimigos/'+file,EXT.sprite);if(!f)return note('Inimigos','inimigos/'+file+'.png',null);
-    try{const img=await blobImg(f.blob),js=await probeJSON('inimigos/'+file+'.json')||{},q=js.quadro||[img.height,img.height],n=+js.quadros||((sheetScan(img,q[0],q[1])||[1])[0])||1;
-      ASSETS.enemy[k]={...gridSprite(img,{fw:q[0],fh:q[1],scale:+js.tamanho||1,flip:!!js.olha_esquerda,pixel:!!js.pixel,ink:!!js.contorno,anims:{parado:{row:0,frames:n,fps:+js.fps||8}}}),blob:f.blob};note('Inimigos',f.file,true,`${n} quadro(s) de ${q[0]}×${q[1]} px`)}catch(e){note('Inimigos',f.file,false,'não consegui ler a imagem')}})());
   jobs.push((async()=>{const aj=await probeJSON('fundos/ajustes.json')||{};await Promise.all(REGION_FILES.map(async(name,i)=>{const f=await probe('fundos/'+name,EXT.fundo);if(!f)return note('Fundos','fundos/'+name+'.jpg (ou .png .webp)',null);
     try{const o=aj[name]||{};ASSETS.bg[i]={img:await blobImg(f.blob),blob:f.blob,cfg:{encaixe:o.encaixe||'cobrir',modo:o.modo||'substituir',opacidade:o.opacidade==null?1:+o.opacidade,sujeira:o.sujeira!==false}};rerenderSection(i);note('Fundos',f.file,true)}catch(e){note('Fundos',f.file,false,'não consegui ler a imagem')}}))})());
   for(const[file,k]of SFX_FILES)jobs.push((async()=>{const f=await probe('sons/'+file,EXT.som);if(!f)return note('Sons','sons/'+file+'.ogg (ou .mp3 .wav)',null);
@@ -63,3 +77,48 @@ function renderFolderStatus(){const ul=$('folderList');if(!ul)return;ul.innerHTM
     items.sort((a,c)=>a.arquivo.localeCompare(c.arquivo)).forEach(x=>{const s=document.createElement('li');s.className=x.ok?'ok':x.ok===false?'bad':'off';s.textContent=(x.ok?'✓ ':x.ok===false?'✕ ':'· ')+x.arquivo+(x.nota?' — '+x.nota:'');sub.appendChild(s)});ul.appendChild(li)}
   if(!FOLDER_FOUND||!FOLDER.some(x=>x.ok!==null)){const p=document.createElement('li');p.className='off';p.textContent=FOLDER_FOUND?'A pasta existe, mas ainda não tem arquivos com os nomes da lista.':'Pasta recursos/ não encontrada aqui. Ela funciona no GitHub Pages e no servidor local; na prévia do claude.ai ela não existe.';ul.prepend(p)}}
 function preferRegionTrack(){const i=Math.max(0,lastIdx),k=MUS.list.findIndex(t=>!t.builtin&&t.region===i);if(SET.follow&&k>=0&&!MUS.playing&&MUS.idx!==k){MUS.idx=k;MUS.pos=0;uiPlayer()}}
+
+
+const PODER_ACAO={
+  faisca(){
+    PL.spellKind='lancar';PL.spellT=.45;heroAnimName='';
+    spawnFx('efeito_faisca',PL.x+PL.face*44*K,PL.y-34*K,PL.face);
+    sfx('golpe');
+    for(const list of ENEMIES)for(const e of list){
+      if(!e.vis||e.dead>0||e.k==='jelly')continue;
+      const b=enemyBox(e);
+      if(Math.sign(b.x-PL.x)===PL.face&&Math.abs(b.x-PL.x)<260*K&&Math.abs(b.y-(PL.y-32*K))<54*K){
+        e.hp-=2;e.fl=1;e.kb+=PL.face*120*K;spawnFx('efeito_acerto',b.x,b.y,PL.face);
+        if(e.hp<=0){e.dead=22;e.lx=null;sfx('inimigo_morre');dropFrags(b.x,b.y,4)}
+      }
+    }
+  },
+  queda(){
+    PL.spellKind='mergulho';PL.spellT=.55;PL.vy=1100*K;PL.inv=.6;heroAnimName='';
+    spawnFx('efeito_mergulho',PL.x,PL.y-16*K,PL.face);
+    sfx('avanco');
+  },
+  clarao(){
+    PL.spellKind='clarao';PL.spellT=.45;heroAnimName='';
+    spawnFx('efeito_clarao',PL.x,PL.y-76*K,PL.face);
+    sfx('golpe');
+    for(const list of ENEMIES)for(const e of list){
+      if(!e.vis||e.dead>0||e.k==='jelly')continue;
+      const b=enemyBox(e);
+      if(Math.abs(b.x-PL.x)<95*K&&b.y<PL.y&&PL.y-b.y<190*K){
+        e.hp-=2;e.fl=1;spawnFx('efeito_acerto',b.x,b.y,PL.face);
+        if(e.hp<=0){e.dead=22;e.lx=null;sfx('inimigo_morre');dropFrags(b.x,b.y,4)}
+      }
+    }
+  },
+  reacender(){
+    if(PL.hp>=PL.max){toast('Vida já está cheia.');PL.luz+=33;return}
+    PL.healT=.8;heroAnimName='';
+    spawnFx('efeito_acender',PL.x,PL.y-36*K,PL.face);
+    PL.hp=Math.min(PL.max,PL.hp+1);hudGame();sfx('coleta');
+  },
+  corrida(){
+    PL.sdashCharge=.35;heroAnimName='';
+    setTimeout(()=>{if(MODE==='play'&&PL.dead<=0){PL.sdash=.45;PL.sdashCharge=0;PL.vx=PL.face*980*K;PL.vy=0;spawnFx('efeito_disparo',PL.x,PL.y-32*K,PL.face);sfx('avanco')}},350);
+  }
+};

@@ -1,3 +1,372 @@
 {
-  "faces_left": true
+  "faces_left": true,
+  "scale": 1,
+  "pixel": false,
+  "outline": false,
+  "glow": true,
+  "fps": {
+    "idle": 8,
+    "run": 14,
+    "jump": 12,
+    "fall": 12,
+    "attack": 38,
+    "attack-up": 22,
+    "attack-down": 22,
+    "dash": 46,
+    "hurt": 18,
+    "death": 10,
+    "double-jump": 18,
+    "land": 18,
+    "look-up": 12,
+    "look-down": 12,
+    "wall-slide": 10,
+    "wall-jump": 14,
+    "superdash-charge": 14,
+    "superdash": 18,
+    "shadow-dash": 46,
+    "spell": 24,
+    "dive": 20,
+    "spell-up": 20,
+    "heal": 14,
+    "fx-attack": 24,
+    "fx-attack-up": 24,
+    "fx-attack-down": 24,
+    "fx-hit": 28,
+    "fx-dash": 36,
+    "fx-shadow-dash": 36,
+    "fx-superdash": 20,
+    "fx-dive": 24,
+    "fx-spell-up": 24,
+    "fx-heal": 16
+  },
+  "loop": {
+    "idle": true,
+    "run": true,
+    "jump": false,
+    "fall": true,
+    "attack": false,
+    "attack-up": false,
+    "attack-down": false,
+    "dash": false,
+    "hurt": false,
+    "death": false,
+    "double-jump": false,
+    "land": false,
+    "look-up": false,
+    "look-down": false,
+    "wall-slide": true,
+    "wall-jump": false,
+    "superdash-charge": false,
+    "superdash": true,
+    "shadow-dash": false,
+    "spell": false,
+    "dive": false,
+    "spell-up": false,
+    "heal": true
+  },
+  "files": {
+    "idle": [
+      "idle_still/Knight_idle_still_020000.png",
+      "idle_still/Knight_idle_still_020001.png",
+      "idle_still/Knight_idle_still_020002.png",
+      "idle_still/Knight_idle_still_020003.png",
+      "idle_still/Knight_idle_still_020004.png",
+      "idle_still/Knight_idle_still_020005.png",
+      "idle_still/Knight_idle_still_020006.png",
+      "idle_still/Knight_idle_still_020007.png",
+      "idle_still/Knight_idle_still_020008.png"
+    ],
+    "run": [
+      "run/Knight_run0000.png",
+      "run/Knight_run0001.png",
+      "run/Knight_run0002.png",
+      "run/Knight_run0003.png",
+      "run/Knight_run0004.png",
+      "run/Knight_run0005.png",
+      "run/Knight_run0006.png",
+      "run/Knight_run0007.png"
+    ],
+    "jump": [
+      "jump/Knight_jump_01.png",
+      "jump/Knight_jump_02.png",
+      "jump/Knight_jump_03.png",
+      "jump/Knight_jump_04.png",
+      "jump/Knight_jump_05.png",
+      "jump/Knight_jump_06.png"
+    ],
+    "fall": [
+      "fall/Knight_fall_01.png",
+      "fall/Knight_fall_02.png",
+      "fall/Knight_fall_03.png",
+      "fall/Knight_fall_04.png",
+      "fall/Knight_fall_05.png",
+      "fall/Knight_fall_06.png"
+    ],
+    "attack": [
+      "slash_left_longer/Knight_slash_left_longer0000.png",
+      "slash_left_longer/Knight_slash_left_longer0001.png",
+      "slash_left_longer/Knight_slash_left_longer0002.png",
+      "slash_left_longer/Knight_slash_left_longer0003.png",
+      "slash_left_longer/Knight_slash_left_longer0004.png",
+      "slash_left_longer/Knight_slash_left_longer0005.png",
+      "slash_left_longer/Knight_slash_left_longer0006.png",
+      "slash_left_longer/Knight_slash_left_longer0007.png",
+      "slash_left_longer/Knight_slash_left_longer0008.png"
+    ],
+    "attack-up": [
+      "up_slash/Knight_up_slash0000.png",
+      "up_slash/Knight_up_slash0001.png",
+      "up_slash/Knight_up_slash0002.png",
+      "up_slash/Knight_up_slash0003.png",
+      "up_slash/Knight_up_slash0004.png"
+    ],
+    "attack-down": [
+      "down_slash_v2/Knight_down_slash_v02000.png",
+      "down_slash_v2/Knight_down_slash_v02001.png",
+      "down_slash_v2/Knight_down_slash_v02002.png",
+      "down_slash_v2/Knight_down_slash_v02003.png",
+      "down_slash_v2/Knight_down_slash_v02004.png"
+    ],
+    "dash": [
+      "dash_v2/Knight_dash_v020000.png",
+      "dash_v2/Knight_dash_v020001.png",
+      "dash_v2/Knight_dash_v020002.png",
+      "dash_v2/Knight_dash_v020003.png",
+      "dash_v2/Knight_dash_v020004.png",
+      "dash_v2/Knight_dash_v020005.png",
+      "dash_v2/Knight_dash_v020006.png",
+      "dash_v2/Knight_dash_v020007.png"
+    ],
+    "hurt": [
+      "stun/Knight_stun0000.png",
+      "stun/Knight_stun0001.png",
+      "stun/Knight_stun0002.png",
+      "stun/Knight_stun0003.png",
+      "stun/Knight_stun0004.png"
+    ],
+    "death": [
+      "death_anim/Knight_death_anim0000.png",
+      "death_anim/Knight_death_anim0001.png",
+      "death_anim/Knight_death_anim0002.png",
+      "death_anim/Knight_death_anim0003.png",
+      "death_anim/Knight_death_anim0004.png",
+      "death_anim/Knight_death_anim0005.png",
+      "death_anim/Knight_death_anim0006.png",
+      "death_anim/Knight_death_anim0007.png",
+      "death_anim/Knight_death_anim0008.png",
+      "death_anim/Knight_death_anim0009.png",
+      "death_anim/Knight_death_anim0010.png",
+      "death_anim/Knight_death_anim0011.png",
+      "death_anim/Knight_death_anim0012.png",
+      "death_anim/Knight_death_anim0013.png"
+    ],
+    "double-jump": [
+      "double_jump_v2/Knight_double_jump_v020000.png",
+      "double_jump_v2/Knight_double_jump_v020001.png",
+      "double_jump_v2/Knight_double_jump_v020002.png",
+      "double_jump_v2/Knight_double_jump_v020003.png",
+      "double_jump_v2/Knight_double_jump_v020004.png",
+      "double_jump_v2/Knight_double_jump_v020005.png",
+      "double_jump_v2/Knight_double_jump_v020006.png",
+      "double_jump_v2/Knight_double_jump_v020007.png"
+    ],
+    "land": [
+      "land/Knight_land0000.png",
+      "land/Knight_land0001.png",
+      "land/Knight_land0002.png"
+    ],
+    "look-up": [
+      "look_up/Knight_look_up0000.png",
+      "look_up/Knight_look_up0001.png",
+      "look_up/Knight_look_up0002.png",
+      "look_up/Knight_look_up0003.png",
+      "look_up/Knight_look_up0004.png",
+      "look_up/Knight_look_up0005.png"
+    ],
+    "look-down": [
+      "look_down/Knight_look_down0000.png",
+      "look_down/Knight_look_down0001.png",
+      "look_down/Knight_look_down0002.png",
+      "look_down/Knight_look_down0003.png",
+      "look_down/Knight_look_down0004.png",
+      "look_down/Knight_look_down0005.png"
+    ],
+    "wall-slide": [
+      "wall_slide/Knight_wall_slide0000.png",
+      "wall_slide/Knight_wall_slide0001.png",
+      "wall_slide/Knight_wall_slide0002.png",
+      "wall_slide/Knight_wall_slide0003.png"
+    ],
+    "wall-jump": [
+      "wall_jump/Knight_wall_jump0000.png",
+      "wall_jump/Knight_wall_jump0001.png",
+      "wall_jump/Knight_wall_jump0002.png"
+    ],
+    "superdash-charge": [
+      "superdash/Knight_superdash0000.png",
+      "superdash/Knight_superdash0001.png",
+      "superdash/Knight_superdash0002.png",
+      "superdash/Knight_superdash0003.png",
+      "superdash/Knight_superdash0004.png",
+      "superdash/Knight_superdash0005.png",
+      "superdash/Knight_superdash0006.png",
+      "superdash/Knight_superdash0007.png",
+      "superdash/Knight_superdash0008.png",
+      "superdash/Knight_superdash0009.png",
+      "superdash/Knight_superdash0010.png"
+    ],
+    "superdash": [
+      "superdash/Knight_superdash0011.png",
+      "superdash/Knight_superdash0012.png",
+      "superdash/Knight_superdash0013.png",
+      "superdash/Knight_superdash0014.png"
+    ],
+    "shadow-dash": [
+      "shadow_dash/Knight_shadow_dash0000.png",
+      "shadow_dash/Knight_shadow_dash0001.png",
+      "shadow_dash/Knight_shadow_dash0002.png",
+      "shadow_dash/Knight_shadow_dash0003.png",
+      "shadow_dash/Knight_shadow_dash0004.png",
+      "shadow_dash/Knight_shadow_dash0005.png",
+      "shadow_dash/Knight_shadow_dash0006.png",
+      "shadow_dash/Knight_shadow_dash0007.png"
+    ],
+    "spell": [
+      "cast_v03/Knight_cast_v030001.png",
+      "cast_v03/Knight_cast_v030003.png",
+      "cast_v03/Knight_cast_v030004.png",
+      "cast_v03/Knight_cast_v030005.png",
+      "cast_v03/Knight_cast_v030006.png",
+      "cast_v03/Knight_cast_v030007.png",
+      "cast_v03/Knight_cast_v030008.png",
+      "cast_v03/Knight_cast_v030009.png",
+      "cast_v03/Knight_cast_v030010.png",
+      "cast_v03/Knight_cast_v030011.png",
+      "cast_v03/Knight_cast_v030012.png",
+      "cast_v03/Knight_cast_v030013.png"
+    ],
+    "dive": [
+      "quake/Knight_quake0000.png",
+      "quake/Knight_quake0001.png",
+      "quake/Knight_quake0003.png",
+      "quake/Knight_quake0005.png",
+      "quake/Knight_quake0006.png",
+      "quake/Knight_quake0007.png",
+      "quake/Knight_quake0008.png",
+      "quake/Knight_quake0009.png",
+      "quake/Knight_quake0010.png",
+      "quake/Knight_quake0011.png",
+      "quake/Knight_quake0012.png",
+      "quake/Knight_quake0013.png",
+      "quake/Knight_quake0014.png"
+    ],
+    "spell-up": [
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020000.png",
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020001.png",
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020002.png",
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020003.png",
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020004.png",
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020005.png",
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020006.png",
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020007.png",
+      "scream_cast_lvl_02/Knight_scream_cast_lvl_020008.png"
+    ],
+    "heal": [
+      "focus_v2/Knight_focus_v020000.png",
+      "focus_v2/Knight_focus_v020001.png",
+      "focus_v2/Knight_focus_v020002.png",
+      "focus_v2/Knight_focus_v020003.png",
+      "focus_v2/Knight_focus_v020004.png",
+      "focus_v2/Knight_focus_v020005.png",
+      "focus_v2/Knight_focus_v020006.png",
+      "focus_v2/Knight_focus_v020007.png",
+      "focus_v2/Knight_focus_v020008.png",
+      "focus_v2/Knight_focus_v020009.png",
+      "focus_v2/Knight_focus_v020010.png",
+      "focus_v2/Knight_focus_v020011.png"
+    ],
+    "fx-attack": [
+      "_ effects/slashes_effect/Knight_slashes_effect0001.png",
+      "_ effects/slashes_effect/Knight_slashes_effect0002.png"
+    ],
+    "fx-attack-up": [
+      "_ effects/up_slash_effect/Knight_up_slash_effect0000.png",
+      "_ effects/up_slash_effect/Knight_up_slash_effect0001.png"
+    ],
+    "fx-attack-down": [
+      "_ effects/down_slash_effect/Knight_down_slash_effect0001.png",
+      "_ effects/down_slash_effect/Knight_down_slash_effect0002.png"
+    ],
+    "fx-hit": [
+      "_ effects/bling/Knight_bling0000.png",
+      "_ effects/bling/Knight_bling0001.png",
+      "_ effects/bling/Knight_bling0002.png",
+      "_ effects/bling/Knight_bling0003.png",
+      "_ effects/bling/Knight_bling0004.png",
+      "_ effects/bling/Knight_bling0005.png",
+      "_ effects/bling/Knight_bling0006.png",
+      "_ effects/bling/Knight_bling0007.png"
+    ],
+    "fx-dash": [
+      "_ effects/dash_effect/Knight_dash_effect0000.png",
+      "_ effects/dash_effect/Knight_dash_effect0001.png",
+      "_ effects/dash_effect/Knight_dash_effect0002.png",
+      "_ effects/dash_effect/Knight_dash_effect0003.png",
+      "_ effects/dash_effect/Knight_dash_effect0004.png",
+      "_ effects/dash_effect/Knight_dash_effect0005.png",
+      "_ effects/dash_effect/Knight_dash_effect0006.png"
+    ],
+    "fx-shadow-dash": [
+      "_ effects/shadow_dash_trail/Knight_shadow_dash_trail0000.png",
+      "_ effects/shadow_dash_trail/Knight_shadow_dash_trail0001.png",
+      "_ effects/shadow_dash_trail/Knight_shadow_dash_trail0002.png",
+      "_ effects/shadow_dash_trail/Knight_shadow_dash_trail0003.png",
+      "_ effects/shadow_dash_trail/Knight_shadow_dash_trail0004.png",
+      "_ effects/shadow_dash_trail/Knight_shadow_dash_trail0005.png",
+      "_ effects/shadow_dash_trail/Knight_shadow_dash_trail0006.png"
+    ],
+    "fx-superdash": [
+      "_ effects/superdash_effect/Knight_superdash_effect0000_appear.png",
+      "_ effects/superdash_effect/Knight_superdash_effect0001_appear.png",
+      "_ effects/superdash_effect/Knight_superdash_effect0002_appear.png",
+      "_ effects/superdash_effect/Knight_superdash_effect0003.png",
+      "_ effects/superdash_effect/Knight_superdash_effect0004.png",
+      "_ effects/superdash_effect/Knight_superdash_effect0005.png",
+      "_ effects/superdash_effect/Knight_superdash_effect0006.png",
+      "_ effects/superdash_effect/Knight_superdash_effect0007_disipate.png",
+      " _ effects/superdash_effect/Knight_superdash_effect0008_disipate.png",
+      "_ effects/superdash_effect/Knight_superdash_effect0009_disipate.png"
+    ],
+    "fx-dive": [
+      "_ effects/dash_burst/Knight_dash_burst0000.png",
+      "_ effects/dash_burst/Knight_dash_burst0001.png",
+      "_ effects/dash_burst/Knight_dash_burst0002.png",
+      "_ effects/dash_burst/Knight_dash_burst0003.png",
+      "_ effects/dash_burst/Knight_dash_burst0004.png",
+      "_ effects/dash_burst/Knight_dash_burst0005.png"
+    ],
+    "fx-spell-up": [
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0000.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0001.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0002.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0003.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0004.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0005.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0006.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0007.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0008.png",
+      "_ effects/nail_charge_effect/Knight_nail_charge_effect0009.png"
+    ],
+    "fx-heal": [
+      "_ effects/first_charge_effect/Knight_first_charge_effect0000.png",
+      "_ effects/first_charge_effect/Knight_first_charge_effect0001.png",
+      "_ effects/first_charge_effect/Knight_first_charge_effect0002.png",
+      "_ effects/first_charge_effect/Knight_first_charge_effect0003.png",
+      "_ effects/first_charge_effect/Knight_first_charge_effect0004.png",
+      "_ effects/first_charge_effect/Knight_first_charge_effect0005.png",
+      "_ effects/first_charge_effect/Knight_first_charge_effect0006.png",
+      "_ effects/first_charge_effect/Knight_first_charge_effect0007.png",
+      "_ effects/first_charge_effect/Knight_first_charge_effect0008.png"
+    ]
+  }
 }
