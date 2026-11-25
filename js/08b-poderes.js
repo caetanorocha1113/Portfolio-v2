@@ -1,6 +1,6 @@
 /* ---------- poderes: habilidades do personagem, liberadas uma a uma conforme forem construídas ---------- */
 /* estado: 'liberado' funciona no modo Jogar; 'bloqueado' ainda está em construção.
-   Para liberar um poder: troque o estado para 'liberado' e escreva a ação dele em PODER_ACAO (mais abaixo). */
+   Para liberar um poder: troque o estado para 'liberado'; a ação dele fica em PODER_ACAO (js/08-pasta-recursos.js). */
 const PODERES=[
  {id:'avanco',nome:'Avanço',grupo:'Movimento',tecla:'K, C ou Shift',estado:'liberado',
   desc:'Avanço rápido no chão ou no ar. Durante o avanço, o personagem não leva dano.',anims:['dash','fx-dash'],
@@ -30,8 +30,7 @@ const PODERES=[
   desc:'Concentra energia para recuperar uma máscara de vida.',anims:['heal','fx-heal'],
   icone:'M12 22c4 0 6-3 6-6 0-4-4-6-4-10-3 2-4 5-3 7-2-1-3-3-3-3-2 3-2 6-2 6 0 3 2 6 6 6z'}
 ];
-/* ações dos poderes: cada poder liberado ganha aqui a sua função quando for construído */
-const PODER_ACAO={};
+/* ações dos poderes: ficam em PODER_ACAO, declarado em js/08-pasta-recursos.js (só pode existir uma declaração no site) */
 const LUZ_MAX=99,LUZ_POR_ACERTO=11;/* energia: enche ao acertar criaturas, gasta nas magias */
 const poderDe=id=>PODERES.find(q=>q.id===id);
 const temPoder=id=>{const p=poderDe(id);return!!p&&p.estado==='liberado'};
