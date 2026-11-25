@@ -3,30 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Velumbra</title>
-<meta name="description" content="Uma descida jogável por oito regiões de um reino subterrâneo desenhado à mão.">
+<title>Atlas · Portfólio de Caetano Rocha de Oliveira</title>
+<meta name="description" content="Portfólio escolar de Caetano Rocha de Oliveira, apresentado como uma jornada por um mapa: cada área é uma matéria, com as atividades, os projetos e os trabalhos dela.">
+<meta name="theme-color" content="#030407">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Atlas · Portfólio de Caetano Rocha de Oliveira">
+<meta property="og:description" content="Um portfólio escolar em forma de mapa: cada área é uma matéria. Dá para ler rolando a página ou atravessar o mapa jogando.">
+<meta property="og:image" content="https://caetanorocha1113.github.io/Portfolio-v2/conteudo/compartilhar.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23030407'/%3E%3Cpath d='M16 4l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' fill='%23e8e0cf'/%3E%3C/svg%3E">
+<script>
+/* decide antes da primeira pintura se a abertura cobre a tela (evita ver o site piscar por baixo) */
+(function(){var d=document.documentElement;d.classList.add('js');try{var forcar=/[?&]abertura\b/.test(location.search),calmo=matchMedia('(prefers-reduced-motion: reduce)').matches;if(forcar||(!calmo&&!location.hash))d.classList.add('com-abertura')}catch(e){}})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English+SC&display=swap">
 <link rel="stylesheet" href="css/estilo.css">
-<script defer src="js/01-base.js"></script>
-<script defer src="js/02-regioes.js"></script>
-<script defer src="js/03-cenario.js"></script>
-<script defer src="js/04-jogo.js"></script>
-<script defer src="js/05-audio.js"></script>
-<script defer src="js/06-loop.js"></script>
-<script defer src="js/07-interface.js"></script>
-<script defer src="js/08-pasta-recursos.js"></script>
-<script defer src="js/08b-poderes.js"></script>
-<script defer src="js/09-inicio.js"></script>
+<link rel="stylesheet" href="css/portfolio.css">
+<!-- 00: conteúdo e abertura. Os scripts do motor (01 a 09) são carregados por js/00-conteudo.js depois que as seções existem. -->
+<script defer src="js/00-conteudo.js"></script>
+<script defer src="js/00b-abertura.js"></script>
 </head>
 <body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<div class="abertura" id="abertura" role="presentation">
+  <canvas class="ab-tela" id="abTela" aria-hidden="true"></canvas>
+  <div class="ab-mapa" id="abMapa" aria-hidden="true"></div>
+  <div class="ab-falas" id="abFalas" aria-live="off"></div>
+  <div class="ab-titulo" id="abTitulo" aria-hidden="true">
+    <p class="ab-nome" id="abNome">Atlas</p>
+    <p class="ab-sub" id="abSub">Portfólio de Caetano Rocha de Oliveira</p>
+  </div>
+  <button type="button" class="ab-pular" id="abPular">Pular abertura</button>
+</div>
+
 <div class="vignette" aria-hidden="true"></div>
 <div class="paper" id="paper" aria-hidden="true"></div>
 <div class="topbar" id="topbar">
   <div class="seg" role="group" aria-label="Modo de navegação">
-    <button type="button" id="mAuto" aria-pressed="true" title="O site rola normalmente e Lume joga sozinha">Passeio</button>
-    <button type="button" id="mPlay" aria-pressed="false" title="Você controla Lume com teclado ou toque">Jogar</button>
+    <button type="button" id="mAuto" aria-pressed="true" title="O site rola normalmente e o personagem joga sozinho ao fundo">Passeio</button>
+    <button type="button" id="mPlay" aria-pressed="false" title="Você controla o personagem com teclado ou toque">Jogar</button>
   </div>
   <button type="button" class="tbtn" id="openPow" aria-haspopup="dialog">Poderes</button>
   <button type="button" class="tbtn" id="openShop" aria-haspopup="dialog">Oficina</button>
@@ -36,15 +57,15 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <div class="hint" id="hint" hidden>
-  <p class="hint-t">Modo Jogar</p>
+  <p class="hint-t">Modo Jogo</p>
   <dl>
     <div><dt>A D / ← →</dt><dd>andar</dd></div>
-    <div><dt>Espaço / Z</dt><dd>pular, de novo no ar para bater as asas</dd></div>
-    <div><dt>J / X</dt><dd>golpe de lanterna (+ W para cima, + S no ar para baixo e quicar)</dd></div>
+    <div><dt>Espaço / Z</dt><dd>pular (de novo no ar: salto duplo, quando liberado)</dd></div>
+    <div><dt>J / X</dt><dd>golpe (+ W para cima, + S no ar para baixo e quicar)</dd></div>
     <div><dt>K / C / Shift</dt><dd>avanço rápido, sem levar dano</dd></div>
-    <div><dt>F / H / L</dt><dd>magias, cura e super avanço (bloqueados até serem construídos)</dd></div>
-    <div><dt>I / Tab</dt><dd>ver os poderes</dd></div>
-    <div><dt>Mapa à direita</dt><dd>salta para o início de cada região</dd></div>
+    <div><dt>F / H / L</dt><dd>magias, cura e super avanço (liberados pelos Guardiões)</dd></div>
+    <div><dt>I</dt><dd>ver os poderes</dd></div>
+    <div><dt>Mapa à direita</dt><dd>salta para o início de cada área</dd></div>
   </dl>
   <p class="hint-n">Desça pelas fendas no chão. Derrote criaturas para soltar fragmentos de luz.</p>
   <button type="button" class="ghost" id="hintClose">Entendi</button>
@@ -54,13 +75,13 @@
   <div class="pad-l"><button type="button" data-k="left">◀</button><button type="button" data-k="right">▶</button></div>
   <div class="pad-r">
     <div class="pad-aim"><button type="button" data-k="up">▲</button><button type="button" data-k="down">▼</button></div>
-    <button type="button" data-k="acd" class="sm" aria-label="Reacender">◉</button><button type="button" data-k="pod" class="sm" aria-label="Poder de luz">✧</button><button type="button" data-k="dash" class="sm">»</button><button type="button" data-k="atk">✦</button><button type="button" data-k="jump" class="big">⤒</button>
+    <button type="button" data-k="acd" class="sm" aria-label="Cura">◉</button><button type="button" data-k="pod" class="sm" aria-label="Magia">✧</button><button type="button" data-k="dash" class="sm">»</button><button type="button" data-k="atk">✦</button><button type="button" data-k="jump" class="big">⤒</button>
   </div>
 </div>
 
 <div class="pbar" id="pbar">
   <canvas class="pcover" id="pcover" width="96" height="96" aria-hidden="true"></canvas>
-  <div class="pmeta"><b id="ptitle">Sino de Cinzaraiz</b><span id="partist">Trilha de Velumbra · I</span></div>
+  <div class="pmeta"><b id="ptitle">Trilha</b><span id="partist">Trilha do Atlas</span></div>
   <div class="pmain">
     <div class="pbtns">
       <button type="button" id="pprev" aria-label="Faixa anterior"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
@@ -70,7 +91,7 @@
     <div class="pprog"><span id="pcur">0:00</span><input type="range" id="pseek" min="0" max="1000" value="0" aria-label="Posição na faixa"><span id="pdur">0:00</span></div>
   </div>
   <div class="pside">
-    <button type="button" id="pfollow" aria-pressed="true" title="Trocar a música ao mudar de região" aria-label="Acompanhar região"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></button>
+    <button type="button" id="pfollow" aria-pressed="false" title="Trocar a música ao mudar de área" aria-label="Acompanhar área"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></button>
     <button type="button" id="pmute" aria-label="Silenciar música"></button>
     <input type="range" id="pvol" min="0" max="100" value="55" aria-label="Volume da música">
     <button type="button" id="plist" aria-label="Lista de faixas" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 6h13v2H3zm0 5h13v2H3zm0 5h9v2H3zm15-6v8.2a3 3 0 1 0 2 2.8V8h3V6h-5z"/></svg></button>
@@ -84,7 +105,7 @@
 
 <aside class="panel shop" id="shop" role="dialog" aria-modal="false" aria-labelledby="shopT" hidden>
   <header><h3 id="shopT">Oficina</h3><button type="button" class="x" data-close="shop" aria-label="Fechar oficina">×</button></header>
-  <p class="note">Troque qualquer peça do conceito por arquivos seus. Tudo fica salvo só neste navegador. O <button type="button" class="lnk" data-guide="comeco">Guia</button> explica cada formato.</p>
+  <p class="note">Ferramenta temporária de produção: mostra o que carregou da pasta <code>recursos/</code> e deixa testar arquivos neste navegador. O <button type="button" class="lnk" data-guide="comeco">Guia</button> explica cada formato.</p>
 
   <details open><summary>Pasta recursos/</summary>
     <p class="note">Arquivos colocados em <code>recursos/</code> carregam sozinhos ao abrir o site. ✓ encontrado · ainda não colocado · ✕ com problema. A lista está no <button type="button" class="lnk" data-guide="pasta">Guia</button>.</p>
@@ -106,7 +127,7 @@
     <table class="anims"><thead><tr><th>Animação</th><th>Linha</th><th>Quadros</th><th>FPS</th></tr></thead><tbody id="pAnims"></tbody></table>
     <div class="checks"><label><input type="checkbox" id="pFlip"> A folha olha para a esquerda</label><label><input type="checkbox" id="pPix"> Pixel art</label><label><input type="checkbox" id="pInk" checked> Contorno de tinta</label><label><input type="checkbox" id="pGlow" checked> Brilho de lanterna</label></div>
     <canvas class="prev" id="pPrev" width="360" height="150" aria-label="Prévia da animação do personagem"></canvas>
-    <div class="btns"><button type="button" id="pApply">Aplicar personagem</button><button type="button" class="ghost" data-reset="player">Voltar para Lume</button></div>
+    <div class="btns"><button type="button" id="pApply">Aplicar personagem</button><button type="button" class="ghost" data-reset="player">Remover folha de teste</button></div>
   </details>
 
   <details><summary>Inimigos</summary>
@@ -118,8 +139,8 @@
     <div class="btns"><button type="button" id="eApply">Aplicar criatura</button><button type="button" class="ghost" id="eReset">Voltar ao desenho original</button></div>
   </details>
 
-  <details><summary>Fundos das regiões</summary>
-    <div class="row"><label for="bReg">Região</label><select id="bReg"></select></div>
+  <details><summary>Fundos das áreas</summary>
+    <div class="row"><label for="bReg">Área</label><select id="bReg"></select></div>
     <div class="row"><label for="bImg">Imagem</label><input type="file" id="bImg" accept="image/*"></div>
     <div class="grid3"><label>Encaixe<select id="bFit"><option value="cobrir">Cobrir</option><option value="conter">Conter</option></select></label><label>Modo<select id="bMode"><option value="substituir">Substituir</option><option value="sobrepor">Sobrepor</option></select></label><label>Opacidade<input type="range" id="bOp" min="0" max="100" value="100"></label></div>
     <div class="checks"><label><input type="checkbox" id="bDirt" checked> Manter grão e sujeira por cima</label></div>
@@ -132,7 +153,7 @@
   </details>
 
   <details><summary>Música</summary>
-    <div class="checks"><label><input type="checkbox" id="setAuto"> Começar a tocar no primeiro clique ou tecla</label><label><input type="checkbox" id="setFollow"> Trocar a faixa ao mudar de região</label></div>
+    <div class="checks"><label><input type="checkbox" id="setAuto"> Começar a tocar no primeiro clique ou tecla</label><label><input type="checkbox" id="setFollow"> Trocar a faixa ao mudar de área</label></div>
     <label class="filebtn">Adicionar músicas<input type="file" id="mAdd" accept="audio/*" multiple></label>
     <ul class="mlist" id="mList"></ul>
   </details>
@@ -154,7 +175,7 @@
 
 <div class="modal" id="guide" hidden>
   <div class="panel guide" role="dialog" aria-modal="true" aria-labelledby="guideT">
-    <header><h3 id="guideT">Guia de personalização</h3><button type="button" class="x" data-close="guide" aria-label="Fechar guia">×</button></header>
+    <header><h3 id="guideT">Guia</h3><button type="button" class="x" data-close="guide" aria-label="Fechar guia">×</button></header>
     <nav class="gtabs" id="gtabs" role="tablist"></nav>
     <div class="gbody" id="gbody"></div>
   </div>
@@ -176,139 +197,25 @@
     <path d="M29 15 Q24 6 18 5 M35 15 Q40 6 46 5" fill="none" stroke="#e8e0cf" stroke-width="1.6" stroke-linecap="round"/>
   </svg>
   <div class="hud-txt">
-    <span class="hud-region" id="hudRegion">I · Cinzaraiz</span>
+    <span class="hud-region" id="hudRegion">I · Início</span>
     <span class="hud-depth" id="hudDepth">0 m</span>
     <div class="pips" id="pips"></div>
     <div class="ghud"><span class="hpbar" id="hpbar" aria-label="Vida"></span><span class="fragc" id="fragc" aria-label="Fragmentos de luz">0</span></div>
   </div>
 </div>
 
-<nav class="map" id="map" aria-label="Regiões de Velumbra"></nav>
+<nav class="map" id="map" aria-label="Mapa do portfólio"></nav>
 
-<main id="top">
-  <section class="realm hero" id="cinzaraiz" data-depth="0" data-name="Cinzaraiz" style="--accent:#f2d49b">
-    <canvas class="lyr back"></canvas><canvas class="lyr mid"></canvas>
-    <div class="copy">
-      <p class="eyebrow">Crônica de uma descida</p>
-      <h1>Velumbra</h1>
-      <svg class="flourish" viewBox="0 0 300 18" aria-hidden="true"><path d="M0 9 H122 M178 9 H300" stroke="currentColor" stroke-width="1"/><path d="M150 1 L158 9 L150 17 L142 9 Z" fill="none" stroke="currentColor"/><circle cx="150" cy="9" r="2" fill="currentColor"/><path d="M122 9 q8 -8 14 0 M178 9 q-8 -8 -14 0" fill="none" stroke="currentColor"/></svg>
-      <p class="lede">Sob a última vila da superfície dorme um reino inteiro. Siga Lume, a mariposa errante, e a sua lanterna por oito regiões, da cinza fria do alto até a escuridão que esqueceu o próprio nome.</p>
-      <dl class="facts">
-        <div><dt>Região I</dt><dd>Cinzaraiz, a vila</dd></div>
-        <div><dt>Clima</dt><dd>Cinza e garoa</dd></div>
-        <div><dt>Luz</dt><dd>Lua e lampião</dd></div>
-      </dl>
-      <div class="cue" aria-hidden="true">Role para descer com Lume<i></i></div>
-    </div>
-    <canvas class="lyr front"></canvas>
-  </section>
-
-  <section class="realm" id="galerias" data-depth="180" data-name="Galerias de Âmbar" style="--accent:#f2a145">
-    <canvas class="lyr back"></canvas><canvas class="lyr mid"></canvas>
-    <div class="copy r">
-      <p class="eyebrow">Região II · −180 m</p>
-      <h2>Galerias de Âmbar<small>Estradas de um povo que já partiu</small></h2>
-      <p class="lede">Túneis escavados à mão cruzam-se e perdem-se uns nos outros. As lanternas de âmbar ainda acendem sozinhas ao anoitecer, guiando ninguém por caminhos que só os besouros lembram.</p>
-      <dl class="facts">
-        <div><dt>Clima</dt><dd>Poeira suspensa</dd></div>
-        <div><dt>Luz</dt><dd>Âmbar velho</dd></div>
-        <div><dt>Habitantes</dt><dd>Besouros de carga</dd></div>
-      </dl>
-    </div>
-    <canvas class="lyr front"></canvas>
-  </section>
-
-  <section class="realm" id="sendas" data-depth="420" data-name="Sendas do Musgo" style="--accent:#8ff0b8">
-    <canvas class="lyr back"></canvas><canvas class="lyr mid"></canvas>
-    <div class="copy l">
-      <p class="eyebrow">Região III · −420 m</p>
-      <h2>Sendas do Musgo<small>Onde a pedra aprendeu a respirar</small></h2>
-      <p class="lede">Arcos antigos foram engolidos por folhagens que sobem como maré. Feixes de luz pálida atravessam fendas que ninguém lembra de ter aberto, e as flores azuis só se fecham quando alguém passa.</p>
-      <dl class="facts">
-        <div><dt>Clima</dt><dd>Folhas caindo</dd></div>
-        <div><dt>Luz</dt><dd>Feixes e vaga-lumes</dd></div>
-        <div><dt>Habitantes</dt><dd>Jardineiros de musgo</dd></div>
-      </dl>
-    </div>
-    <canvas class="lyr front"></canvas>
-  </section>
-
-  <section class="realm" id="brejo" data-depth="760" data-name="Brejo dos Esporos" style="--accent:#ffc074">
-    <canvas class="lyr back"></canvas><canvas class="lyr mid"></canvas>
-    <div class="copy r">
-      <p class="eyebrow">Região IV · −760 m</p>
-      <h2>Brejo dos Esporos<small>Um ar morno e doce demais</small></h2>
-      <p class="lede">Cogumelos do tamanho de catedrais soltam esporos dourados que sobem em vez de cair. As poças verdes borbulham devagar com algo que talvez esteja vivo, e certamente está com fome.</p>
-      <dl class="facts">
-        <div><dt>Clima</dt><dd>Esporos ascendentes</dd></div>
-        <div><dt>Luz</dt><dd>Bioluminescência</dd></div>
-        <div><dt>Perigo</dt><dd>Poças ácidas</dd></div>
-      </dl>
-    </div>
-    <canvas class="lyr front"></canvas>
-  </section>
-
-  <section class="realm" id="cidadela" data-depth="1150" data-name="Cidadela da Chuva" style="--accent:#9cc6ff">
-    <canvas class="lyr back"></canvas><canvas class="lyr mid"></canvas>
-    <div class="copy l">
-      <p class="eyebrow">Região V · −1.150 m</p>
-      <h2>Cidadela da Chuva Eterna<small>A capital sob o lago</small></h2>
-      <p class="lede">Sob um lago que nunca seca, a capital chora há séculos. Torres de vidro azul, estátuas sem rosto e uma chuva que cai sem ter céu de onde cair. As janelas continuam acesas para quem nunca voltou.</p>
-      <dl class="facts">
-        <div><dt>Clima</dt><dd>Chuva sem fim</dd></div>
-        <div><dt>Luz</dt><dd>Janelas azuis</dd></div>
-        <div><dt>Habitantes</dt><dd>Nobres esquecidos</dd></div>
-      </dl>
-    </div>
-    <canvas class="lyr front"></canvas>
-  </section>
-
-  <section class="realm" id="minas" data-depth="1620" data-name="Minas de Quartzo-Rosa" style="--accent:#ff9fd4">
-    <canvas class="lyr back"></canvas><canvas class="lyr mid"></canvas>
-    <div class="copy l">
-      <p class="eyebrow">Região VI · −1.620 m</p>
-      <h2>Minas de Quartzo-Rosa<small>O cristal que cresce sozinho</small></h2>
-      <p class="lede">Os mineiros cantavam aqui enquanto o cristal crescia mais rápido do que podiam cortar. O canto parou há muito tempo. O cristal, não. Ele ainda zumbe baixinho, na nota exata da última canção.</p>
-      <dl class="facts">
-        <div><dt>Clima</dt><dd>Cintilação</dd></div>
-        <div><dt>Luz</dt><dd>Quartzo vivo</dd></div>
-        <div><dt>Ruído</dt><dd>Um zumbido em lá</dd></div>
-      </dl>
-    </div>
-    <canvas class="lyr front"></canvas>
-  </section>
-
-  <section class="realm" id="ninho" data-depth="2230" data-name="Ninho das Mil Patas" style="--accent:#d8e09a">
-    <canvas class="lyr back"></canvas><canvas class="lyr mid"></canvas>
-    <div class="copy r">
-      <p class="eyebrow">Região VII · −2.230 m</p>
-      <h2>Ninho das Mil Patas<small>Aqui não há lanternas. Há olhos.</small></h2>
-      <p class="lede">Teias antigas cobrem túneis que se dobram sobre si mesmos. Casulos pendem do teto como frutos pálidos, e cada passo ecoa um pouco tarde demais. A única luz é a que você trouxe.</p>
-      <dl class="facts">
-        <div><dt>Clima</dt><dd>Poeira lenta</dd></div>
-        <div><dt>Luz</dt><dd>Quase nenhuma</dd></div>
-        <div><dt>Conselho</dt><dd>Não pare</dd></div>
-      </dl>
-    </div>
-    <canvas class="lyr front"></canvas>
-  </section>
-
-  <section class="realm" id="fosso" data-depth="2840" data-name="O Fosso Sem Luz" style="--accent:#d9d3ff">
-    <canvas class="lyr back"></canvas><canvas class="lyr mid"></canvas>
-    <div class="copy r">
-      <p class="eyebrow">Região VIII · −2.840 m e além</p>
-      <h2>O Fosso Sem Luz<small>Aqui termina o mapa</small></h2>
-      <p class="lede">Lá embaixo há uma luz branca que não aquece e uma escuridão tão antiga que esqueceu o próprio nome. Lume ergue a lanterna, olha uma última vez para cima, e desce.</p>
-      <dl class="facts">
-        <div><dt>Clima</dt><dd>Luz que sobe</dd></div>
-        <div><dt>Luz</dt><dd>Branca e fria</dd></div>
-        <div><dt>Fundo</dt><dd>Desconhecido</dd></div>
-      </dl>
-      <button class="ascend" id="ascend" type="button">Voltar à superfície</button>
-      <p class="credit">Mundo, personagem e arte originais, pintados em código, em homenagem aos metroidvanias desenhados à mão.</p>
-    </div>
-    <canvas class="lyr front"></canvas>
-  </section>
+<main id="conteudo" tabindex="-1">
+  <p class="carregando">Carregando o portfólio…</p>
 </main>
+<noscript><p class="sem-js">Este portfólio monta as páginas com JavaScript. Ative o JavaScript para ver as matérias e as atividades.</p></noscript>
+
+<div class="modal detalhe-fundo" id="detalhe" hidden>
+  <article class="panel detalhe" role="dialog" aria-modal="true" aria-labelledby="detT" tabindex="-1">
+    <button type="button" class="x det-x" id="detFechar" aria-label="Fechar atividade">×</button>
+    <div class="det-corpo" id="detCorpo"></div>
+  </article>
+</div>
 </body>
 </html>

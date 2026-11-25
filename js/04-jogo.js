@@ -1,6 +1,7 @@
 /* ---------- world geometry: grounds with openings, platform shafts, route ---------- */
 const SIDE=secs.map(s=>{const cp=s.querySelector('.copy');return cp.classList.contains('r')?'r':cp.classList.contains('l')?'l':'c'});
-const PLAT=[null,
+const PLAT=[/* platform look by theme (same order as REG) */
+ {top:'#4a5568',body:'#161c28',dark:'#080b12',deco:'chain',acc:'#f2d49b'},
  {top:'#4a5d6e',body:'#18222c',dark:'#090d12',deco:'chain',acc:'#f2a145'},
  {top:'#2f8a60',body:'#0e2e2c',dark:'#041414',deco:'moss',acc:'#8ff0b8'},
  {top:'#b8763a',body:'#2a170b',dark:'#120a05',deco:'shroom',acc:'#ffc074'},
@@ -8,8 +9,8 @@ const PLAT=[null,
  {top:'#9a6ab0',body:'#2b1d3e',dark:'#140c1f',deco:'crystal',acc:'#ff9fd4'},
  {top:'#4a5040',body:'#0f110c',dark:'#030302',deco:'web',acc:'#d8e09a'},
  {top:'#3a3858',body:'#0a0a12',dark:'#000000',deco:'none',acc:'#b9b0ff'}];
-function secGeom(i){const s=secs[i],w=s.clientWidth,H=s.offsetHeight,h=H*1.2;return{w,H,h,u:clamp(w/1280,.5,1.25),top:s.offsetTop-.1*H}}
-function GF(i,w,h,u){const r=rng(7919*(i+1)+131);switch(i){case 0:return edgeFn(r,h*.8,14*u,520*u);case 1:edgeFn(r,h*.16,32*u,220*u);return edgeFn(r,h*.8,10*u,420*u);case 2:return()=>h*.78-2*u;case 3:edgeFn(r,h*.1,26*u,200*u);return edgeFn(r,h*.81,26*u,300*u);case 4:return()=>h*.8;case 5:edgeFn(r,h*.15,40*u,200*u);return edgeFn(r,h*.83,14*u,300*u);case 6:edgeFn(r,h*.2,60*u,170*u);return edgeFn(r,h*.8,36*u,200*u);default:return x=>x<w*.37?h*.6-5*u:null}}
+function secGeom(i){const d=DIO[i],w=d.clientWidth,H=d.offsetHeight,h=H*1.2;return{w,H,h,u:clamp(w/1280,.5,1.25),top:d.getBoundingClientRect().top+scrollY-.1*H}}
+function GF(i,w,h,u){const r=rng(7919*(i+1)+131);switch(TEMA[i]){case 0:return edgeFn(r,h*.8,14*u,520*u);case 1:edgeFn(r,h*.16,32*u,220*u);return edgeFn(r,h*.8,10*u,420*u);case 2:return()=>h*.78-2*u;case 3:edgeFn(r,h*.1,26*u,200*u);return edgeFn(r,h*.81,26*u,300*u);case 4:return()=>h*.8;case 5:edgeFn(r,h*.15,40*u,200*u);return edgeFn(r,h*.83,14*u,300*u);case 6:edgeFn(r,h*.2,60*u,170*u);return edgeFn(r,h*.8,36*u,200*u);default:return x=>x<w*.37?h*.6-5*u:null}}
 let ROUTE=[],PLATS=[],GROUNDS=[],LANDX=[],SC=1,K=1,SPACING=150;
 function groundPage(i,x){const g=GROUNDS[i];if(!g)return null;if(g.hole&&x>g.hole.x0&&x<g.hole.x1)return null;const v=g.G(x);return v==null?null:g.top+v}
 function gnode(i,x){return{x,y:groundPage(i,x),ground:1,sec:i}}
@@ -27,7 +28,7 @@ function buildRoute(){const W=secs[0].clientWidth;SC=clamp(W/1280,.62,1.15)*1.5;
     let lx=bx(.5);if(ng.hole&&Math.abs(lx-ng.hole.cx)<HW*2.4)lx=ng.hole.cx+(ng.hole.cx<W/2?1:-1)*HW*2.8;
     if(groundPage(i+1,lx)==null)lx=W*.2;
     const y0=gr.top+gr.G(hl.cx),y1=groundPage(i+1,lx),n=Math.max(2,Math.round((y1-y0)/SPACING))-1;
-    for(let j=1;j<=n;j++){const x=j===1?hl.cx:bx(j%2?.2:.8),y=y0+(y1-y0)*j/(n+1),p={x,y,pw:(98+(j*37%23))*gr.u,theme:i+1,k:PLATS.length};PLATS.push(p);ROUTE.push({x,y,plat:1,j:1})}
+    for(let j=1;j<=n;j++){const x=j===1?hl.cx:bx(j%2?.2:.8),y=y0+(y1-y0)*j/(n+1),p={x,y,pw:(98+(j*37%23))*gr.u,theme:TEMA[i+1],k:PLATS.length};PLATS.push(p);ROUTE.push({x,y,plat:1,j:1})}
     land=lx}
 }
 function drawPlatform(c,x,y,pw,u,T,r){const th=13*u;
@@ -46,13 +47,13 @@ function drawPlatform(c,x,y,pw,u,T,r){const th=13*u;
 function drawPlatforms(c,i,w,h,u){const top=GROUNDS[i]?GROUNDS[i].top:secGeom(i).top;PLATS.forEach(p=>{const cy=p.y-top;if(cy<-40||cy>h+60)return;drawPlatform(c,p.x,cy,p.pw,u,PLAT[p.theme],rng(4441+p.k*17))})}
 function shaftPath(c,x0,x1,y0,y1,u,seed){const r=rng(seed);c.beginPath();c.moveTo(x0,y0);for(let y=y0;y<=y1;y+=12*u)c.lineTo(x0+(r()-.5)*7*u+Math.sin(y*.04)*3*u,y);c.lineTo(x1,y1);for(let y=y1;y>=y0;y-=12*u)c.lineTo(x1+(r()-.5)*7*u+Math.sin(y*.037)*3*u,y);c.closePath()}
 function drawHole(c,i,w,h,u){const gr=GROUNDS[i];if(!gr)return;const r=rng(777+i);
-  if(gr.hole){const{x0,x1,cx}=gr.hole,gy=Math.min(gr.G(x0),gr.G(x1),gr.G(cx))-5*u,acc=PLAT[i+1].acc;
+  if(gr.hole){const{x0,x1,cx}=gr.hole,gy=Math.min(gr.G(x0),gr.G(x1),gr.G(cx))-5*u,acc=PLAT[TEMA[i+1]].acc;
     shaftPath(c,x0,x1,gy,h+10,u,91+i);const g=c.createLinearGradient(0,gy,0,h);g.addColorStop(0,'rgba(3,2,6,.98)');g.addColorStop(.5,'rgba(3,2,6,.94)');g.addColorStop(1,'rgba(3,2,6,.86)');c.fillStyle=g;c.fill();
     glow(c,cx,h*1.02,(x1-x0)*1.2,acc,.2);
     for(const ex of[x0,x1])for(let k=0;k<6;k++){const yy=gy+4*u+k*10*u,s=(5+r()*6)*u,xx=ex+(ex===x0?-1:1)*s*.3;c.fillStyle=mix('#1c1a22','#000000',r()*.4);c.beginPath();c.ellipse(xx,yy,s,s*.8,0,0,TAU);c.fill();c.strokeStyle='rgba(255,255,255,.1)';c.lineWidth=1;c.beginPath();c.arc(xx,yy,s*.7,Math.PI*1.1,Math.PI*1.6);c.stroke()}
     c.strokeStyle='rgba(20,18,24,.95)';c.lineCap='round';for(let k=0;k<4;k++){const sx=x0+r()*(x1-x0),L=(20+r()*60)*u;c.lineWidth=(1+r()*2)*u;c.beginPath();c.moveTo(sx,gy+2*u);c.quadraticCurveTo(sx+(r()-.5)*14*u,gy+L*.5,sx+(r()-.5)*8*u,gy+L);c.stroke()}
     glow(c,cx,gy-6*u,(x1-x0)*.7,acc,.12)}
-  if(i>0&&GROUNDS[i-1]&&GROUNDS[i-1].hole){const{x0,x1,cx}=GROUNDS[i-1].hole,Cy=REG[i].C?REG[i].C(cx):h*.2,y1=Math.max(h*.12,Cy+50*u);shaftPath(c,x0-6*u,x1+6*u,-10,y1,u,191+i);const g=c.createLinearGradient(0,0,0,y1);g.addColorStop(0,'rgba(3,2,6,.92)');g.addColorStop(.7,'rgba(3,2,6,.55)');g.addColorStop(1,'rgba(3,2,6,0)');c.fillStyle=g;c.fill()}
+  if(i>0&&GROUNDS[i-1]&&GROUNDS[i-1].hole){const{x0,x1,cx}=GROUNDS[i-1].hole,Cy=SREG[i].C?SREG[i].C(cx):h*.2,y1=Math.max(h*.12,Cy+50*u);shaftPath(c,x0-6*u,x1+6*u,-10,y1,u,191+i);const g=c.createLinearGradient(0,0,0,y1);g.addColorStop(0,'rgba(3,2,6,.92)');g.addColorStop(.7,'rgba(3,2,6,.55)');g.addColorStop(1,'rgba(3,2,6,0)');c.fillStyle=g;c.fill()}
 }
 
 /* ---------- custom assets (filled by the recursos/ folder and by the workshop) ---------- */
@@ -103,7 +104,7 @@ function spawnFx(anim,x,y,face,rot){const spr=ASSETS.player;if(!spr||!spr.anims)
 
 /* ---------- enemies (page coordinates) ---------- */
 const HB={crawler:[22,15,14],flyer:[16,12,0],hopper:[15,20,0],spider:[26,14,14],sentinel:[15,44,40],dropper:[12,13,0]};
-const ENEMIES=ENEMY_DEF.map((l,i)=>l.map(d=>({...d,sec:i,ph:Math.random()*2,kb:0,fl:0,x:0,y:0,vis:false,hp:3,dead:0,ox:0,oy:0,lx:null,lg:0,top:0,j:0,face:1})));
+const ENEMIES=secs.map((s,i)=>(ENEMY_DEF[TEMA[i]]||[]).map(d=>({...d,sec:i,ph:Math.random()*2,kb:0,fl:0,x:0,y:0,vis:false,hp:3,dead:0,ox:0,oy:0,lx:null,lg:0,top:0,j:0,face:1})));
 /* ---------- custom enemies from recursos/inimigos/inimigos.json (folders, regions and behaviour written by the owner) ---------- */
 const BEHAVIOURS={andar:{ground:1},pular:{ground:1},investir:{ground:1},atirar:{ground:1},parado:{ground:1},voar:{air:1},perseguir:{air:1},flutuar:{air:1},teto:{air:1}};
 const ROLE_ONCE={virar:1,atacar:1,morrer:1};
@@ -125,7 +126,7 @@ function updateCustom(e,i,dt,gr,W,vh){
   e.kb*=Math.pow(.02,dt);e.fl=Math.max(0,e.fl-dt*4);e.turnT=Math.max(0,e.turnT-dt);e.atkT=Math.max(0,e.atkT-dt);e.cd-=dt;e.charge=Math.max(0,e.charge-dt);
   const play=MODE==='play'&&PL.dead<=0,lastFace=e.face;
   if(e.beh==='flutuar'){e.x=W*(e.x0+Math.sin(T*.12+e.ph*3)*.06);e.y=gr.top+gr.h*e.yf+Math.sin(T*.5+e.ph*2)*26*K}
-  else if(e.beh==='teto'){if(!REG[i].C)return;e.x=W*e.x0;e.top=gr.top+REG[i].C(e.x);e.y=e.top+(50+(1+Math.sin(T*.7+e.ph*3))*90)*K}
+  else if(e.beh==='teto'){if(!SREG[i].C)return;e.x=W*e.x0;e.top=gr.top+SREG[i].C(e.x);e.y=e.top+(50+(1+Math.sin(T*.7+e.ph*3))*90)*K}
   else{const p=T*e.sp+e.ph;let x=W*(e.x0+e.rg*(tri(p)-.5));if(e.rg>0)e.face=tri(p+.002)-tri(p)>=0?1:-1;
     if(e.beh==='investir'&&play){const dx=PL.x-(x+e.ox);if(e.charge<=0&&e.cd<=0&&Math.abs(dx)<280*K&&Math.abs(PL.y-e.lg)<90*K){e.charge=.75;e.cd=2.5;e.cdir=Math.sign(dx)||1;e.atkT=animLen(e.spr,roleOf(e,'atacar'))}
       if(e.charge>0){e.ox+=e.cdir*560*K*(+e.cfg.velocidade||1)*dt;e.face=e.cdir}else e.ox*=Math.pow(.25,dt)}
@@ -155,7 +156,7 @@ function updateEnemies(dt){const W=FW,vh=FH;
       if(e.dead>0){e.dead-=dt;if(e.dead<=0)e.hp=3;continue}
       e.kb*=Math.pow(.02,dt);e.fl=Math.max(0,e.fl-dt*4);
       if(e.k==='jelly'){e.x=W*(e.x0+Math.sin(T*.12+e.ph*3)*e.rg);e.y=gr.top+gr.h*e.yf+Math.sin(T*.5+e.ph*2)*26}
-      else if(e.k==='dropper'){if(!REG[i].C)continue;e.x=W*e.x0;e.top=gr.top+REG[i].C(e.x);e.y=e.top+(50+(1+Math.sin(T*.7+e.ph*3))*90)*K}
+      else if(e.k==='dropper'){if(!SREG[i].C)continue;e.x=W*e.x0;e.top=gr.top+SREG[i].C(e.x);e.y=e.top+(50+(1+Math.sin(T*.7+e.ph*3))*90)*K}
       else{const p=T*(e.sp||.05)+e.ph;let x=W*(e.x0+e.rg*(tri(p)-.5))+e.kb;e.face=tri(p+.002)-tri(p)>=0?1:-1;let g=groundPage(i,x);if(g==null){if(e.lx==null)continue;x=e.lx;g=e.lg}e.lx=x;e.lg=g;e.x=x;e.y=g;
         if(e.k==='hopper')e.j=Math.abs(Math.sin(T*2.6+e.ph*5))*34;
         if(e.k==='flyer'){e.y=g-e.hv*K+Math.sin(T*2.2+e.ph*4)*14*K;
@@ -172,7 +173,7 @@ function surfaceAt(on,x){if(!on)return null;if(on.t==='g')return groundPage(on.i
 function findLanding(x,y0,y1){let best=null;for(let i=0;i<GROUNDS.length;i++){const gy=groundPage(i,x);if(gy!=null&&gy>=y0-8*K&&gy<=y1+1&&(!best||gy<best.y))best={y:gy,on:{t:'g',i}}}
   for(const p of PLATS){if(Math.abs(x-p.x)>p.pw/2+6*K)continue;const py=p.y-2;if(py>=y0-8*K&&py<=y1+1&&(!best||py<best.y))best={y:py,on:{t:'p',p}}}return best}
 
-/* ---------- Passeio: Lume follows the route by itself ---------- */
+/* ---------- Passeio: the character follows the route by itself ---------- */
 const L={landT:0,i:0,ni:0,x:0,y:0,mode:'idle',jt:0,ct:0,ax:0,ay:0,bx:0,by:0,dur:.5,hh:0,face:1,ph:0,atk:0,cd:0,F:0,sq:1,flut:0,dbl:false,dblDone:false,idle:0,stepT:0,mv:false,ready:false};
 function updateAuto(dt){const vh=FH,s=SC;
   if(!L.ready){L.ready=true;L.i=L.ni=0;L.x=ROUTE[0].x;L.y=ROUTE[0].y}
@@ -192,7 +193,7 @@ function updateAuto(dt){const vh=FH,s=SC;
   L.F+=((L.mode==='jump'?1:0)-L.F)*Math.min(1,dt*14);L.cd-=dt;L.atk=Math.max(0,L.atk-dt*3.2);
   if(L.mode==='idle'){L.idle+=dt;if(L.idle>3.6){L.idle=0;L.face*=-1}}else L.idle=0;
   if((L.mode==='walk'||L.mode==='idle')&&L.cd<=0)for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.air||e.k==='flyer'||e.k==='jelly'||e.k==='dropper')continue;
-    if(Math.abs(e.x-L.x)<58*K&&Math.abs(e.y-L.y)<34*K){L.atk=1;L.cd=1.2;L.face=e.x>L.x?1:-1;e.kb+=L.face*70*K;e.fl=1;heroAnimName='';if(!spawnFx('efeito_golpe',L.x+L.face*40*K,L.y-32*K,L.face)&&!customHero())slashes.push({x:L.x,y:L.y,f:L.face,d:0,t:0});burst(e.x,e.y-18*K,LC[e.sec],16,220);sfx('golpe',.6);sfx('acerto',.5);break}}
+    if(Math.abs(e.x-L.x)<58*K&&Math.abs(e.y-L.y)<34*K){L.atk=1;L.cd=1.2;L.face=e.x>L.x?1:-1;e.kb+=L.face*70*K;e.fl=1;heroAnimName='';if(!spawnFx('efeito_golpe',L.x+L.face*40*K,L.y-32*K,L.face)&&!customHero())slashes.push({x:L.x,y:L.y,f:L.face,d:0,t:0});burst(e.x,e.y-18*K,lcOf(e.sec),16,220);sfx('golpe',.6);sfx('acerto',.5);break}}
 }
 
 /* ---------- Jogar: full platformer ---------- */
@@ -205,17 +206,17 @@ function setMode(m){if(m===MODE)return;MODE=m;document.documentElement.classList
   else{let best=0,bd=1e9;ROUTE.forEach((n,k)=>{const d=Math.hypot(n.x-PL.x,(n.y-PL.y)*2);if(d<bd){bd=d;best=k}});L.i=L.ni=best;L.mode='idle';L.x=ROUTE[best].x;L.y=ROUTE[best].y;window.scrollTo({top:Math.max(0,L.y-FH*.72),behavior:'instant'});showHint(false)}
   updateModeUI()}
 function hurtPlayer(src){if(PL.inv>0||PL.dead>0||PL.dash>0)return;PL.hp--;PL.inv=1.3;const d=src.x>PL.x?-1:1;PL.vx=d*420*K;PL.vy=-430*K;PL.on=null;sfx('dano');shake.t=.3;shake.a=7;hitstop=.08;burst(PL.x,PL.y-30*K,'#ffffff',14,260);hudGame();
-  if(PL.hp<=0){PL.dead=1.8;sfx('morte');burst(PL.x,PL.y-30*K,LC[Math.max(0,lastIdx)],30,320)}}
+  if(PL.hp<=0){PL.dead=1.8;sfx('morte');burst(PL.x,PL.y-30*K,lcOf(lastIdx),30,320)}}
 function dropFrags(x,y,n){for(let k=0;k<n;k++)frags.push({x,y,vx:(Math.random()-.5)*300*K,vy:-(250+Math.random()*350)*K,t:0})}
 function playerAttack(){const f=PL.face,d=PL.atkDir;let box;
   if(d<0)box={x:PL.x,y:PL.y-88*K,hw:36*K,hh:44*K};else if(d>0)box={x:PL.x,y:PL.y+28*K,hw:32*K,hh:40*K};else box={x:PL.x+f*40*K,y:PL.y-32*K,hw:36*K,hh:32*K};
   heroAnimName='';if(!spawnFx(d<0?'efeito_golpe_cima':d>0?'efeito_golpe_baixo':'efeito_golpe',PL.x+(d===0?f*40*K:0),PL.y-32*K+(d<0?-50*K:d>0?44*K:0),f,d<0?-Math.PI/2*f:d>0?Math.PI/2*f:0)&&!customHero())slashes.push({x:PL.x,y:PL.y,f,d,t:0});let hit=false;
-  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-box.x)<b.hw+box.hw&&Math.abs(b.y-box.y)<b.hh+box.hh){hit=true;e.hp--;e.fl=1;PL.luz=Math.min(LUZ_MAX,PL.luz+LUZ_POR_ACERTO);const kd=d===0?f:(e.x>PL.x?1:-1);e.kb+=kd*70*K;if(e.k==='flyer')e.ox+=kd*90*K;if(!spawnFx('efeito_acerto',b.x,b.y,f))burst(b.x,b.y,LC[e.sec],14,240);sfx('acerto');
+  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-box.x)<b.hw+box.hw&&Math.abs(b.y-box.y)<b.hh+box.hh){hit=true;e.hp--;e.fl=1;PL.luz=Math.min(LUZ_MAX,PL.luz+LUZ_POR_ACERTO);const kd=d===0?f:(e.x>PL.x?1:-1);e.kb+=kd*70*K;if(e.k==='flyer')e.ox+=kd*90*K;if(!spawnFx('efeito_acerto',b.x,b.y,f))burst(b.x,b.y,lcOf(e.sec),14,240);sfx('acerto');
     if(e.hp<=0){e.dead=22;e.lx=null;e.ox=e.oy=0;burst(b.x,b.y,'#ffffff',26,340);sfx('inimigo_morre');dropFrags(b.x,b.y,3+(Math.random()*3|0))}}}
   if(hit){hitstop=.06;shake.t=.14;shake.a=4;if(d>0){PL.vy=-760*K;PL.jumps=0}else if(d===0)PL.vx-=f*160*K}}
 function updatePlay(dt){const k=K,W=FW;
   PL.inv=Math.max(0,PL.inv-dt);PL.landT=Math.max(0,PL.landT-dt);PL.dashCD-=dt;PL.atkCD-=dt;PL.atk=Math.max(0,PL.atk-dt);PL.coy-=dt;jumpQ-=dt;atkQ-=dt;dashQ-=dt;poderQ-=dt;acenderQ-=dt;corridaQ-=dt;PL.flut=Math.max(0,PL.flut-dt*2.5);PL.sq+=(1-PL.sq)*Math.min(1,dt*12); PL.spellT=Math.max(0,PL.spellT-dt);PL.healT=Math.max(0,PL.healT-dt);PL.wallJumpT=Math.max(0,PL.wallJumpT-dt);
-  if(PL.dead>0){PL.dead-=dt;if(PL.dead<=0){spawnAt(PL.cp);PL.hp=PL.max;PL.inv=1.5;hudGame();toast('Lume desperta no último chão firme.')}return}
+  if(PL.dead>0){PL.dead-=dt;if(PL.dead<=0){spawnAt(PL.cp);PL.hp=PL.max;PL.inv=1.5;hudGame();toast('O pequeno viajante desperta no último chão firme.')}return}
   if(PL.abyss>0){PL.abyss-=dt;PL.y+=50*k*dt;if(PL.abyss<=0){spawnAt(GROUNDS.length-1);PL.inv=1}return}
   const dir=(inp.right?1:0)-(inp.left?1:0);
   if(dashQ>0&&!temPoder('avanco')){dashQ=0;poderBloqueado('avanco')}
@@ -236,7 +237,7 @@ function updatePlay(dt){const k=K,W=FW;
   if(!PL.on&&PL.vy>=0){const hit=findLanding(PL.x,py,ny);if(hit){ny=hit.y;const hard=PL.vy>700*k;PL.on=hit.on;PL.vy=0;PL.jumps=0;PL.sq=hard?.68:.82;PL.landT=hard?.2:.12;sfx('pouso',hard?1:.6);burst(PL.x,ny,'#cfc6b4',hard?10:5,hard?110:60);if(hit.on.t==='g')PL.cp=hit.on.i}}
   PL.y=ny;
   if(PL.on&&Math.abs(PL.vx)>40*k){PL.ph+=Math.abs(PL.vx)*dt*.12/SC*1.5;PL.stepT-=dt;if(PL.stepT<=0){PL.stepT=.26;sfx('passo')}}
-  const last=GROUNDS[GROUNDS.length-1];if(PL.y>last.top+last.h*.93){PL.abyss=2.2;sfx('morte',.6);toast('Lume tocou a luz do fundo. A descida recomeça na borda.')}
+  const last=GROUNDS[GROUNDS.length-1];if(PL.y>last.top+last.h*.93){PL.abyss=2.2;sfx('morte',.6);toast('O viajante tocou a luz do fundo. A jornada recomeça na borda.')}
   if(PL.inv<=0&&PL.dash<=0)outer:for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly'||e.harmless)continue;const b=enemyBox(e);if(Math.abs(b.x-PL.x)<b.hw+11*k&&Math.abs(b.y-(PL.y-24*k))<b.hh+24*k){hurtPlayer(e);break outer}}
   PL.F+=((PL.on?0:1)-PL.F)*Math.min(1,dt*14);
 }
@@ -250,7 +251,7 @@ function camera(dt){const max=document.documentElement.scrollHeight-FH;camY+=(PL
 const acv=document.createElement('canvas'),ac=acv.getContext('2d'),scv=document.createElement('canvas'),sc=scv.getContext('2d');
 function inkComposite(){sc.setTransform(1,0,0,1,0,0);sc.globalCompositeOperation='source-over';sc.clearRect(0,0,scv.width,scv.height);sc.drawImage(acv,0,0);sc.globalCompositeOperation='source-in';sc.fillStyle='#09060c';sc.fillRect(0,0,scv.width,scv.height);
   fc.save();fc.setTransform(1,0,0,1,0,0);fc.globalAlpha=1;fc.globalCompositeOperation='source-over';const b=Math.floor(T*8),o=1.7*FD;for(let k=0;k<8;k++){const a=k/8*TAU+b*.7,oo=o*(.85+((b*13+k*7)%5)*.09);fc.drawImage(scv,Math.cos(a)*oo,Math.sin(a)*oo)}fc.drawImage(acv,0,0);fc.restore()}
-let heroAnimName='',heroAnimT0=0;
+let heroAnimName='',heroAnimT0=0,HERO_PRONTO=false;
 function heroAnim(){
   if(MODE==='play'){
     if(PL.dead>0)return'morte';
@@ -278,7 +279,7 @@ function heroAnim(){
 function drawSlash(s,lc){const a=1-s.t/.18;if(a<=0)return;const y=s.y-scrollY;fc.save();fc.globalCompositeOperation='lighter';fc.translate(s.x+(s.d===0?s.f*18*K:0),y-32*K+(s.d<0?-34*K:s.d>0?40*K:0));
   fc.rotate(s.d<0?-Math.PI/2:s.d>0?Math.PI/2:(s.f>0?0:Math.PI));fc.fillStyle=rgba(lc,a*.85);fc.beginPath();fc.arc(0,0,46*K,-1.2,1.2);fc.arc(-14*K,0,40*K,1.1,-1.1,true);fc.closePath();fc.fill();
   fc.strokeStyle=rgba('#ffffff',a*.6);fc.lineWidth=1.5;fc.beginPath();fc.arc(0,0,46*K,-1.1,1.1);fc.stroke();fc.restore();dotAt(lc,s.x+(s.d===0?s.f*40*K:0),y-32*K+(s.d<0?-40*K:s.d>0?44*K:0),60*K,a*.5)}
-function drawWorld(dt,ox,oy){const lc=LC[Math.max(0,lastIdx)],ws=SC*.82,late=[];
+function drawWorld(dt,ox,oy){const lc=lcOf(lastIdx),ws=SC*.82,late=[];
   ac.setTransform(FD,0,0,FD,ox*FD,oy*FD);ac.clearRect(-60,-60,FW+120,FH+120);
   for(let i=0;i<ENEMIES.length;i++){const a=MODE==='play'?1:Math.min(1,weights[i]*2.5);for(const e of ENEMIES[i]){if(!e.vis)continue;if(e.k==='custom'){drawCustom(e,a,late,ox,oy);continue}const sy=e.y-scrollY,ph=T*6+e.ph*9,spr=ASSETS.enemy[e.k];
     if(spr&&spr.anims){const draw=c=>{c.globalAlpha=a;const yy=e.k==='hopper'?sy-e.j*ws:e.k==='flyer'||e.k==='dropper'||e.k==='jelly'?sy+24*ws:sy;drawSprite(c,spr,'parado',T+e.ph,e.x,yy,e.face,48*K,e.fl);c.globalAlpha=1;if(e.k==='dropper'){c.strokeStyle='rgba(207,210,190,.35)';c.beginPath();c.moveTo(e.x,e.top-scrollY);c.lineTo(e.x,sy-10*ws);c.stroke()}};
@@ -292,12 +293,12 @@ function drawWorld(dt,ox,oy){const lc=LC[Math.max(0,lastIdx)],ws=SC*.82,late=[];
     :{x:L.x,y:L.y,face:L.face,ph:L.ph,mv:L.mv,F:L.F,atk:L.atk,sq:L.sq,flut:L.flut,hide:false};
   const Y=H.y-scrollY,onScreen=Y>-140&&Y<FH+140;let lx=H.x,ly=Y-40*K,glowOn=true;
   const an=heroAnim();if(an!==heroAnimName){heroAnimName=an;heroAnimT0=T}
-  if(onScreen&&!H.hide){const spr=ASSETS.player;
+  if(onScreen&&!H.hide&&HERO_PRONTO){const spr=ASSETS.player;
     if(spr&&spr.anims){glowOn=!!spr.cfg.glow;const draw=c=>{const p=drawSprite(c,spr,an,T-heroAnimT0,H.x,Y,H.face,84*K,0);if(p)[lx,ly]=p};if(spr.cfg.ink===false)late.push(()=>{fc.save();fc.translate(ox,oy);draw(fc);fc.restore()});else draw(ac)}
     else[lx,ly]=drawLume(ac,H.x,Y,SC,H.face,H.ph,H.mv,H.F,H.atk,T,lc,H.sq,H.flut)}
   inkComposite();
   fc.save();fc.translate(ox,oy);late.forEach(f=>f());fc.restore();drawShots(ox,oy);
-  if(onScreen&&!H.hide&&glowOn){const dark=weights[6]||0;dotAt(lc,lx,ly,(120+dark*260)*K,.35+dark*.15);dotAt(lc,lx,ly,14*SC,.9);if(!ASSETS.player)dotAt('#ffbf5e',H.x+H.face*2.3*SC,Y-33.5*SC,9*SC,.5)}
+  if(onScreen&&!H.hide&&glowOn){const dark=TEMA.reduce((m,t,i)=>t===6?Math.max(m,weights[i]||0):m,0);dotAt(lc,lx,ly,(120+dark*260)*K,.35+dark*.15);dotAt(lc,lx,ly,14*SC,.9);if(!ASSETS.player)dotAt('#ffbf5e',H.x+H.face*2.3*SC,Y-33.5*SC,9*SC,.5)}
   for(let k=sfxSprites.length-1;k>=0;k--){const e=sfxSprites[k];e.t+=dt;if(!ASSETS.player||e.t>e.len+.02){sfxSprites.splice(k,1);continue}fc.save();fc.translate(ox+e.x,oy+e.y-scrollY);fc.rotate(e.rot);drawSprite(fc,ASSETS.player,e.a,e.t,0,0,e.face,84*K,0,true);fc.restore()}
   for(let k=slashes.length-1;k>=0;k--){const s=slashes[k];s.t+=dt;if(s.t>.18){slashes.splice(k,1);continue}drawSlash(s,lc)}
   for(let k=trails.length-1;k>=0;k--){const t=trails[k];t.a-=dt*3;if(t.a<=0){trails.splice(k,1);continue}dotAt('#cdbfd8',t.x,t.y-scrollY-28*K,34*K,t.a*.5)}

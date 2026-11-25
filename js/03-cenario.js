@@ -4,7 +4,7 @@ const GRAIN=(()=>{const g=document.createElement('canvas');g.width=g.height=256;
   for(let i=0;i<46;i++){x.strokeStyle=`rgba(0,0,0,${.05+r()*.14})`;x.lineWidth=.6;x.beginPath();const a=r()*256,b=r()*256;x.moveTo(a,b);x.quadraticCurveTo(a+(r()-.5)*40,b+(r()-.5)*40,a+(r()-.5)*70,b+(r()-.5)*70);x.stroke()}return g})();
 const TMP=document.createElement('canvas');
 function postFX(cv,c,w,h,d,l,i){const W=cv.width,H=cv.height;if(W<4)return;TMP.width=W;TMP.height=H;const t=TMP.getContext('2d');t.drawImage(cv,0,0);
-  c.save();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,W,H);c.filter=l==='back'?'saturate(.62) contrast(1.08) brightness(.9)':'saturate(.72) contrast(1.06) brightness(.94)';c.drawImage(TMP,0,0);c.filter='none';
+  c.save();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,W,H);c.filter=(l==='back'?'saturate(.62) contrast(1.08) brightness(.9)':'saturate(.72) contrast(1.06) brightness(.94)')+(VARIANTE[i]?` hue-rotate(${VARIANTE[i]}deg)`:'');c.drawImage(TMP,0,0);c.filter='none';
   const r=rng(313*(i+1)+l.length*7);
   c.globalCompositeOperation='source-atop';c.fillStyle=c.createPattern(GRAIN,'repeat');c.globalAlpha=l==='back'?.75:.9;c.fillRect(0,0,W,H);c.globalAlpha=1;
   for(let k=0;k<28;k++){const x=r()*W,y=r()*H,rad=(80+r()*280)*d,g=c.createRadialGradient(x,y,0,x,y,rad);g.addColorStop(0,`rgba(6,4,8,${.1+r()*.16})`);g.addColorStop(1,'rgba(6,4,8,0)');c.fillStyle=g;c.fillRect(x-rad,y-rad,rad*2,rad*2)}
@@ -17,21 +17,26 @@ function postFX(cv,c,w,h,d,l,i){const W=cv.width,H=cv.height;if(W<4)return;TMP.w
 /* ---------- section rendering ---------- */
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const secs=[...document.querySelectorAll('.realm')];
+/* each section (built from conteudo/portfolio.json) uses one painted theme; the painted band is the .diorama inside it */
+const DIO=secs.map(s=>s.querySelector('.diorama')||s);
+const TEMA=secs.map(s=>Math.max(0,TEMA_IDS.indexOf(s.dataset.tema)));
+const VARIANTE=secs.map(s=>+s.dataset.variante||0);
+const SREG=secs.map((s,i)=>Object.create(REG[TEMA[i]]));/* per section: own ground (G) and ceiling (C), shared drawing code */
 const layers=secs.map(s=>({back:s.querySelector('.lyr.back'),mid:s.querySelector('.lyr.mid'),front:s.querySelector('.lyr.front')}));
 const drawn=secs.map(()=>false);
-function renderSection(i){const s=secs[i],R=REG[i],w=s.clientWidth,h=s.clientHeight*1.2,u=clamp(w/1280,.5,1.25);
-  ['back','mid','front'].forEach((l,k)=>{const cv=layers[i][l],d=l==='back'?1:Math.min(window.devicePixelRatio||1,1.5);cv.width=Math.round(w*d);cv.height=Math.round(h*d);const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,h);const bo=l==='back'&&ASSETS.bg[i]&&ASSETS.bg[i].img?ASSETS.bg[i]:null;try{if(!(bo&&bo.cfg.modo!=='sobrepor')){R[l](c,w,h,rng(7919*(i+1)+k*131),u,R.p);if(l==='back')DETAIL[i](c,w,h,rng(5557*(i+1)),u,R.p)}if(bo)drawBg(c,bo,w,h);if(l==='mid'){drawHole(c,i,w,h,u);drawPlatforms(c,i,w,h,u)}}catch(e){console.error('region',i,l,e)}try{if(!(bo&&bo.cfg.sujeira===false))postFX(cv,c,w,h,d,l,i)}catch(e){console.error('postfx',e)}});
+function renderSection(i){const s=DIO[i],R=SREG[i],w=s.clientWidth,h=s.clientHeight*1.2,u=clamp(w/1280,.5,1.25);
+  ['back','mid','front'].forEach((l,k)=>{const cv=layers[i][l],d=l==='back'?1:Math.min(window.devicePixelRatio||1,1.5);cv.width=Math.round(w*d);cv.height=Math.round(h*d);const c=cv.getContext('2d',{willReadFrequently:l!=='back'});c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,h);const bo=l==='back'&&ASSETS.bg[i]&&ASSETS.bg[i].img?ASSETS.bg[i]:null;try{if(!(bo&&bo.cfg.modo!=='sobrepor')){R[l](c,w,h,rng(7919*(i+1)+k*131),u,R.p);if(l==='back')DETAIL[TEMA[i]](c,w,h,rng(5557*(i+1)),u,R.p)}if(bo)drawBg(c,bo,w,h);if(l==='mid'){drawHole(c,i,w,h,u);drawPlatforms(c,i,w,h,u)}}catch(e){console.error('region',i,l,e)}try{if(!(bo&&bo.cfg.sujeira===false))postFX(cv,c,w,h,d,l,i)}catch(e){console.error('postfx',e)}});
   drawn[i]=true}
 function release(i){Object.values(layers[i]).forEach(cv=>{cv.width=1;cv.height=1});drawn[i]=false}
 
 /* ---------- HUD + map ---------- */
-const roman=['I','II','III','IV','V','VI','VII','VIII'];
+function romanNum(n){let s='';for(const[v,r]of[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']])while(n>=v){s+=r;n-=v}return s}
+const roman=secs.map((s,i)=>romanNum(i+1));
 const pips=document.getElementById('pips'),map=document.getElementById('map');
-secs.forEach((s,i)=>{pips.appendChild(document.createElement('span'));const a=document.createElement('a');a.href='#'+s.id;a.innerHTML=`<span class="nm">${roman[i]} · ${s.dataset.name}</span><span class="dot"></span>`;map.appendChild(a)});
-const pipEls=[...pips.children],mapEls=[...map.children];
+secs.forEach(()=>pips.appendChild(document.createElement('span')));
+const pipEls=[...pips.children],mapEls=[...map.querySelectorAll('a')];
 const hudRegion=document.getElementById('hudRegion'),hudDepth=document.getElementById('hudDepth'),vfillEl=document.getElementById('vfill');
 const depths=secs.map(s=>+s.dataset.depth);
-document.getElementById('ascend').addEventListener('click',()=>window.scrollTo({top:0,behavior:reduce?'auto':'smooth'}));
 let lastIdx=-1,maxIdx=0;
 
 /* ---------- particles ---------- */
@@ -55,19 +60,20 @@ function dot(c,col,x,y,rad,a){if(a<=.01)return;c.globalAlpha=Math.min(1,a);c.dra
 let pools=[];
 function initFx(){FD=Math.min(window.devicePixelRatio||1,1.5);FW=innerWidth;FH=innerHeight;fx.width=Math.round(FW*FD);fx.height=Math.round(FH*FD);fc.setTransform(FD,0,0,FD,0,0);
   const k=clamp(FW*FH/(1440*900),.35,1.2);
-  pools=REG.map(Rg=>Rg.fx.map(([type,n,col])=>{const arr=[];const m=Math.round(n*k*(reduce?.4:1));for(let j=0;j<m;j++){const p={x:R()*FW,y:R()*FH,col};FX[type].init(p);arr.push(p)}return{type,arr}}))}
+  pools=SREG.map(Rg=>Rg.fx.map(([type,n,col])=>{const arr=[];const m=Math.round(n*k*(reduce?.4:1));for(let j=0;j<m;j++){const p={x:R()*FW,y:R()*FH,col};FX[type].init(p);arr.push(p)}return{type,arr}}))}
 
-/* ---------- actors: Lume walks the ground and jumps a trail of platforms between realms ---------- */
-const LC=['#ffd896','#ffc77a','#d6ffe4','#ffdca8','#dbe9ff','#ffd8f0','#ffe2b0','#f3eeff'];
+/* ---------- actors: the character walks the ground and jumps a trail of platforms between areas ---------- */
+const LC=['#ffd896','#ffc77a','#d6ffe4','#ffdca8','#dbe9ff','#ffd8f0','#ffe2b0','#f3eeff'];/* by theme */
+const lcOf=i=>LC[TEMA[Math.max(0,i)]]||LC[0];
 const tri=p=>1-Math.abs((((p%2)+2)%2)-1);
 const rects=[],midOff=new Array(secs.length).fill(0);
 function canvasTop(i){const b=rects[i];return b.top-.1*b.height+midOff[i]}
-function groundAt(i,x){const Rg=REG[i];if(!drawn[i]||!Rg.G||!rects[i])return null;const g=Rg.G(x);return g==null?null:canvasTop(i)+g}
-function ceilAt(i,x){const Rg=REG[i];if(!rects[i])return null;return canvasTop(i)+(Rg.C?Rg.C(x):rects[i].height*.25)}
+function groundAt(i,x){const Rg=SREG[i];if(!drawn[i]||!Rg.G||!rects[i])return null;const g=Rg.G(x);return g==null?null:canvasTop(i)+g}
+function ceilAt(i,x){const Rg=SREG[i];if(!rects[i])return null;return canvasTop(i)+(Rg.C?Rg.C(x):rects[i].height*.25)}
 const WH=(c0,f)=>f>0?mix(c0,'#ffffff',Math.min(1,f)):c0;
 function dotAt(col,x,y,rad,a){const o=fc.globalCompositeOperation;fc.globalCompositeOperation='lighter';dot(fc,col,x,y,rad,a);fc.globalAlpha=1;fc.globalCompositeOperation=o}
 
-/* Lume, ink-drawn chibi: hooded moth wanderer, dark face with two amber eyes, feathery antennae through the hood, ragged cloak, lantern */
+/* fallback character drawn in code (used only when recursos/personagem/ is empty): hooded moth wanderer, dark face with two amber eyes, feathery antennae through the hood, ragged cloak, lantern */
 function drawLume(c,x,y,s,face,ph,mv,F,atk,t,lc,sq=1,flut=0){
   const jr=rng(Math.floor(t*8)*7+3),J=a=>(jr()-.5)*a,INK='#0a080d';
   c.save();c.translate(x,y);c.scale(s*face*(1+(1-sq)*.7),s*sq);c.lineJoin='round';c.lineCap='round';

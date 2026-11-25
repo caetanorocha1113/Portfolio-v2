@@ -1,0 +1,256 @@
+{
+  "site": {
+    "nome": "Atlas",
+    "subtitulo": "Portfólio de Caetano Rocha de Oliveira",
+    "descricao": "Portfólio escolar de Caetano Rocha de Oliveira, apresentado como uma jornada por um mapa: cada área é uma matéria, com as atividades, os projetos e os trabalhos dela.",
+    "tema_inicio": "cinzaraiz",
+    "tema_final": "fosso",
+    "atividades_visiveis": 4
+  },
+  "perfil": {
+    "nome": "Caetano Rocha de Oliveira",
+    "titulo": "3º ano do ensino médio integrado ao técnico de sistemas · SESI-SENAI",
+    "resumo": "[2 a 3 frases de apresentação.]",
+    "foto": "",
+    "links": [
+      { "rotulo": "[GitHub]", "url": "" },
+      { "rotulo": "[LinkedIn ou outro link]", "url": "" }
+    ],
+    "contato": { "email": "[e-mail]", "cidade": "[cidade]" }
+  },
+  "abertura": {
+    "mostrar": "sempre",
+    "falas": [
+      "Havia um Atlas que guardava todo o saber do mundo.",
+      "Um dia, ele se partiu.",
+      "Cada página virou uma terra. Cada terra, um enigma."
+    ]
+  },
+  "areas": [
+    {
+      "id": "humanas",
+      "materia": "Humanas",
+      "titulo_area": "Cidadela das Eras",
+      "periodo": "[ano / semestre]",
+      "descricao": "[O que foi estudado em Humanas, em 2 a 4 frases.]",
+      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "tema": "cidadela",
+      "atividades": [
+        {
+          "id": "exemplo-1",
+          "titulo": "[Título da atividade]",
+          "tipo": "projeto",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo. Aqui entram o que foi pedido, o que foi feito e o que foi aprendido.]\n\n[Um segundo parágrafo, se precisar.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": true,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-2",
+          "titulo": "[Título da atividade]",
+          "tipo": "trabalho",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        }
+      ],
+      "jogo": {
+        "intro": "Sob uma chuva que nunca para, a Cidadela das Eras guarda a memória de todos os povos. As estátuas ainda discutem o passado em voz baixa. Em algum ponto da praça central, a página das Humanas espera, vigiada pelo Guardião das Eras.",
+        "chefe": "guardiao-humanas",
+        "poder_recompensa": "salto_duplo",
+        "musica_exploracao": "",
+        "musica_chefe": ""
+      }
+    },
+    {
+      "id": "matematica",
+      "materia": "Matemática",
+      "titulo_area": "Minas do Número",
+      "periodo": "[ano / semestre]",
+      "descricao": "[O que foi estudado em Matemática, em 2 a 4 frases.]",
+      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "tema": "minas",
+      "atividades": [
+        {
+          "id": "exemplo-1",
+          "titulo": "[Título da atividade]",
+          "tipo": "prova",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": true,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-2",
+          "titulo": "[Título da atividade]",
+          "tipo": "trabalho",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        }
+      ],
+      "jogo": {
+        "intro": "Aqui o cristal cresce em proporções exatas, e cada eco volta medido. Os túneis seguem padrões que só fazem sentido para quem conta os passos. No fundo, o Guardião do Número protege a página da Matemática.",
+        "chefe": "guardiao-matematica",
+        "poder_recompensa": "garras",
+        "musica_exploracao": "",
+        "musica_chefe": ""
+      }
+    },
+    {
+      "id": "linguagens",
+      "materia": "Linguagens",
+      "titulo_area": "Galerias das Vozes",
+      "periodo": "[ano / semestre]",
+      "descricao": "[O que foi estudado em Linguagens, em 2 a 4 frases.]",
+      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "tema": "galerias",
+      "atividades": [
+        {
+          "id": "exemplo-1",
+          "titulo": "[Título da atividade]",
+          "tipo": "apresentação",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": true,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-2",
+          "titulo": "[Título da atividade]",
+          "tipo": "trabalho",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        }
+      ],
+      "jogo": {
+        "intro": "Nas paredes de âmbar, inscrições em línguas esquecidas ainda brilham ao entardecer. Cada galeria conta uma história diferente, e todas falam ao mesmo tempo. O Guardião das Vozes guarda a página das Linguagens.",
+        "chefe": "guardiao-linguagens",
+        "poder_recompensa": "faisca",
+        "musica_exploracao": "",
+        "musica_chefe": ""
+      }
+    },
+    {
+      "id": "natureza",
+      "materia": "Natureza",
+      "titulo_area": "Sendas Vivas",
+      "periodo": "[ano / semestre]",
+      "descricao": "[O que foi estudado em Natureza, em 2 a 4 frases.]",
+      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "tema": "sendas",
+      "atividades": [
+        {
+          "id": "exemplo-1",
+          "titulo": "[Título da atividade]",
+          "tipo": "projeto",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": true,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-2",
+          "titulo": "[Título da atividade]",
+          "tipo": "outro",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        }
+      ],
+      "jogo": {
+        "intro": "Nas Sendas Vivas, a pedra respira e o musgo aprende. Tudo aqui cresce, se transforma e volta a crescer. A página da Natureza está presa entre raízes, vigiada pelo Guardião da Seiva.",
+        "chefe": "guardiao-natureza",
+        "poder_recompensa": "reacender",
+        "musica_exploracao": "",
+        "musica_chefe": ""
+      }
+    },
+    {
+      "id": "tecnico",
+      "materia": "Técnico em Sistemas",
+      "titulo_area": "A Grande Teia",
+      "periodo": "[ano / semestre]",
+      "descricao": "[O que foi estudado no técnico, em 2 a 4 frases. As submatérias podem virar áreas próprias depois.]",
+      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "tema": "ninho",
+      "atividades": [
+        {
+          "id": "exemplo-1",
+          "titulo": "[Título da atividade]",
+          "tipo": "projeto",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": true,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-2",
+          "titulo": "[Título da atividade]",
+          "tipo": "projeto",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        }
+      ],
+      "jogo": {
+        "intro": "Fios finíssimos ligam cada canto deste lugar e levam mensagens de um ponto a outro sem descanso. Quem entende a Teia entende como as coisas se conectam. No centro dela, o Guardião da Teia protege a última página: a do Técnico.",
+        "chefe": "guardiao-tecnico",
+        "poder_recompensa": "corrida",
+        "musica_exploracao": "",
+        "musica_chefe": ""
+      }
+    }
+  ],
+  "sobre": "[Texto livre sobre você: interesses, objetivos, o que gosta de construir.]",
+  "historia": {
+    "prologo": "Antes de haver mapas, havia o Atlas: um livro que guardava tudo o que já se aprendeu. Numa noite sem lua, ele se partiu, e cada página caiu sobre o mundo como uma terra isolada, guardada por um Guardião que transformou o saber em enigma. De uma vila esquecida na superfície, um pequeno viajante de máscara pálida parte em silêncio para recuperar as páginas.",
+    "final": "Com a última página de volta, o Atlas se fecha e se abre de novo, inteiro. O que ele revela não é um mundo distante: é o caminho percorrido. Cada terra vencida era uma matéria; cada enigma, uma atividade. O mapa inteiro é este portfólio."
+  }
+}

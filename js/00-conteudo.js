@@ -1,0 +1,431 @@
+/* ---------- conteúdo do portfólio ----------
+   Lê conteudo/portfolio.json e monta a página: abertura (início), uma seção por área/matéria,
+   cartões de atividade, painel de detalhe com endereço próprio (#area/atividade), Sobre e Contato.
+   Só depois carrega o motor visual e de jogo (js/01 a js/09), que pinta os cenários atrás do texto.
+   Se o motor falhar, o conteúdo continua lá. Tudo aqui fica dentro de uma função: os únicos nomes
+   globais são CONTEUDO e (em 00b) ABERTURA, para não colidir com os scripts do motor. */
+(function () {
+  'use strict';
+
+  const ARQUIVO = 'conteudo/portfolio.json';
+  /* mesma ordem de REG em js/02-regioes.js */
+  const TEMAS = ['cinzaraiz', 'galerias', 'sendas', 'brejo', 'cidadela', 'minas', 'ninho', 'fosso'];
+  const ACENTO = { cinzaraiz: '#f2d49b', galerias: '#f2a145', sendas: '#8ff0b8', brejo: '#ffc074', cidadela: '#9cc6ff', minas: '#ff9fd4', ninho: '#d8e09a', fosso: '#d9d3ff' };
+  const TIPOS = { projeto: 'Projeto', trabalho: 'Trabalho', prova: 'Prova', 'apresentação': 'Apresentação', apresentacao: 'Apresentação', outro: 'Outro' };
+  const ICONE_TIPO = {
+    projeto: 'M12 2l9 5v10l-9 5-9-5V7zM3 7l9 5 9-5M12 12v10',
+    trabalho: 'M6 2h9l5 5v15H6zM15 2v5h5M9 12h8M9 16h8',
+    prova: 'M12 3a9 9 0 1 0 0 18 9 9 0 1 0 0-18zM8 12l3 3 5-6',
+    'apresentação': 'M3 4h18v11H3zM12 15v5M8 20h8M7 11l3-3 3 3 4-4',
+    outro: 'M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z'
+  };
+  const FLOREIO = '<svg class="flourish" viewBox="0 0 300 18" aria-hidden="true"><path d="M0 9 H122 M178 9 H300" stroke="currentColor" stroke-width="1"/><path d="M150 1 L158 9 L150 17 L142 9 Z" fill="none" stroke="currentColor"/><circle cx="150" cy="9" r="2" fill="currentColor"/><path d="M122 9 q8 -8 14 0 M178 9 q-8 -8 -14 0" fill="none" stroke="currentColor"/></svg>';
+
+  let pronto;
+  const promessa = new Promise(r => { pronto = r; });
+  let fontesOk;
+  const C = window.CONTEUDO = { dados: null, pronto: promessa, areas: [], secoes: [], fontes: {}, fontesProntas: new Promise(r => { fontesOk = r; }) };
+
+  /* ---------- utilidades ---------- */
+  function romano(n) {
+    const t = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+    let s = ''; for (const [v, r] of t) while (n >= v) { s += r; n -= v; } return s;
+  }
+  const slug = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const texto = v => (v == null ? '' : String(v));
+  const lista = v => (Array.isArray(v) ? v : v ? [v] : []);
+  /* cria um elemento; filhos podem ser texto, elementos ou listas */
+  function el(tag, attrs, ...filhos) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === 'class') e.className = v;
+      else if (k === 'html') e.innerHTML = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? '' : v);
+    }
+    for (const f of filhos.flat(Infinity)) if (f != null && f !== false) e.append(f instanceof Node ? f : document.createTextNode(String(f)));
+    return e;
+  }
+  /* texto com marcadores [ … ] destacados (o que o dono ainda vai preencher) */
+  function comMarcadores(s) {
+    const frag = document.createDocumentFragment(), str = texto(s);
+    let i = 0;
+    for (const m of str.matchAll(/\[[^\]]*\]/g)) {
+      if (m.index > i) frag.append(str.slice(i, m.index));
+      frag.append(el('span', { class: 'marcador' }, m[0]));
+      i = m.index + m[0].length;
+    }
+    if (i < str.length) frag.append(str.slice(i));
+    return frag;
+  }
+  const soMarcador = s => /^\s*\[[^\]]*\]\s*$/.test(texto(s));
+  /* parágrafos: linha em branco separa parágrafos; quebra simples vira <br> */
+  function paragrafos(s, cls) {
+    return texto(s).split(/\n\s*\n/).filter(p => p.trim()).map(p => {
+      const e = el('p', { class: cls });
+      p.split('\n').forEach((l, k) => { if (k) e.append(el('br')); e.append(comMarcadores(l)); });
+      return e;
+    });
+  }
+  function dataBonita(d) {
+    const m = texto(d).match(/^(\d{4})(?:-(\d{1,2}))?/);
+    if (!m) return texto(d);
+    if (!m[2]) return m[1];
+    try { return new Date(+m[1], +m[2] - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }); } catch (e) { return d; }
+  }
+  /* gira a matiz de uma cor (para temas repetidos ficarem diferentes) */
+  function girarCor(hex, graus) {
+    if (!graus) return hex;
+    let [r, g, b] = [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16) / 255);
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+    let h = 0, s = 0;
+    if (d) { s = d / (1 - Math.abs(2 * l - 1)); h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
+    h = (h + graus + 360) % 360;
+    const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+    const [R, G, B] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+    return '#' + [R, G, B].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
+  }
+  const ehExterno = u => /^(https?:)?\/\//i.test(u) || /^mailto:/i.test(u);
+  function imagemDe(item) {
+    if (!item) return null;
+    if (typeof item === 'string') return { src: item, legenda: '' };
+    return item.src ? { src: item.src, legenda: texto(item.legenda || item.alt) } : null;
+  }
+
+  /* ---------- dados ---------- */
+  function normalizar(d) {
+    d.site = d.site || {};
+    d.perfil = d.perfil || {};
+    d.perfil.contato = d.perfil.contato || {};
+    d.abertura = d.abertura || {};
+    d.historia = d.historia || {};
+    const usados = {}, contagem = {};
+    const temaInicio = TEMAS.includes(d.site.tema_inicio) ? d.site.tema_inicio : 'cinzaraiz';
+    const temaFinal = TEMAS.includes(d.site.tema_final) ? d.site.tema_final : 'fosso';
+    const livres = TEMAS.filter(t => t !== temaInicio && t !== temaFinal);
+    d.areas = lista(d.areas).map((a, i) => {
+      let id = slug(a.id || a.materia) || 'area-' + (i + 1);
+      while (usados[id] || id === 'inicio' || id === 'sobre' || id === 'conteudo') id += '-' + (i + 1);
+      usados[id] = 1;
+      const tema = TEMAS.includes(a.tema) ? a.tema : livres[i % livres.length];
+      const vistos = {};
+      const atividades = lista(a.atividades).map((t, k) => {
+        let tid = slug(t.id || t.titulo) || 'atividade-' + (k + 1);
+        while (vistos[tid]) tid += '-' + (k + 1);
+        vistos[tid] = 1;
+        const tipo = slug(t.tipo) === 'apresentacao' ? 'apresentação' : (TIPOS[t.tipo] ? t.tipo : 'outro');
+        return { ...t, id: tid, tipo, imagens: lista(t.imagens).map(imagemDe).filter(Boolean), links: lista(t.links).filter(l => l && (l.rotulo || l.url)), tags: lista(t.tags) };
+      });
+      /* destaques primeiro, mantendo a ordem do arquivo dentro de cada grupo */
+      atividades.sort((x, y) => (y.destaque ? 1 : 0) - (x.destaque ? 1 : 0));
+      return { ...a, id, tema, atividades, competencias: lista(a.competencias), jogo: a.jogo || {} };
+    });
+    /* variação de cor quando um tema se repete */
+    const giros = [0, 34, -34, 68, -68, 102];
+    const todas = [temaInicio, ...d.areas.map(a => a.tema), temaFinal];
+    const variantes = todas.map(t => { const n = contagem[t] = (contagem[t] || 0) + 1; return giros[(n - 1) % giros.length]; });
+    d._temas = { inicio: temaInicio, final: temaFinal, variantes };
+    return d;
+  }
+
+  /* ---------- montagem das seções ---------- */
+  function diorama() {
+    return el('div', { class: 'diorama', 'aria-hidden': 'true' },
+      el('canvas', { class: 'lyr back' }), el('canvas', { class: 'lyr mid' }), el('canvas', { class: 'lyr front' }));
+  }
+  function secao(id, tema, nome, variante, classe, profundidade) {
+    const acento = girarCor(ACENTO[tema] || '#e8d3a2', variante);
+    return el('section', {
+      class: 'realm ' + classe, id, 'data-tema': tema, 'data-variante': variante || null, 'data-name': nome,
+      'data-depth': profundidade, style: '--accent:' + acento, 'aria-labelledby': 't-' + id
+    }, diorama());
+  }
+
+  function montarInicio(d, n) {
+    const p = d.perfil, s = d.site, primeira = d.areas[0];
+    const sec = secao('inicio', d._temas.inicio, 'Início', d._temas.variantes[0], 'hero', 0);
+    const foto = p.foto ? el('img', { class: 'hero-foto', src: p.foto, alt: 'Foto de ' + texto(p.nome), width: 160, height: 160, decoding: 'async' }) : null;
+    const mapa = el('nav', { class: 'atlas-mapa', 'aria-label': 'Mapa das matérias' },
+      el('ol', null, d.areas.map((a, i) => el('li', null,
+        el('a', { href: '#' + a.id, style: '--accent:' + girarCor(ACENTO[a.tema], d._temas.variantes[i + 1]) },
+          el('span', { class: 'am-n' }, romano(i + 2)),
+          el('span', { class: 'am-m' }, texto(a.materia)),
+          el('span', { class: 'am-t' }, texto(a.titulo_area)))))));
+    const copy = el('div', { class: 'copy c' },
+      el('p', { class: 'eyebrow' }, 'Crônica de uma jornada'),
+      el('h1', { id: 't-inicio' }, texto(s.nome || 'Portfólio')),
+      el('div', { html: FLOREIO, class: 'floreio' }),
+      el('p', { class: 'hero-sub' }, texto(s.subtitulo || ('Portfólio de ' + texto(p.nome)))),
+      p.titulo ? el('p', { class: 'hero-titulo' }, comMarcadores(p.titulo)) : null,
+      foto,
+      p.resumo ? el('p', { class: 'lede' }, comMarcadores(p.resumo)) : null,
+      el('div', { class: 'hero-acoes' },
+        primeira ? el('a', { class: 'botao', href: '#' + primeira.id }, 'Ver matérias') : null,
+        el('button', { type: 'button', class: 'botao fantasma', id: 'btnJogar', onclick: () => { const b = document.getElementById('mPlay'); if (b) b.click(); } }, 'Jogar'),
+        el('button', { type: 'button', class: 'botao-texto', id: 'btnAbertura', onclick: () => window.ABERTURA && window.ABERTURA.tocar(true) }, 'Rever abertura')),
+      mapa,
+      el('div', { class: 'cue', 'aria-hidden': 'true' }, 'Role para começar a jornada', el('i')));
+    sec.append(copy);
+    return sec;
+  }
+
+  function capa(area, atv, num) {
+    const img = atv.imagens[0];
+    if (img) return el('div', { class: 'capa' }, el('img', { src: img.src, alt: '', loading: 'lazy', decoding: 'async' }));
+    const ic = ICONE_TIPO[atv.tipo] || ICONE_TIPO.outro;
+    return el('div', { class: 'capa capa-arte', 'data-n': num },
+      el('span', { class: 'capa-n', 'aria-hidden': 'true' }, num),
+      el('span', { class: 'capa-ic-w', 'aria-hidden': 'true', html: '<svg class="capa-ic" viewBox="0 0 24 24"><path d="' + ic + '"/></svg>' }));
+  }
+  function cartao(area, atv, k, visiveis) {
+    const meta = [TIPOS[atv.tipo] || 'Outro'];
+    if (atv.data) meta.push(dataBonita(atv.data));
+    return el('article', { class: 'card' + (k >= visiveis ? ' oculto' : '') + (atv.destaque ? ' destaque' : ''), role: 'listitem' },
+      el('a', { class: 'card-a', href: '#' + area.id + '/' + atv.id, 'data-area': area.id, 'data-atv': atv.id },
+        capa(area, atv, romano(k + 1)),
+        el('div', { class: 'card-txt' },
+          el('p', { class: 'card-meta' }, meta.join(' · '),
+            atv.destaque ? el('span', { class: 'selo selo-destaque' }, 'destaque') : null,
+            atv.exemplo ? el('span', { class: 'selo' }, 'exemplo') : null),
+          el('h3', null, comMarcadores(atv.titulo || 'Sem título')),
+          atv.resumo ? el('p', { class: 'card-resumo' }, comMarcadores(atv.resumo)) : null)));
+  }
+
+  function montarArea(d, a, i) {
+    const n = i + 2, lado = i % 2 ? 'r' : 'l';
+    const sec = secao(a.id, a.tema, texto(a.materia), d._temas.variantes[i + 1], 'area', Math.round(n === 1 ? 0 : (n - 1) * 380));
+    const visiveis = Math.max(1, +d.site.atividades_visiveis || 4);
+    const cards = el('div', { class: 'cards', role: 'list', 'aria-label': 'Atividades de ' + texto(a.materia) },
+      a.atividades.map((t, k) => cartao(a, t, k, visiveis)));
+    const extra = a.atividades.length - visiveis;
+    const mais = extra > 0 ? el('button', {
+      type: 'button', class: 'botao fantasma mais', 'aria-expanded': 'false',
+      onclick: e => {
+        const aberto = e.currentTarget.getAttribute('aria-expanded') === 'true';
+        cards.querySelectorAll('.card').forEach((c, k) => c.classList.toggle('oculto', aberto && k >= visiveis));
+        e.currentTarget.setAttribute('aria-expanded', String(!aberto));
+        e.currentTarget.textContent = aberto ? `Ver todas as ${a.atividades.length} atividades` : 'Mostrar menos';
+      }
+    }, `Ver todas as ${a.atividades.length} atividades`) : null;
+    const vazio = a.atividades.length ? null : el('p', { class: 'vazio' }, comMarcadores('[As atividades desta matéria aparecem aqui.]'));
+    const copy = el('div', { class: 'copy painel-area ' + lado },
+      el('header', { class: 'area-cab' },
+        el('p', { class: 'eyebrow' }, `Área ${romano(n)}`, a.titulo_area ? ' · ' : '', a.titulo_area ? comMarcadores(a.titulo_area) : null),
+        el('h2', { id: 't-' + a.id }, texto(a.materia), a.periodo ? el('small', null, comMarcadores(a.periodo)) : null),
+        a.descricao ? el('p', { class: 'lede' }, comMarcadores(a.descricao)) : null,
+        a.competencias.length ? el('ul', { class: 'comp', 'aria-label': 'Competências' }, a.competencias.map(c => el('li', null, comMarcadores(c)))) : null),
+      cards, vazio, mais);
+    sec.append(copy);
+    return sec;
+  }
+
+  function copiar(textoCopiar, aviso) {
+    const ok = () => { aviso.textContent = 'Copiado.'; setTimeout(() => { aviso.textContent = ''; }, 2400); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(textoCopiar).then(ok, () => { aviso.textContent = textoCopiar; });
+    else { aviso.textContent = textoCopiar; }
+  }
+
+  function montarFinal(d, total) {
+    const p = d.perfil, ct = p.contato, n = total;
+    const sec = secao('sobre', d._temas.final, 'Sobre e contato', d._temas.variantes[d._temas.variantes.length - 1], 'final', (n - 1) * 380);
+    const aviso = el('span', { class: 'aviso', role: 'status', 'aria-live': 'polite' });
+    const email = texto(ct.email);
+    const emailReal = email && !soMarcador(email) && email.includes('@');
+    const links = lista(p.links).filter(l => l && (l.rotulo || l.url));
+    const copy = el('div', { class: 'copy painel-final r' },
+      el('p', { class: 'eyebrow' }, 'Fim do mapa'),
+      el('h2', { id: 't-sobre' }, 'Sobre', el('small', null, 'Quem atravessou o mapa')),
+      el('div', { class: 'sobre-txt' }, paragrafos(d.sobre || '[Texto sobre você.]', 'lede')),
+      el('h3', { class: 'sub' }, 'Contato'),
+      el('dl', { class: 'contato' },
+        el('div', null, el('dt', null, 'E-mail'), el('dd', null,
+          emailReal ? el('a', { href: 'mailto:' + email }, email) : comMarcadores(email || '[e-mail]'),
+          emailReal ? el('button', { type: 'button', class: 'botao-texto', onclick: () => copiar(email, aviso) }, 'Copiar') : null, aviso)),
+        ct.cidade ? el('div', null, el('dt', null, 'Cidade'), el('dd', null, comMarcadores(ct.cidade))) : null),
+      links.length ? el('ul', { class: 'links' }, links.map(l => el('li', null,
+        l.url ? el('a', { href: l.url, target: ehExterno(l.url) ? '_blank' : null, rel: ehExterno(l.url) ? 'noopener' : null }, comMarcadores(l.rotulo || l.url)) : comMarcadores(l.rotulo)))) : null,
+      el('button', { class: 'ascend', id: 'ascend', type: 'button', onclick: () => { if (!document.documentElement.classList.contains('playing')) window.scrollTo({ top: 0, behavior: reduzido() ? 'auto' : 'smooth' }); } }, 'Voltar ao início'),
+      el('p', { class: 'credit' }, 'Cenários pintados em código. Feito em HTML, CSS e JavaScript.'));
+    sec.append(copy);
+    return sec;
+  }
+  const reduzido = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function montar(d) {
+    const main = document.getElementById('conteudo');
+    main.textContent = '';
+    const secs = [montarInicio(d)];
+    d.areas.forEach((a, i) => secs.push(montarArea(d, a, i)));
+    secs.push(montarFinal(d, d.areas.length + 2));
+    secs.forEach(s => main.append(s));
+    C.secoes = secs;
+    C.areas = d.areas;
+    /* mapa fixo à direita: uma entrada por seção, na mesma ordem (o motor usa essa ordem) */
+    const mapa = document.getElementById('map');
+    mapa.textContent = '';
+    secs.forEach((s, i) => mapa.append(el('a', { href: '#' + s.id }, el('span', { class: 'nm' }, romano(i + 1) + ' · ' + s.dataset.name), el('span', { class: 'dot' }))));
+    /* título e descrição da aba vindos do conteúdo */
+    const s = d.site;
+    if (s.nome) document.title = s.nome + (s.subtitulo ? ' · ' + s.subtitulo : '');
+    if (s.descricao) { const m = document.querySelector('meta[name="description"]'); if (m) m.setAttribute('content', s.descricao); }
+  }
+
+  /* ---------- detalhe da atividade ---------- */
+  const det = () => document.getElementById('detalhe');
+  let quemAbriu = null, abertoEm = null;
+  function acharAtividade(areaId, atvId) {
+    const a = C.areas.find(x => x.id === areaId);
+    if (!a) return null;
+    const k = a.atividades.findIndex(t => t.id === atvId);
+    return k < 0 ? null : { area: a, atv: a.atividades[k], k };
+  }
+  function abrirDetalhe(areaId, atvId) {
+    const r = acharAtividade(areaId, atvId);
+    if (!r) { fecharDetalhe(false); return; }
+    const { area, atv, k } = r, corpo = document.getElementById('detCorpo');
+    const meta = [texto(area.materia), TIPOS[atv.tipo] || 'Outro'];
+    if (atv.data) meta.push(dataBonita(atv.data));
+    const ant = area.atividades[k - 1], prox = area.atividades[k + 1];
+    const aviso = el('span', { class: 'aviso', role: 'status', 'aria-live': 'polite' });
+    corpo.textContent = '';
+    corpo.append(...[
+      el('header', { class: 'det-cab' },
+        el('p', { class: 'eyebrow' }, meta.join(' · '), atv.exemplo ? el('span', { class: 'selo' }, 'exemplo') : null),
+        el('h2', { id: 'detT' }, comMarcadores(atv.titulo || 'Sem título')),
+        atv.resumo ? el('p', { class: 'det-resumo' }, comMarcadores(atv.resumo)) : null,
+        atv.tags.length ? el('ul', { class: 'tags', 'aria-label': 'Etiquetas' }, atv.tags.map(t => el('li', null, texto(t)))) : null),
+      atv.imagens.length ? el('div', { class: 'det-galeria' + (atv.imagens.length === 1 ? ' uma' : '') }, atv.imagens.map((im, j) =>
+        el('figure', null,
+          el('a', { href: im.src, target: '_blank', rel: 'noopener' }, el('img', { src: im.src, alt: im.legenda || `${texto(atv.titulo)}, imagem ${j + 1}`, loading: 'lazy', decoding: 'async' })),
+          im.legenda ? el('figcaption', null, im.legenda) : null))) : null,
+      el('div', { class: 'det-texto' }, paragrafos(atv.descricao || atv.resumo || '[Texto completo da atividade.]')),
+      atv.links.length ? el('div', { class: 'det-arquivos' }, el('h3', null, 'Arquivos e links'),
+        el('ul', null, atv.links.map(l => el('li', null, l.url
+          ? el('a', { href: l.url, target: '_blank', rel: 'noopener' }, comMarcadores(l.rotulo || l.url))
+          : comMarcadores(l.rotulo))))) : null,
+      el('footer', { class: 'det-nav' },
+        ant ? el('a', { class: 'botao-texto', href: '#' + area.id + '/' + ant.id }, '← Anterior') : el('span'),
+        el('span', { class: 'det-copiar' }, el('button', { type: 'button', class: 'botao-texto', onclick: () => copiar(location.href, aviso) }, 'Copiar link'), aviso),
+        prox ? el('a', { class: 'botao-texto', href: '#' + area.id + '/' + prox.id }, 'Próxima →') : el('span'))
+    ].filter(Boolean));
+    const m = det();
+    if (m.hidden) { quemAbriu = document.activeElement; m.hidden = false; document.documentElement.classList.add('detalhe-aberto'); }
+    abertoEm = area.id;
+    m.querySelector('.detalhe').scrollTop = 0;
+    m.querySelector('.detalhe').focus({ preventScroll: true });
+  }
+  function fecharDetalhe(mudarEndereco) {
+    const m = det();
+    if (!m || m.hidden) return;
+    m.hidden = true;
+    document.documentElement.classList.remove('detalhe-aberto');
+    if (mudarEndereco && abertoEm) history.replaceState(null, '', location.pathname + location.search + '#' + abertoEm);
+    if (quemAbriu && document.contains(quemAbriu)) quemAbriu.focus({ preventScroll: true });
+    quemAbriu = null;
+  }
+  function rota(inicial) {
+    const h = decodeURIComponent(location.hash.slice(1));
+    const [a, t] = h.split('/');
+    if (a && t) {
+      if (inicial) { const s = document.getElementById(a); if (s) s.scrollIntoView({ block: 'start' }); }
+      abrirDetalhe(a, t);
+    } else fecharDetalhe(false);
+  }
+  function prepararDetalhe() {
+    const m = det();
+    document.getElementById('detFechar').addEventListener('click', () => fecharDetalhe(true));
+    m.addEventListener('click', e => { if (e.target === m) fecharDetalhe(true); });
+    m.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.stopPropagation(); fecharDetalhe(true); return; }
+      if (e.key !== 'Tab') return;
+      const f = [...m.querySelectorAll('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x => x.offsetParent !== null);
+      if (!f.length) return;
+      const pri = f[0], ult = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === pri || document.activeElement === m.querySelector('.detalhe'))) { e.preventDefault(); ult.focus(); }
+      else if (!e.shiftKey && document.activeElement === ult) { e.preventDefault(); pri.focus(); }
+    });
+    addEventListener('hashchange', () => rota(false));
+  }
+
+  /* ---------- relayout: quando a altura do conteúdo muda (fontes, imagens, "ver todas"),
+     o motor recalcula o chão e as plataformas ---------- */
+  function vigiarAltura() {
+    if (!('ResizeObserver' in window)) return;
+    const main = document.getElementById('conteudo');
+    let ultima = main.offsetHeight, t = 0;
+    new ResizeObserver(() => {
+      const h = main.offsetHeight;
+      if (Math.abs(h - ultima) < 2) return;
+      ultima = h;
+      clearTimeout(t);
+      t = setTimeout(() => window.dispatchEvent(new Event('resize')), 260);
+    }).observe(main);
+  }
+
+  /* ---------- motor (cenários e jogo) ---------- */
+  const MOTOR = ['js/01-base.js', 'js/02-regioes.js', 'js/03-cenario.js', 'js/04-jogo.js', 'js/05-audio.js', 'js/06-loop.js', 'js/07-interface.js', 'js/08-pasta-recursos.js', 'js/08b-poderes.js', 'js/09-inicio.js'];
+  function carregarMotor() {
+    for (const src of MOTOR) {
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = false; /* mantém a ordem numérica */
+      document.body.append(s);
+    }
+  }
+
+  function mostrarErro(e) {
+    const main = document.getElementById('conteudo');
+    main.textContent = '';
+    main.append(el('div', { class: 'erro-conteudo' },
+      el('h1', null, 'Portfólio'),
+      el('p', null, 'Não consegui ler ', el('code', null, ARQUIVO), '.'),
+      el('p', null, location.protocol === 'file:'
+        ? 'Abrindo o arquivo direto do computador, o navegador bloqueia a leitura. Na pasta do projeto, rode python -m http.server 8000 e abra http://localhost:8000.'
+        : 'Confira se o arquivo existe e se o JSON está válido (vírgulas e aspas).'),
+      el('p', { class: 'erro-det' }, texto(e && e.message))));
+    console.warn('Portfólio: conteúdo não carregou', e);
+  }
+
+  /* fontes do dono (recursos/fontes/titulo e texto) carregadas logo no início, para a abertura já usá-las.
+     O índice recursos/indice.json diz qual extensão existe (assim o navegador não pede arquivos que faltam). */
+  async function fontesCedo() {
+    try {
+      const r = await fetch('recursos/indice.json', { cache: 'no-cache' });
+      if (!r.ok) return;
+      const tem = new Set((await r.json()).arquivos || []);
+      await Promise.all([['titulo', '--display', "'Cinzel','Trajan Pro',Georgia,serif"], ['texto', '--body', "'Cormorant Garamond','Garamond',Georgia,serif"]].map(async ([nome, prop, reserva]) => {
+        const ext = ['woff2', 'woff', 'ttf', 'otf'].find(e => tem.has('fontes/' + nome + '.' + e));
+        if (!ext) return;
+        const fam = 'Dono-' + nome, ff = new FontFace(fam, `url(recursos/fontes/${nome}.${ext})`);
+        await ff.load();
+        document.fonts.add(ff);
+        document.documentElement.style.setProperty(prop, `'${fam}',${reserva}`);
+        C.fontes[nome] = 'fontes/' + nome + '.' + ext;
+      }));
+    } catch (e) { /* sem fontes do dono: ficam as padrão */ }
+  }
+
+  async function iniciar() {
+    prepararDetalhe();
+    fontesCedo().then(fontesOk);
+    let dados;
+    try {
+      const r = await fetch(ARQUIVO, { cache: 'no-cache' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      dados = normalizar(await r.json());
+    } catch (e) {
+      mostrarErro(e);
+      pronto(null);
+      return;
+    }
+    C.dados = dados;
+    montar(dados);
+    pronto(dados);
+    rota(true);
+    vigiarAltura();
+    /* o motor carrega já, por trás do escuro inicial; a abertura começa quando ele termina a primeira pintura */
+    carregarMotor();
+  }
+  iniciar();
+})();

@@ -1,7 +1,8 @@
 /* ---------- audio engine: original generated soundtrack + synthesized effects ---------- */
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const SET=Object.assign({autoplay:true,follow:true,sfxVol:.6,vol:.55,muted:false},LS.get('velumbra:set',{}));
-function saveSet(){LS.set('velumbra:set',SET)}
+/* follow=false: in Passeio the music is a normal playlist (no switching by area) */
+const SET=Object.assign({autoplay:true,follow:false,sfxVol:.6,vol:.55,muted:false},LS.get('portfolio:set',{}));
+function saveSet(){LS.set('portfolio:set',SET)}
 const AU={C:null,master:null,music:null,sfx:null,rev:null,noise:null};
 function audioInit(){if(AU.C)return AU.C;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;let C;try{C=new AC()}catch(e){return null}AU.C=C;
   AU.master=C.createGain();AU.master.connect(C.destination);
@@ -44,7 +45,7 @@ function killBus(b,fade=.35){if(!b||!AU.C)return;const t=AU.C.currentTime;[b.dry
 /* original compositions, written as patterns over scales */
 const SCL={min:[0,2,3,5,7,8,10],maj:[0,2,4,5,7,9,11],phr:[0,1,3,5,7,8,10],lyd:[0,2,4,6,7,9,11],loc:[0,1,3,5,6,8,10],harm:[0,2,3,5,7,8,11]};
 function makeTrack(o){const stepDur=60/o.bpm/4,totalSteps=o.bars*16,sc=SCL[o.scale];const D=d=>o.root+sc[((d%7)+7)%7]+12*Math.floor(d/7);
-  return{title:o.title,region:o.region,builtin:true,beds:o.beds,stepDur,totalSteps,dur:totalSteps*stepDur,
+  return{title:o.title,tema:o.region,region:-1,builtin:true,beds:o.beds,stepDur,totalSteps,dur:totalSteps*stepDur,
     step(k,t,b){if(k>=totalSteps)return;const bar=Math.floor(k/16),s=k%16,ch=o.prog[bar%o.prog.length],r=rng(o.seed*7919+k*31+7),part=Math.floor(bar/8)%4,fade=bar>=o.bars-1?.5:1;
       o.play({k,bar,s,ch,D,r,t,b,part,sd:stepDur,fade,mel:(M,inst,oct=12,v=1,from=0)=>{if(bar<from)return;const ph=k%32;for(const n of M)if(n[0]===ph)INST[inst](b,t,D(ch+n[1])+oct,n[2]*stepDur,v*fade)}})}}}
 const BUILTIN=[
@@ -95,7 +96,7 @@ const curTrack=()=>MUS.list[MUS.idx];
 function musicTime(){const tr=curTrack();if(!tr)return 0;if(!MUS.playing)return MUS.pos;if(tr.builtin)return Math.max(0,MUS.startPos+(AU.C.currentTime-MUS.startCtx));return tr.el?tr.el.currentTime:0}
 function musicDur(tr=curTrack()){return tr?(tr.builtin?tr.dur:(tr.el&&isFinite(tr.el.duration)?tr.el.duration:0)):0}
 function stopEngine(){if(MUS.timer){clearInterval(MUS.timer);MUS.timer=null}if(MUS.bus){killBus(MUS.bus);MUS.bus=null}MUS.list.forEach(t=>{if(t.el&&!t.el.paused)t.el.pause()})}
-function connectEl(tr){if(tr.src||!AU.C)return;try{tr.src=AU.C.createMediaElementSource(tr.el);tr.src.connect(AU.music)}catch(e){}tr.el.onended=()=>{if(curTrack()!==tr)return;if(SET.follow&&tr.region!=null&&tr.region>=0)musicSeek(0,true);else musicNext()}}
+function connectEl(tr){if(tr.src||!AU.C)return;try{tr.src=AU.C.createMediaElementSource(tr.el);tr.src.connect(AU.music)}catch(e){}tr.el.onended=()=>{if(curTrack()!==tr)return;if(SET.follow&&(tr.region>=0||tr.tema!=null))musicSeek(0,true);else musicNext()}}
 function musicPlay(){const C=audioInit();if(!C)return;if(C.state==='suspended')C.resume();const tr=curTrack();if(!tr)return;stopEngine();MUS.playing=true;MUS.started=true;
   if(tr.builtin){MUS.bus=newBus();MUS.startCtx=C.currentTime+.05;MUS.startPos=MUS.pos;MUS.step=Math.ceil(MUS.pos/tr.stepDur);(tr.beds||[]).forEach(k=>bed(MUS.bus,k,C.currentTime));MUS.timer=setInterval(musicTick,40);musicTick()}
   else{connectEl(tr);try{tr.el.currentTime=MUS.pos}catch(e){}tr.el.play().catch(()=>{})}
@@ -109,10 +110,12 @@ function musicSeek(p,forcePlay){const was=MUS.playing||forcePlay;if(MUS.playing)
 function musicTick(){const tr=curTrack();if(!tr||!tr.builtin||!MUS.playing)return;const C=AU.C,now=musicTime();
   if(now>=tr.dur){if(SET.follow)musicSeek(0,true);else musicNext();return}
   while(MUS.step*tr.stepDur<now+.35&&MUS.step<tr.totalSteps){const when=MUS.startCtx+(MUS.step*tr.stepDur-MUS.startPos);if(when>=C.currentTime-.02){try{tr.step(MUS.step,Math.max(when,C.currentTime),MUS.bus)}catch(e){}}MUS.step++}}
-function musicRegion(i){if(!SET.follow||!MUS.started)return;const c=MUS.list.map((t,k)=>[t,k]).filter(([t])=>t.region===i);if(!c.length)return;const pick=c.find(([t])=>!t.builtin)||c[0];if(pick[1]!==MUS.idx)musicSelect(pick[1],MUS.playing)}
+/* track for section i: the owner's track for that area first, then any track of its theme */
+function faixaDaArea(i){const c=MUS.list.map((t,k)=>[t,k]),a=c.find(([t])=>t.region===i)||c.find(([t])=>!t.builtin&&t.tema===TEMA[i])||c.find(([t])=>t.tema===TEMA[i]);return a?a[1]:-1}
+function musicRegion(i){if(!SET.follow||!MUS.started)return;const k=faixaDaArea(i);if(k>=0&&k!==MUS.idx)musicSelect(k,MUS.playing)}
 function setMusicVol(v){SET.vol=v;saveSet();if(AU.music)AU.music.gain.setTargetAtTime(SET.muted?0:v,AU.C.currentTime,.05)}
 function setMuted(m){SET.muted=m;saveSet();if(AU.music)AU.music.gain.setTargetAtTime(m?0:SET.vol,AU.C.currentTime,.05)}
-function audioWake(e){const C=audioInit();if(!C)return;if(C.state==='suspended')C.resume();if(!MUS.started&&SET.autoplay&&!(e&&e.target&&e.target.closest&&e.target.closest('.pbar,.panel'))){MUS.started=true;if(SET.follow){const i=Math.max(0,lastIdx),c=MUS.list.map((t,k)=>[t,k]).filter(([t])=>t.region===i);if(c.length){MUS.idx=(c.find(([t])=>!t.builtin)||c[0])[1];MUS.pos=0}}musicPlay();toast('Tocando: '+curTrack().title)}}
+function audioWake(e){const C=audioInit();if(!C)return;if(C.state==='suspended')C.resume();if(!MUS.started&&SET.autoplay&&!(e&&e.target&&e.target.closest&&e.target.closest('.pbar,.panel'))){MUS.started=true;if(SET.follow){const k=faixaDaArea(Math.max(0,lastIdx));if(k>=0){MUS.idx=k;MUS.pos=0}}musicPlay();toast('Tocando: '+curTrack().title)}}
 
 /* synthesized sound effects (original) */
 function sfxOut(v,rev){const g=AU.C.createGain();g.gain.value=v;g.connect(AU.sfx);if(rev)g.connect(AU.sfxRev);return g}

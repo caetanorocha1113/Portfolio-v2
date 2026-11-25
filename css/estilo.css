@@ -18,18 +18,26 @@ html{scroll-behavior:smooth;background:var(--void)}
 body{background:var(--void);color:var(--ink);font-family:var(--body);font-size:20px;line-height:1.55;overflow-x:hidden}
 main{position:relative}
 
+/* Each section: content on top, and a painted diorama band (back / mid / front canvases) anchored to the bottom of the section,
+   where the character walks. The band has a fixed height, so long content never stretches the scenery or moves the ground.
+   The section background fades to the void at the top, so a section dissolves into the next one. */
+:root{--band:max(800px,132vh)}
 .realm{
-  position:relative;min-height:max(800px,132vh);margin-top:-16vh;overflow:hidden;
+  position:relative;min-height:var(--band);margin-top:-16vh;overflow:hidden;
   display:flex;align-items:flex-start;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:30vh 12vh;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 16vh);mask-image:linear-gradient(to bottom,transparent 0,#000 16vh);
+  background:linear-gradient(to bottom,transparent 0,var(--void) 16vh);
 }
-.realm.hero{margin-top:0;-webkit-mask-image:none;mask-image:none;padding-block:17vh 12vh;justify-content:center}
+.realm.hero{margin-top:0;background:var(--void);padding-block:17vh 12vh;justify-content:center}
+.diorama{position:absolute;left:0;right:0;bottom:0;height:var(--band);z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 16vh);mask-image:linear-gradient(to bottom,transparent 0,#000 16vh)}
+.realm.hero .diorama{top:0;height:auto;-webkit-mask-image:none;mask-image:none}/* the opening section is painted from top to bottom */
 .lyr{position:absolute;left:0;top:-10%;width:100%;height:120%;display:block;pointer-events:none;will-change:transform}
 .lyr.back{z-index:0}.lyr.mid{z-index:1}.lyr.front{z-index:3}
 
-.copy{position:relative;z-index:4;max-width:31rem;width:100%;display:flex;flex-direction:column;gap:.9rem}
+/* above the game layer (.fx, z-index 20): the game never covers text or buttons */
+.copy{position:relative;z-index:25;max-width:31rem;width:100%;display:flex;flex-direction:column;gap:.9rem}
 .copy::before{content:"";position:absolute;inset:-18% -22%;background:radial-gradient(closest-side,rgba(2,3,6,.62),rgba(2,3,6,.25) 60%,transparent);z-index:-1;pointer-events:none}
 .copy.l{margin-right:auto;margin-left:clamp(0px,6vw,110px)}
 .copy.r{margin-left:auto;margin-right:clamp(0px,6vw,110px)}

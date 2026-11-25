@@ -14,10 +14,10 @@ Para conferir o que foi encontrado, abra o site, clique em **Oficina** e veja a 
 
 | Arquivo | Onde aparece | Formatos aceitos |
 |---|---|---|
-| `titulo` | nome do reino, nomes das regiões, painel do canto, título da música | `.woff2` `.woff` `.ttf` `.otf` |
-| `texto` | parágrafos, legendas, lista de faixas | `.woff2` `.woff` `.ttf` `.otf` |
+| `titulo` | nome do portfólio, nomes das áreas, títulos, painel do canto, abertura | `.woff2` `.woff` `.ttf` `.otf` |
+| `texto` | parágrafos, cartões, falas da abertura, lista de faixas | `.woff2` `.woff` `.ttf` `.otf` |
 
-Exemplo: `recursos/fontes/titulo.ttf`. Confira se a fonte tem acentos (Â, ã, ç).
+Exemplo: `recursos/fontes/titulo.ttf`. Confira se a fonte tem acentos (Â, ã, ç). As fontes carregam logo no início, para a abertura já usá-las.
 
 ## 2. Personagem — `recursos/personagem/`
 
@@ -124,7 +124,7 @@ Há dois jeitos, e eles podem ser usados juntos.
    ```
 
    Os quadros podem ter **qualquer nome**: o site usa a ordem numérica dos nomes (2 vem antes de 10), lida no índice `recursos/indice.json`, que o GitHub gera sozinho a cada envio.
-2. No `inimigos/inimigos.json`, descreva cada inimigo: pasta, regiões, comportamento e animações.
+2. No `inimigos/inimigos.json`, descreva cada inimigo: pasta, áreas em que aparece, comportamento e animações.
 
 ```json
 {
@@ -134,7 +134,7 @@ Há dois jeitos, e eles podem ser usados juntos.
       "nome": "Minha Criatura",
       "pasta": "Minha Criatura",
       "comportamento": "andar",
-      "regioes": { "cinzaraiz": 2, "galerias": 1 },
+      "regioes": { "humanas": 2, "linguagens": 1 },
       "animacoes": { "andar": "Walk", "virar": "Turn", "morrer": "Death" },
       "vida": 3,
       "velocidade": 1,
@@ -146,7 +146,7 @@ Há dois jeitos, e eles podem ser usados juntos.
       "nome": "Voador Atirador",
       "pasta": "Outra Pasta",
       "comportamento": "atirar",
-      "regioes": { "minas": 2 },
+      "regioes": { "ninho": 2 },
       "animacoes": { "andar": "Fly", "atacar": "Fire", "morrer": "Death", "projetil": "Bullet" },
       "altura_voo": 200,
       "recarga": 2.5,
@@ -163,7 +163,7 @@ Há dois jeitos, e eles podem ser usados juntos.
 | `nome` | nome que aparece na Oficina | a pasta |
 | `pasta` | pasta dentro de `recursos/inimigos/` | obrigatório |
 | `comportamento` | um da tabela abaixo | `andar` |
-| `regioes` | região → quantidade (até 12 por região) | obrigatório |
+| `regioes` | área (ou tema) → quantidade (até 12 por área) | obrigatório |
 | `animacoes` | papel → subpasta (veja abaixo) | precisa de `andar` ou `parado` |
 | `vida` | golpes para derrotar | 3 |
 | `velocidade` | 1 = normal; 2 = o dobro | 1 |
@@ -173,9 +173,15 @@ Há dois jeitos, e eles podem ser usados juntos.
 | `dano` | `false` = não machuca ao encostar | `true` |
 | `altura_voo` | altura em px dos voadores acima do chão | 170 |
 | `recarga` | segundos entre tiros (`atirar`) | 2.2 |
-| `substituir` | `true` tira as criaturas originais das regiões em que este inimigo aparece | `substituir_originais` |
+| `substituir` | `true` tira as criaturas desenhadas das áreas em que este inimigo aparece | `substituir_originais` |
 
-**Regiões:** `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso` (ou os números 1 a 8).
+**Onde aparece (`regioes`):** aceita três jeitos, que podem ser misturados:
+
+- o **id da área** em `conteudo/portfolio.json`: `inicio`, `humanas`, `matematica`, `linguagens`, `natureza`, `tecnico`, `sobre`;
+- o **nome do tema**: `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso` (vale para todas as áreas com esse tema);
+- o **número da seção** no mapa (1 = início).
+
+O comportamento `teto` só funciona em temas com teto (todos menos `cinzaraiz`).
 
 **Comportamentos:**
 
@@ -188,7 +194,7 @@ Há dois jeitos, e eles podem ser usados juntos.
 | `parado` | fica no lugar, só animando |
 | `voar` | voa de um lado para o outro, oscilando |
 | `perseguir` | voa e persegue o jogador quando ele chega perto |
-| `flutuar` | flutua devagar no meio da região |
+| `flutuar` | flutua devagar no meio da área |
 | `teto` | desce e sobe do teto por um fio |
 
 **Papéis das animações** (`animacoes`):
@@ -204,7 +210,7 @@ Há dois jeitos, e eles podem ser usados juntos.
 
 - O tamanho na tela usa a **mesma escala de pixels do seu personagem**: se os quadros vieram do mesmo jogo, as proporções entre personagem e inimigos ficam certas. Use `tamanho` só para ajustar.
 - Os quadros são alinhados pelos pés (voadores: pelo centro).
-- A Oficina → Pasta recursos/ mostra cada inimigo com ✓ (onde foi colocado e quantos quadros cada animação tem) ou ✕ (pasta, subpasta, região ou comportamento errados).
+- A Oficina → Pasta recursos/ mostra cada inimigo com ✓ (onde foi colocado e quantos quadros cada animação tem) ou ✕ (pasta, subpasta, área ou comportamento errados).
 
 ### B) Trocar o desenho das criaturas originais do site
 
@@ -214,11 +220,11 @@ Uma imagem por criatura, com uma linha só de quadros quadrados (o lado do quadr
 |---|---|
 | `besouro.png` | rastejante que patrulha o chão |
 | `mosca.png` | voadora que persegue |
-| `saltador.png` | pula enquanto anda (Brejo) |
-| `aranha.png` | patrulha rápida (Ninho) |
-| `sentinela.png` | alta, anda devagar (Cidadela) |
-| `pendente.png` | desce do teto (Ninho) |
-| `agua-viva.png` | flutua (Fosso) |
+| `saltador.png` | pula enquanto anda (tema brejo) |
+| `aranha.png` | patrulha rápida (tema ninho) |
+| `sentinela.png` | alta, anda devagar (tema cidadela) |
+| `pendente.png` | desce do teto (tema ninho) |
+| `agua-viva.png` | flutua (tema fosso) |
 
 Opcional: `nome.json` ao lado (ex.: `mosca.json`) com `{ "quadro": [40, 40], "quadros": 2, "fps": 14, "tamanho": 0.9, "olha_esquerda": false }`.
 
@@ -228,23 +234,19 @@ Opcional: `nome.json` ao lado (ex.: `mosca.json`) com `{ "quadro": [40, 40], "qu
 - Para gerar no seu computador: `python ferramentas/gerar-indice.py`.
 - Não edite à mão. Sem o índice, o site só encontra quadros numerados `1.png`, `2.png`…
 
-## 4. Fundos das regiões — `recursos/fundos/`
+## 4. Fundos das áreas — `recursos/fundos/`
 
-| Arquivo | Região |
+O site procura primeiro pelo **id da área** e depois pelo **nome do tema** dela:
+
+| Arquivo | Vale para |
 |---|---|
-| `cinzaraiz` | I · a vila da superfície |
-| `galerias` | II · Galerias de Âmbar |
-| `sendas` | III · Sendas do Musgo |
-| `brejo` | IV · Brejo dos Esporos |
-| `cidadela` | V · Cidadela da Chuva Eterna |
-| `minas` | VI · Minas de Quartzo-Rosa |
-| `ninho` | VII · Ninho das Mil Patas |
-| `fosso` | VIII · O Fosso Sem Luz |
+| `inicio`, `humanas`, `matematica`, `linguagens`, `natureza`, `tecnico`, `sobre` | só aquela área (ids de `conteudo/portfolio.json`) |
+| `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso` | todas as áreas com aquele tema |
 
 - Formatos: `.jpg` `.png` `.webp`.
 - Tamanho sugerido: **2400 × 2200 px** (a camada é um pouco mais alta que larga).
-- Vai para a camada de **fundo** (a mais distante). O chão, as fendas e as plataformas continuam no lugar.
-- O chão da região fica a cerca de **80% da altura** da imagem. Se a sua imagem tiver chão desenhado, ponha nessa altura.
+- Vai para a camada de **fundo** (a mais distante) da faixa de cenário na parte de baixo da área. O chão, as fendas e as plataformas continuam no lugar.
+- O chão da área fica a cerca de **80% da altura** da imagem. Se a sua imagem tiver chão desenhado, ponha nessa altura.
 
 **Opcional:** `ajustes.json`:
 
@@ -279,8 +281,11 @@ Opcional: `nome.json` ao lado (ex.: `mosca.json`) com `{ "quadro": [40, 40], "qu
 
 | Arquivo | Toca em |
 |---|---|
-| `cinzaraiz` `galerias` `sendas` `brejo` `cidadela` `minas` `ninho` `fosso` | na região de mesmo nome (troca sozinha ao descer) |
+| id da área (`humanas`, `matematica`…) | naquela área |
+| nome do tema (`cinzaraiz` … `fosso`) | nas áreas com aquele tema |
 | `extra-1` … `extra-5` | só na lista do player |
+
+No Passeio, a música é uma playlist: toca em sequência e não troca sozinha (a não ser que o alfinete "acompanhar área" do player esteja ligado). No modo Jogo, as músicas de cada área serão as do bloco `jogo` de `conteudo/portfolio.json`.
 
 - Formatos: `.mp3` `.ogg` `.m4a`.
 - Para repetir sem emenda, exporte cortado no ponto de loop.
@@ -288,7 +293,7 @@ Opcional: `nome.json` ao lado (ex.: `mosca.json`) com `{ "quadro": [40, 40], "qu
 **Opcional:** `titulos.json` para os nomes que aparecem no player:
 
 ```json
-{ "cinzaraiz": "Tema da vila", "extra-1": "Créditos" }
+{ "humanas": "Tema da Cidadela", "extra-1": "Créditos" }
 ```
 
 ---

@@ -1,11 +1,15 @@
 /* ---------- loop ---------- */
 const weights=new Array(secs.length).fill(0);
 let last=performance.now(),T=0,dirty=true;
-function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;const vh=innerHeight;let rendered=false,cur=0,curF=0;
-  secs.forEach((s,i)=>{const b=s.getBoundingClientRect();rects[i]=b;weights[i]=clamp((Math.min(b.bottom,vh)-Math.max(b.top,0))/vh,0,1);
+function frame(now){
+  /* while the opening covers the screen, the scenery and the game wait (the opening stays smooth) */
+  if(document.documentElement.classList.contains('abertura-cobrindo')){last=now;requestAnimationFrame(frame);return}
+  const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;const vh=innerHeight;let rendered=false,cur=0,curF=0;
+  /* sb: whole section (visibility, current area); b: its painted band (ground, parallax) */
+  secs.forEach((s,i)=>{const sb=s.getBoundingClientRect(),b=DIO[i]===s?sb:DIO[i].getBoundingClientRect();rects[i]=b;weights[i]=clamp((Math.min(sb.bottom,vh)-Math.max(sb.top,0))/vh,0,1);
     const near=b.bottom>-vh*1.2&&b.top<vh*2.2;if(near&&!drawn[i]&&!rendered){renderSection(i);rendered=true}
     else if(drawn[i]&&!(b.bottom>-vh*4&&b.top<vh*5))release(i);
-    if(b.top<=vh*.5){cur=i;curF=clamp((vh*.5-b.top)/b.height,0,1)}
+    if(sb.top<=vh*.5){cur=i;curF=clamp((vh*.5-sb.top)/sb.height,0,1)}
     if(weights[i]>0&&!reduce){const t=clamp(((b.top+b.height/2)-vh/2)/((vh+b.height)/2),-1,1),H=b.height,L=layers[i];
       L.back.style.transform=`translate3d(0,${(-t*.075*H).toFixed(1)}px,0)`;L.front.style.transform=`translate3d(0,${(t*.045*H).toFixed(1)}px,0)`;midOff[i]=0}});
   // HUD

@@ -1,4 +1,7 @@
-/* ---------- regions ---------- */
+/* ---------- regions (themes) ----------
+   Eight painted themes. Each section of the portfolio picks one by name (data-tema), in conteudo/portfolio.json.
+   TEMA_IDS gives the name of each entry of REG, in the same order. */
+const TEMA_IDS=['cinzaraiz','galerias','sendas','brejo','cidadela','minas','ninho','fosso'];
 const REG=[
 /* I · Cinzaraiz */ {fx:[['ash',70,'#d9deea'],['drizzle',60,'#c6d2ec']],p:{top:'#090e1d',bot:'#2b3754',far:'#1e2840',far2:'#161e31',mid:'#0f141e',near:'#04060a',light:'#cdd8ee',warm:'#f4c97a',moon:'#e8eefc',wall:'#1a2132',roof:'#0c111b'},
  back(c,w,h,r,u,P){vfill(c,0,0,w,h,[[0,P.top],[.5,'#18213a'],[.78,P.bot],[1,P.bot]]);
