@@ -6,9 +6,9 @@ Cada seção é uma região, com paleta, clima e iluminação próprios.
 - **Passeio**: o site rola normalmente e Lume, a mariposa da lanterna, joga sozinha.
 - **Jogar**: plataforma completa, com teclado ou toque.
 - Trilha sonora original gerada por código, com player (tocar, pausar, avançar, voltar, volume, lista).
-- **Poderes**: habilidades originais de Lume (avanço, salto duplo, garras, corrida, faísca, mergulho, clarão, reacender…), liberadas aos poucos conforme forem construídas. Lista e estado em `js/08b-poderes.js`; painel no site pela tecla I.
+- **Poderes**: avanço, salto duplo, escalar paredes, super avanço, avanço sombrio, magias (frente, baixo, cima) e cura, liberados aos poucos conforme forem construídos. Lista e estado em `js/08b-poderes.js`; painel no site pela tecla I.
 - **Oficina**: troca fontes, sprites, fundos, sons e músicas pelo navegador.
-- **Pasta `recursos/`**: coloque arquivos com os nomes certos e eles carregam sozinhos. O personagem usa uma pasta por animação. Lista completa em [`recursos/LEIA-ME.md`](recursos/LEIA-ME.md).
+- **Pasta `recursos/`**: coloque arquivos com os nomes certos e eles carregam sozinhos. O personagem usa uma pasta por animação, com nomes em inglês (idle, run, jump…). Lista completa em [`recursos/LEIA-ME.md`](recursos/LEIA-ME.md).
 
 ## Rodar
 

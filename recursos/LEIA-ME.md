@@ -22,43 +22,44 @@ Exemplo: `recursos/fontes/titulo.ttf`. Confira se a fonte tem acentos (Â, ã, �
 
 ## 2. Personagem — `recursos/personagem/`
 
-**Uma pasta por animação**, com os quadros numerados na ordem em que tocam. Todas as pastas já estão criadas no repositório (com um `.gitkeep` para o Git guardar a pasta vazia).
+**Uma pasta por animação** (nomes em inglês), com os quadros numerados na ordem em que tocam. Todas as pastas já estão criadas no repositório (o `.gitkeep` só serve para o Git guardar a pasta vazia).
 
 ```
 recursos/personagem/
-  parado/   01.png 02.png 03.png …
-  correr/   01.png 02.png …
-  pular/    01.png …
+  idle/   1.png 2.png 3.png …
+  run/    1.png 2.png …
+  jump/   1.png …
   …
+  settings.json
 ```
 
 **Regras dos quadros:**
 
 - PNG com **fundo transparente**.
-- Numeração `01.png`, `02.png`, `03.png`… ou `1.png`, `2.png`, `3.png`… A contagem **para no primeiro número que faltar**: não pule números.
-- O site encontra o desenho dentro de cada imagem e **alinha todos os quadros pelos pés** (a parte de baixo do desenho). Quadros recortados justos ou com sobra transparente funcionam igual.
-- Personagem olhando para a **direita**. Se olhar para a esquerda, use `"olha_esquerda": true` no `ajustes.json`.
-- Efeitos (pastas `efeito-…`) são desenhados **centralizados** no ponto do golpe ou do poder e devem apontar para a **direita**.
-- Só a pasta `parado` é obrigatória. Pasta vazia ou faltando usa a animação da coluna "se faltar".
+- Numeração `1.png`, `2.png`, `3.png`… ou `01.png`, `02.png`… A contagem **para no primeiro número que faltar**: não pule números.
+- O site encontra o desenho dentro de cada imagem e **alinha todos os quadros pelos pés**. Quadros recortados justos ou com sobra transparente funcionam igual.
+- Todos os quadros (personagem e efeitos) precisam olhar para o **mesmo lado**. Se olharem para a esquerda, use `"faces_left": true` no `settings.json` (já está assim).
+- Com o seu personagem, o site **não desenha efeitos próprios**: só aparecem os efeitos que você colocar nas pastas `fx-…`. Pasta `fx-…` vazia = nenhum efeito naquela ação.
+- A pasta `idle/` é a mais importante. Enquanto ela estiver vazia, o 1º quadro de outra animação fica parado no lugar.
 
 ### Animações básicas
 
 | Pasta | Quando toca | Repete? | Se faltar |
 |---|---|---|---|
-| `parado/` | sem andar | sim | — |
-| `correr/` | andando | sim | parado |
-| `pular/` | subindo no ar | sim | parado |
-| `cair/` | descendo no ar | sim | pular |
-| `golpe/` | ataque para frente | não | parado |
-| `golpe-cima/` | ataque para cima (W + golpe) | não | golpe |
-| `golpe-baixo/` | ataque para baixo no ar (S + golpe) | não | golpe |
-| `avanco/` | avanço rápido | sim | correr |
-| `dano/` | ao ser atingido | não | parado |
-| `morte/` | ao perder todas as chamas | não | dano |
-| `salto-duplo/` | segundo pulo no ar | não | pular |
-| `pouso/` | ao tocar o chão e ao se preparar para pular | não | parado |
-| `olhar-cima/` | parado segurando W | sim | parado |
-| `olhar-baixo/` | parado segurando S | sim | parado |
+| `idle/` | parado | sim | 1º quadro de `land`, `run`… |
+| `run/` | andando | sim | idle |
+| `jump/` | subindo no ar | sim | idle |
+| `fall/` | descendo no ar | sim | jump |
+| `attack/` | ataque para frente | não | idle |
+| `attack-up/` | ataque para cima (W + golpe) | não | attack |
+| `attack-down/` | ataque para baixo no ar (S + golpe) | não | attack |
+| `dash/` | avanço rápido | sim | run |
+| `hurt/` | ao ser atingido | não | idle |
+| `death/` | ao perder toda a vida | não | hurt |
+| `double-jump/` | segundo pulo no ar | não | jump |
+| `land/` | ao tocar o chão e ao se preparar para pular | não | idle |
+| `look-up/` | parado segurando W | sim | idle |
+| `look-down/` | parado segurando S | sim | idle |
 
 ### Animações dos poderes
 
@@ -66,55 +67,56 @@ Os poderes são liberados aos poucos (painel **Poderes**, tecla I). As pastas po
 
 | Pasta | Poder | Quando toca | Se faltar |
 |---|---|---|---|
-| `parede/` | Garras de Raiz | agarrado na parede, deslizando | cair |
-| `salto-parede/` | Garras de Raiz | saltando da parede | pular |
-| `carregar/` | Corrida de Âmbar | carregando a corrida | parado |
-| `disparo/` | Corrida de Âmbar | durante a corrida longa | avanco |
-| `passo-nevoa/` | Passo de Névoa | avanço que atravessa criaturas | avanco |
-| `lancar/` | Faísca da Lanterna | lançando a faísca | golpe |
-| `mergulho/` | Queda de Cinza | mergulhando para baixo | cair |
-| `clarao/` | Clarão | explosão para cima | golpe-cima |
-| `acender/` | Reacender | concentrando luz para se curar | parado |
+| `wall-slide/` | Escalar paredes | agarrado na parede, deslizando | fall |
+| `wall-jump/` | Escalar paredes | saltando da parede | jump |
+| `superdash-charge/` | Super avanço | carregando | idle |
+| `superdash/` | Super avanço | durante a corrida longa | dash |
+| `shadow-dash/` | Avanço sombrio | avanço que atravessa criaturas | dash |
+| `spell/` | Magia para frente | lançando o projétil | attack |
+| `dive/` | Magia para baixo | mergulhando | fall |
+| `spell-up/` | Magia para cima | soltando a explosão para cima | attack-up |
+| `heal/` | Cura | concentrando para se curar | idle |
 
-### Efeitos (opcionais)
-
-Substituem os efeitos de luz desenhados pelo site.
+### Efeitos
 
 | Pasta | Onde aparece |
 |---|---|
-| `efeito-golpe/` | arco do golpe, à frente do personagem |
-| `efeito-golpe-cima/`, `efeito-golpe-baixo/` | arcos para cima e para baixo (se faltarem, o `efeito-golpe` é girado) |
-| `efeito-salto-duplo/` | no segundo pulo |
-| `efeito-avanco/` | no início do avanço |
-| `efeito-faisca/` | a faísca voando |
-| `efeito-mergulho/` | o impacto do mergulho no chão |
-| `efeito-clarao/` | a explosão para cima |
-| `efeito-acender/` | o brilho da cura |
-| `efeito-disparo/` | o rastro da corrida longa |
-| `efeito-passo-nevoa/` | o rastro de névoa |
+| `fx-attack/` | golpe para frente, à frente do personagem |
+| `fx-attack-up/`, `fx-attack-down/` | golpes para cima e para baixo (se faltarem, o `fx-attack` é girado) |
+| `fx-hit/` | no ponto em que o golpe acerta a criatura |
+| `fx-double-jump/` | no segundo pulo |
+| `fx-dash/` | no início do avanço |
+| `fx-spell/` | o projétil da magia para frente |
+| `fx-dive/` | o impacto da magia para baixo |
+| `fx-spell-up/` | a explosão da magia para cima |
+| `fx-heal/` | durante a cura |
+| `fx-superdash/` | durante o super avanço |
+| `fx-shadow-dash/` | no avanço sombrio |
 
-### Ajustes opcionais — `personagem/ajustes.json`
+Os efeitos são desenhados **centralizados** no ponto da ação.
+
+### `personagem/settings.json`
 
 ```json
 {
-  "tamanho": 1,
-  "olha_esquerda": false,
+  "faces_left": true,
+  "scale": 1,
   "pixel": false,
-  "contorno": false,
-  "lanterna": true,
-  "fps": { "correr": 14, "golpe": 20 },
-  "repetir": { "morte": false }
+  "outline": false,
+  "glow": false,
+  "fps": { "run": 14, "attack": 20 },
+  "loop": { "death": false }
 }
 ```
 
-- `tamanho`: 1 = o desenho do `parado` com cerca de 84 px de altura numa tela de 1280 px.
-- `altura_ref`: troca essa referência por uma altura fixa em px.
+- `faces_left`: `true` quando os quadros olham para a esquerda.
+- `scale`: 1 = o desenho do `idle` com cerca de 84 px de altura numa tela de 1280 px. `ref_height` troca essa referência por uma altura fixa em px.
 - `fps`: velocidade de cada animação, pelo nome da pasta.
-- `repetir`: força uma animação a tocar uma vez (`false`) ou em loop (`true`).
-- `pixel`: `true` para pixel art. `contorno`: `true` desenha a linha de tinta do site em volta.
+- `loop`: força uma animação a tocar uma vez (`false`) ou em loop (`true`).
+- `pixel`: `true` para pixel art. `outline`: `true` desenha a linha de tinta do site em volta. `glow`: `true` acende um brilho de lanterna perto do personagem.
 - O arquivo precisa conter só o JSON. Se estiver quebrado, a Oficina mostra a linha do erro.
 
-Os arquivos antigos `personagem.png` e `personagem.json`, se existirem, **não são mais lidos**.
+Os arquivos antigos `personagem.png` e `personagem.json` **não são mais lidos**.
 
 ## 3. Inimigos — `recursos/inimigos/`
 

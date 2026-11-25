@@ -219,17 +219,17 @@ pasta:['Pasta recursos',`<h4>Colocar arquivos sem configurar nada</h4>
 <p>Publicado (GitHub Pages) ou rodando no seu computador, o site procura arquivos com nomes fixos dentro da pasta <code>recursos/</code>. Coloque o arquivo com o nome certo e recarregue a página. A seção "Pasta recursos/" da Oficina mostra o que foi encontrado e o que falta.</p>
 <div class="tw"><table><tr><th>Pasta</th><th>Nomes dos arquivos</th><th>Formatos</th></tr>
 <tr><td>fontes/</td><td>titulo, texto</td><td>.woff2 .woff .ttf .otf</td></tr>
-<tr><td>personagem/</td><td>uma pasta por animação (parado/, correr/…) com 01.png, 02.png…</td><td>.png</td></tr>
+<tr><td>personagem/</td><td>uma pasta por animação (idle/, run/…) com 1.png, 2.png…</td><td>.png</td></tr>
 <tr><td>inimigos/</td><td>besouro, mosca, saltador, aranha, sentinela, pendente, agua-viva</td><td>.png .webp (1 linha)</td></tr>
 <tr><td>fundos/</td><td>cinzaraiz, galerias, sendas, brejo, cidadela, minas, ninho, fosso</td><td>.jpg .png .webp</td></tr>
 <tr><td>sons/</td><td>pulo, salto-duplo, pouso, passo, golpe, acerto, dano, coleta, avanco, morte, inimigo-morre</td><td>.ogg .mp3 .wav</td></tr>
 <tr><td>musicas/</td><td>cinzaraiz até fosso (uma por região), extra-1 até extra-5</td><td>.mp3 .ogg .m4a</td></tr></table></div>
 <h4>Personagem: uma pasta por animação</h4>
-<ul><li>Dentro de <code>recursos/personagem/</code>, uma pasta para cada animação: <code>parado/</code>, <code>correr/</code>, <code>pular/</code>…</li>
-<li>Dentro de cada pasta, os quadros em PNG com fundo transparente, numerados na ordem em que tocam: <code>01.png</code>, <code>02.png</code>… (ou <code>1.png</code>, <code>2.png</code>…). A contagem para no primeiro número que faltar.</li>
-<li>O site acha sozinho os pés de cada quadro e alinha todos por eles, então quadros recortados justos ou com sobra transparente funcionam.</li>
-<li>Só a pasta <b>parado</b> é obrigatória. As pastas dos poderes (parede, lancar, acender…) podem entrar antes de os poderes serem liberados.</li>
-<li>Ajustes opcionais em <code>personagem/ajustes.json</code>: tamanho, fps, olhar para a esquerda, pixel art, contorno.</li></ul>
+<ul><li>Dentro de <code>recursos/personagem/</code>, uma pasta para cada animação, com nomes em inglês: <code>idle/</code>, <code>run/</code>, <code>jump/</code>, <code>fall/</code>, <code>attack/</code>…</li>
+<li>Dentro de cada pasta, os quadros em PNG com fundo transparente, numerados na ordem em que tocam: <code>1.png</code>, <code>2.png</code>… (ou <code>01.png</code>…). A contagem para no primeiro número que faltar.</li>
+<li>O site alinha todos os quadros pelos pés. Se os quadros olham para a esquerda, use <code>"faces_left": true</code> em <code>personagem/settings.json</code>.</li>
+<li>Com o seu personagem, só aparecem os efeitos das pastas <code>fx-…</code>; o site não desenha efeitos próprios.</li>
+<li>As pastas dos poderes (wall-slide, spell, heal…) podem ser preenchidas antes de os poderes serem liberados.</li></ul>
 <p>A lista completa de pastas está em <code>recursos/LEIA-ME.md</code>.</p>
 <h4>Inimigos, sem configuração</h4>
 <ul><li>Uma linha só, quadros quadrados: o lado do quadro é a altura da imagem. O número de quadros também é detectado.</li></ul>

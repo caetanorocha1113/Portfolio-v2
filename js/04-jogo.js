@@ -61,10 +61,15 @@ const ASSETS={player:null,enemy:{},bg:{},sfx:{}};
 const ANIM_KEYS=['parado','correr','pular','cair','golpe','golpe_cima','golpe_baixo','avanco','dano','morte','salto_duplo','pouso','olhar_cima','olhar_baixo',
   'parede','salto_parede','lancar','acender','carregar','disparo','mergulho','clarao','passo_nevoa'];
 const FX_KEYS=['efeito_golpe','efeito_golpe_cima','efeito_golpe_baixo','efeito_salto_duplo','efeito_avanco',
-  'efeito_faisca','efeito_mergulho','efeito_clarao','efeito_acender','efeito_disparo','efeito_passo_nevoa'];
+  'efeito_faisca','efeito_mergulho','efeito_clarao','efeito_acender','efeito_disparo','efeito_passo_nevoa','efeito_acerto'];
+/* folder name (English) of each animation inside recursos/personagem/ */
+const FOLDER_NAME={parado:'idle',correr:'run',pular:'jump',cair:'fall',golpe:'attack',golpe_cima:'attack-up',golpe_baixo:'attack-down',avanco:'dash',dano:'hurt',morte:'death',salto_duplo:'double-jump',pouso:'land',olhar_cima:'look-up',olhar_baixo:'look-down',
+  parede:'wall-slide',salto_parede:'wall-jump',carregar:'superdash-charge',disparo:'superdash',passo_nevoa:'shadow-dash',lancar:'spell',mergulho:'dive',clarao:'spell-up',acender:'heal',
+  efeito_golpe:'fx-attack',efeito_golpe_cima:'fx-attack-up',efeito_golpe_baixo:'fx-attack-down',efeito_salto_duplo:'fx-double-jump',efeito_avanco:'fx-dash',efeito_faisca:'fx-spell',efeito_mergulho:'fx-dive',efeito_clarao:'fx-spell-up',efeito_acender:'fx-heal',efeito_disparo:'fx-superdash',efeito_passo_nevoa:'fx-shadow-dash',efeito_acerto:'fx-hit'};
+const KEY_OF_FOLDER=Object.fromEntries(Object.entries(FOLDER_NAME).map(([k,v])=>[v,k]));
 const FPS_DEF={parado:6,correr:12,pular:8,cair:8,golpe:18,golpe_cima:18,golpe_baixo:18,avanco:14,dano:8,morte:8,salto_duplo:14,pouso:16,olhar_cima:6,olhar_baixo:6,efeito_golpe:24,efeito_golpe_cima:24,efeito_golpe_baixo:24,efeito_salto_duplo:18,efeito_avanco:20,
-  parede:8,salto_parede:14,lancar:16,acender:10,carregar:12,disparo:14,mergulho:12,clarao:16,passo_nevoa:16,efeito_faisca:16,efeito_mergulho:18,efeito_clarao:18,efeito_acender:12,efeito_disparo:16,efeito_passo_nevoa:18};
-const ANIM_ONCE={golpe:1,golpe_cima:1,golpe_baixo:1,dano:1,morte:1,salto_duplo:1,pouso:1,efeito_golpe:1,efeito_golpe_cima:1,efeito_golpe_baixo:1,efeito_salto_duplo:1,efeito_avanco:1,salto_parede:1,lancar:1,clarao:1,efeito_mergulho:1,efeito_clarao:1,efeito_passo_nevoa:1};
+  parede:8,salto_parede:14,lancar:16,acender:10,carregar:12,disparo:14,mergulho:12,clarao:16,passo_nevoa:16,efeito_faisca:16,efeito_mergulho:18,efeito_clarao:18,efeito_acender:12,efeito_disparo:16,efeito_passo_nevoa:18,efeito_acerto:20};
+const ANIM_ONCE={golpe:1,golpe_cima:1,golpe_baixo:1,dano:1,morte:1,salto_duplo:1,pouso:1,efeito_golpe:1,efeito_golpe_cima:1,efeito_golpe_baixo:1,efeito_salto_duplo:1,efeito_avanco:1,salto_parede:1,lancar:1,clarao:1,efeito_mergulho:1,efeito_clarao:1,efeito_passo_nevoa:1,efeito_acerto:1};
 const ANIM_FALLBACK={golpe_cima:'golpe',golpe_baixo:'golpe',salto_duplo:'pular',pouso:'parado',morte:'dano',olhar_cima:'parado',olhar_baixo:'parado',dano:'parado',golpe:'parado',avanco:'correr',cair:'pular',pular:'parado',correr:'parado',
   parede:'cair',salto_parede:'pular',lancar:'golpe',acender:'parado',carregar:'parado',disparo:'avanco',mergulho:'cair',clarao:'golpe_cima',passo_nevoa:'avanco'};
 const normKey=s=>String(s).toLowerCase().replace(/\.[a-z0-9]+$/,'').trim();
@@ -78,10 +83,11 @@ function gridSprite(img,cfg){const fw=+cfg.fw||img.width,fh=+cfg.fh||img.height,
   return finishSprite({kind:'grade',img,cfg,anims})}
 /* frames: {animKey:[frame,...]} from one folder per animation (recursos/personagem/<animação>/01.png ...);
    each frame already carries its feet anchor (px, py) and the height of the drawing (oh) */
-function framesSprite(lists,cfg){const norm=o=>Object.fromEntries(Object.entries(o||{}).map(([k,v])=>[animKey(k),v])),fps=norm(cfg.fps),rep=norm(cfg.repetir),anims={};
-  for(const[k,fr]of Object.entries(lists)){if(!fr.length)continue;anims[k]={frames:fr,fps:+fps[k]||FPS_DEF[k]||10,loop:rep[k]}}
+function framesSprite(lists,cfg){const norm=o=>Object.fromEntries(Object.entries(o||{}).map(([k,v])=>[KEY_OF_FOLDER[k]||animKey(k),v])),fps=norm(cfg.fps),rep=norm(cfg.repetir),anims={};
+  for(const k of[...ANIM_KEYS,...FX_KEYS]){const fr=lists[k];if(!fr||!fr.length)continue;anims[k]={frames:fr,fps:+fps[k]||FPS_DEF[k]||10,loop:rep[k]}}
+  if(!anims.parado){const src=['pouso','correr','pular','cair','golpe'].map(k=>anims[k]).find(Boolean)||(Object.entries(anims).find(([k])=>!k.startsWith('efeito'))||[])[1];if(src)anims.parado={frames:[src.frames[0]],fps:1,loop:true,stand:true}}
   return finishSprite({kind:'quadros',img:null,cfg,anims})}
-function pickAnim(spr,a){let k=a,g=0;while(k&&!spr.anims[k]&&g++<8)k=ANIM_FALLBACK[k];return spr.anims[k]||spr.anims.parado||Object.values(spr.anims)[0]}
+function pickAnim(spr,a){let k=a,g=0;while(k&&!spr.anims[k]&&g++<8)k=ANIM_FALLBACK[k];return spr.anims[k]||spr.anims.parado||spr.anims.correr||Object.values(spr.anims)[0]}
 function animLen(spr,k){const A=spr.anims[k];return A?A.frames.length/A.fps:0}
 /* draws one frame anchored at (x,y): the pivot (default: bottom centre; effects: centre) lands on that point */
 function drawSprite(c,spr,anim,t,x,y,face,hRef,flash,center){const A=center?spr.anims[anim]:pickAnim(spr,anim);if(!A||!A.frames.length)return null;
@@ -92,6 +98,7 @@ function drawSprite(c,spr,anim,t,x,y,face,hRef,flash,center){const A=center?spr.
   c.restore();return[x+face*f.w*s*.3,y-f.h*s*.45]}
 /* sprite effects (slash, wings, dash) when the player's set has them */
 const sfxSprites=[];
+const customHero=()=>!!(ASSETS.player&&ASSETS.player.kind==='quadros');
 function spawnFx(anim,x,y,face,rot){const spr=ASSETS.player;if(!spr||!spr.anims)return false;let a=anim,r=rot||0;if(!spr.anims[a]){if(anim.startsWith('efeito_golpe_')&&spr.anims.efeito_golpe){a='efeito_golpe'}else return false}else r=0;sfxSprites.push({a,x,y,face,rot:r,t:0,len:animLen(spr,a)});return true}
 
 /* ---------- enemies (page coordinates) ---------- */
@@ -135,13 +142,13 @@ function updateAuto(dt){const vh=FH,s=SC;
     if(st){L.face=st>0?1:-1;L.ph+=Math.abs(st)*.12/s*1.5;L.mv=true;L.stepT-=dt;if(L.stepT<=0){L.stepT=sp>1.5?.2:.3;sfx('passo',.5)}}if(Math.abs(b.x-L.x)<.5){L.i=L.ni;L.mode='idle'}}
   else if(L.mode==='crouch'){L.ct-=dt;L.sq+=(.74-L.sq)*Math.min(1,dt*30);if(L.ct<=0){L.mode='jump';L.jt=0;L.sq=1.2;sfx('pulo',.6)}}
   else if(L.mode==='jump'){L.jt=Math.min(1,L.jt+dt*sp/L.dur);const f=L.jt;L.x=lerp(L.ax,L.bx,f);L.y=lerp(L.ay,L.by,f)-4*L.hh*f*(1-f);
-    if(L.dbl&&!L.dblDone&&f>.42){L.dblDone=true;L.flut=1;heroAnimName='';spawnFx('efeito_salto_duplo',L.x,L.y-30*K,L.face);sfx('salto_duplo',.6);burst(L.x,L.y-24*K,'#d9cfe6',10,140)}
+    if(L.dbl&&!L.dblDone&&f>.42){L.dblDone=true;L.flut=1;heroAnimName='';spawnFx('efeito_salto_duplo',L.x,L.y-30*K,L.face);sfx('salto_duplo',.6);if(!customHero())burst(L.x,L.y-24*K,'#d9cfe6',10,140)}
     if(f>=1){L.i=L.ni;L.mode='idle';L.x=L.bx;L.y=L.by;L.sq=.72;L.landT=.16;sfx('pouso',.6);burst(L.x,L.y,'#cfc6b4',7,70)}}
   L.sq+=(1-L.sq)*Math.min(1,dt*9);L.landT=Math.max(0,L.landT-dt);L.flut=Math.max(0,L.flut-dt*2.2);
   L.F+=((L.mode==='jump'?1:0)-L.F)*Math.min(1,dt*14);L.cd-=dt;L.atk=Math.max(0,L.atk-dt*3.2);
   if(L.mode==='idle'){L.idle+=dt;if(L.idle>3.6){L.idle=0;L.face*=-1}}else L.idle=0;
   if((L.mode==='walk'||L.mode==='idle')&&L.cd<=0)for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='flyer'||e.k==='jelly'||e.k==='dropper')continue;
-    if(Math.abs(e.x-L.x)<58*K&&Math.abs(e.y-L.y)<34*K){L.atk=1;L.cd=1.2;L.face=e.x>L.x?1:-1;e.kb+=L.face*70*K;e.fl=1;heroAnimName='';if(!spawnFx('efeito_golpe',L.x+L.face*40*K,L.y-32*K,L.face))slashes.push({x:L.x,y:L.y,f:L.face,d:0,t:0});burst(e.x,e.y-18*K,LC[e.sec],16,220);sfx('golpe',.6);sfx('acerto',.5);break}}
+    if(Math.abs(e.x-L.x)<58*K&&Math.abs(e.y-L.y)<34*K){L.atk=1;L.cd=1.2;L.face=e.x>L.x?1:-1;e.kb+=L.face*70*K;e.fl=1;heroAnimName='';if(!spawnFx('efeito_golpe',L.x+L.face*40*K,L.y-32*K,L.face)&&!customHero())slashes.push({x:L.x,y:L.y,f:L.face,d:0,t:0});burst(e.x,e.y-18*K,LC[e.sec],16,220);sfx('golpe',.6);sfx('acerto',.5);break}}
 }
 
 /* ---------- Jogar: full platformer ---------- */
@@ -158,8 +165,8 @@ function hurtPlayer(src){if(PL.inv>0||PL.dead>0||PL.dash>0)return;PL.hp--;PL.inv
 function dropFrags(x,y,n){for(let k=0;k<n;k++)frags.push({x,y,vx:(Math.random()-.5)*300*K,vy:-(250+Math.random()*350)*K,t:0})}
 function playerAttack(){const f=PL.face,d=PL.atkDir;let box;
   if(d<0)box={x:PL.x,y:PL.y-88*K,hw:36*K,hh:44*K};else if(d>0)box={x:PL.x,y:PL.y+28*K,hw:32*K,hh:40*K};else box={x:PL.x+f*40*K,y:PL.y-32*K,hw:36*K,hh:32*K};
-  heroAnimName='';if(!spawnFx(d<0?'efeito_golpe_cima':d>0?'efeito_golpe_baixo':'efeito_golpe',PL.x+(d===0?f*40*K:0),PL.y-32*K+(d<0?-50*K:d>0?44*K:0),f,d<0?-Math.PI/2*f:d>0?Math.PI/2*f:0))slashes.push({x:PL.x,y:PL.y,f,d,t:0});let hit=false;
-  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-box.x)<b.hw+box.hw&&Math.abs(b.y-box.y)<b.hh+box.hh){hit=true;e.hp--;e.fl=1;PL.luz=Math.min(LUZ_MAX,PL.luz+LUZ_POR_ACERTO);const kd=d===0?f:(e.x>PL.x?1:-1);e.kb+=kd*70*K;if(e.k==='flyer')e.ox+=kd*90*K;burst(b.x,b.y,LC[e.sec],14,240);sfx('acerto');
+  heroAnimName='';if(!spawnFx(d<0?'efeito_golpe_cima':d>0?'efeito_golpe_baixo':'efeito_golpe',PL.x+(d===0?f*40*K:0),PL.y-32*K+(d<0?-50*K:d>0?44*K:0),f,d<0?-Math.PI/2*f:d>0?Math.PI/2*f:0)&&!customHero())slashes.push({x:PL.x,y:PL.y,f,d,t:0});let hit=false;
+  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-box.x)<b.hw+box.hw&&Math.abs(b.y-box.y)<b.hh+box.hh){hit=true;e.hp--;e.fl=1;PL.luz=Math.min(LUZ_MAX,PL.luz+LUZ_POR_ACERTO);const kd=d===0?f:(e.x>PL.x?1:-1);e.kb+=kd*70*K;if(e.k==='flyer')e.ox+=kd*90*K;if(!spawnFx('efeito_acerto',b.x,b.y,f))burst(b.x,b.y,LC[e.sec],14,240);sfx('acerto');
     if(e.hp<=0){e.dead=22;e.lx=null;e.ox=e.oy=0;burst(b.x,b.y,'#ffffff',26,340);sfx('inimigo_morre');dropFrags(b.x,b.y,3+(Math.random()*3|0))}}}
   if(hit){hitstop=.06;shake.t=.14;shake.a=4;if(d>0){PL.vy=-760*K;PL.jumps=0}else if(d===0)PL.vx-=f*160*K}}
 function updatePlay(dt){const k=K,W=FW;
@@ -169,10 +176,10 @@ function updatePlay(dt){const k=K,W=FW;
   const dir=(inp.right?1:0)-(inp.left?1:0);
   if(dashQ>0&&!temPoder('avanco')){dashQ=0;poderBloqueado('avanco')}
   if(dashQ>0&&PL.dashCD<=0){PL.dash=.17;PL.dashCD=.55;dashQ=0;if(dir)PL.face=dir;sfx('avanco');spawnFx('efeito_avanco',PL.x,PL.y-30*K,PL.face)}
-  if(PL.dash>0){PL.dash-=dt;PL.vx=PL.face*780*k;PL.vy=0;PL.trailT-=dt;if(PL.trailT<=0){PL.trailT=.025;trails.push({x:PL.x,y:PL.y,a:.7})}}
+  if(PL.dash>0){PL.dash-=dt;PL.vx=PL.face*780*k;PL.vy=0;PL.trailT-=dt;if(PL.trailT<=0&&!customHero()){PL.trailT=.025;trails.push({x:PL.x,y:PL.y,a:.7})}}
   else{const tgt=dir*320*k,acc=(PL.on?3000:2000)*k;PL.vx=PL.vx<tgt?Math.min(tgt,PL.vx+acc*dt):Math.max(tgt,PL.vx-acc*dt);if(dir&&PL.atk<=0)PL.face=dir;PL.vy=Math.min(PL.vy+2300*k*(PL.vy<0&&!inp.jump?2.1:1)*dt,1250*k)}
   if(jumpQ>0){if(PL.on||PL.coy>0){PL.vy=-980*k;PL.on=null;PL.coy=0;jumpQ=0;PL.sq=1.25;sfx('pulo');burst(PL.x,PL.y,'#cfc6b4',6,60)}
-    else if(PL.jumps<1&&PL.dash<=0&&temPoder('salto_duplo')){PL.vy=-840*k;PL.jumps=1;jumpQ=0;PL.flut=1;heroAnimName='';spawnFx('efeito_salto_duplo',PL.x,PL.y-30*k,PL.face);PL.sq=1.15;sfx('salto_duplo');burst(PL.x,PL.y-24*k,'#d9cfe6',12,160)}}
+    else if(PL.jumps<1&&PL.dash<=0&&temPoder('salto_duplo')){PL.vy=-840*k;PL.jumps=1;jumpQ=0;PL.flut=1;heroAnimName='';spawnFx('efeito_salto_duplo',PL.x,PL.y-30*k,PL.face);PL.sq=1.15;sfx('salto_duplo');if(!customHero())burst(PL.x,PL.y-24*k,'#d9cfe6',12,160)}}
   if(jumpQ>.11&&!PL.on&&PL.coy<=0&&PL.jumps<1&&!temPoder('salto_duplo')){jumpQ=0;poderBloqueado('salto_duplo')}
   if(poderQ>0){poderQ=0;usarPoder(inp.down&&!PL.on?'queda':inp.up?'clarao':'faisca')}
   if(acenderQ>0){acenderQ=0;usarPoder('reacender')}
@@ -221,11 +228,11 @@ function drawWorld(dt,ox,oy){const lc=LC[Math.max(0,lastIdx)],ws=SC*.82,late=[];
   const Y=H.y-scrollY,onScreen=Y>-140&&Y<FH+140;let lx=H.x,ly=Y-40*K,glowOn=true;
   const an=heroAnim();if(an!==heroAnimName){heroAnimName=an;heroAnimT0=T}
   if(onScreen&&!H.hide){const spr=ASSETS.player;
-    if(spr&&spr.anims){glowOn=spr.cfg.glow!==false;const draw=c=>{const p=drawSprite(c,spr,an,T-heroAnimT0,H.x,Y,H.face,84*K,0);if(p)[lx,ly]=p};if(spr.cfg.ink===false)late.push(()=>{fc.save();fc.translate(ox,oy);draw(fc);fc.restore()});else draw(ac)}
+    if(spr&&spr.anims){glowOn=!!spr.cfg.glow;const draw=c=>{const p=drawSprite(c,spr,an,T-heroAnimT0,H.x,Y,H.face,84*K,0);if(p)[lx,ly]=p};if(spr.cfg.ink===false)late.push(()=>{fc.save();fc.translate(ox,oy);draw(fc);fc.restore()});else draw(ac)}
     else[lx,ly]=drawLume(ac,H.x,Y,SC,H.face,H.ph,H.mv,H.F,H.atk,T,lc,H.sq,H.flut)}
   inkComposite();
   fc.save();fc.translate(ox,oy);late.forEach(f=>f());fc.restore();
-  if(onScreen&&!H.hide&&glowOn){const dark=weights[6]||0;dotAt(lc,lx,ly,(120+dark*260*(MODE==='play'&&temPoder('pavio')?2:1))*K,.35+dark*.15);dotAt(lc,lx,ly,14*SC,.9);if(!ASSETS.player)dotAt('#ffbf5e',H.x+H.face*2.3*SC,Y-33.5*SC,9*SC,.5)}
+  if(onScreen&&!H.hide&&glowOn){const dark=weights[6]||0;dotAt(lc,lx,ly,(120+dark*260)*K,.35+dark*.15);dotAt(lc,lx,ly,14*SC,.9);if(!ASSETS.player)dotAt('#ffbf5e',H.x+H.face*2.3*SC,Y-33.5*SC,9*SC,.5)}
   for(let k=sfxSprites.length-1;k>=0;k--){const e=sfxSprites[k];e.t+=dt;if(!ASSETS.player||e.t>e.len+.02){sfxSprites.splice(k,1);continue}fc.save();fc.translate(ox+e.x,oy+e.y-scrollY);fc.rotate(e.rot);drawSprite(fc,ASSETS.player,e.a,e.t,0,0,e.face,84*K,0,true);fc.restore()}
   for(let k=slashes.length-1;k>=0;k--){const s=slashes[k];s.t+=dt;if(s.t>.18){slashes.splice(k,1);continue}drawSlash(s,lc)}
   for(let k=trails.length-1;k>=0;k--){const t=trails[k];t.a-=dt*3;if(t.a<=0){trails.splice(k,1);continue}dotAt('#cdbfd8',t.x,t.y-scrollY-28*K,34*K,t.a*.5)}

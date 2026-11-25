@@ -32,16 +32,16 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
   for(const[name,role]of[['titulo','display'],['texto','body']])jobs.push((async()=>{const f=await probe('fontes/'+name,EXT.fonte);
     if(!f)return note('Fontes','fontes/'+name+'.woff2 (ou .woff .ttf .otf)',null);
     try{await applyFont(role,f.blob);note('Fontes',f.file,true)}catch(e){note('Fontes',f.file,false,'arquivo de fonte inválido')}})());
-  jobs.push((async()=>{const js=await probeJSON('personagem/ajustes.json')||{},
-    opts={scale:+js.tamanho||1,flip:!!js.olha_esquerda,pixel:!!js.pixel,ink:!!js.contorno,glow:js.lanterna!==false,altura_ref:+js.altura_ref||0,fps:js.fps,repetir:js.repetir};
+  jobs.push((async()=>{const js=await probeJSON('personagem/settings.json')||{},
+    opts={scale:+js.scale||1,flip:!!js.faces_left,pixel:!!js.pixel,ink:!!js.outline,glow:!!js.glow,altura_ref:+js.ref_height||0,fps:js.fps,repetir:js.loop};
     try{const lists={},vazios=[];
-      await Promise.all([...ANIM_KEYS,...FX_KEYS].map(async k=>{const dir='personagem/'+k.replace(/_/g,'-')+'/';let pad=2,f=await probe(dir+'01',['png']);if(!f){pad=1;f=await probe(dir+'1',['png'])}
+      await Promise.all([...ANIM_KEYS,...FX_KEYS].map(async k=>{const dir='personagem/'+FOLDER_NAME[k]+'/';let pad=2,f=await probe(dir+'01',['png']);if(!f){pad=1;f=await probe(dir+'1',['png'])}
         const arr=[];for(let i=1;f&&i<200;i++){const fr=await frameFromBlob(f.blob);if(fr)arr.push(fr);else vazios.push(f.file);f=await probe(dir+String(i+1).padStart(pad,'0'),['png'])}if(arr.length)lists[k]=arr}));
-      if(!Object.keys(lists).length)return note('Personagem','personagem/parado/01.png (uma pasta por animação)',null);
-      if(!lists.parado)note('Personagem','personagem/parado/',false,'a pasta parado é a única obrigatória; enquanto ela falta, outra animação fica no lugar');
+      if(!Object.keys(lists).length)return note('Personagem','personagem/idle/1.png (uma pasta por animação)',null);
+      if(!lists.parado)note('Personagem','personagem/idle/',false,'a pasta idle (parado) está vazia; enquanto isso, o 1º quadro de outra animação fica parado no lugar');
       vazios.forEach(v=>note('Personagem',v,false,'imagem vazia (sem nenhum pixel visível)'));
       const spr=framesSprite(lists,opts);ASSETS.player=spr;
-      note('Personagem','personagem/<animação>/',true,Object.entries(spr.anims).map(([k,A])=>k.replace(/_/g,'-')+' '+A.frames.length).join(', '))}
+      note('Personagem','personagem/<pasta>/',true,Object.keys(lists).map(k=>FOLDER_NAME[k]+' '+lists[k].length).join(', ')+(js.faces_left?' · virado com faces_left':''))}
     catch(e){console.warn(e);note('Personagem','personagem/',false,'não consegui ler os quadros')}})());
   for(const[file,k]of ENEMY_FILES)jobs.push((async()=>{const f=await probe('inimigos/'+file,EXT.sprite);if(!f)return note('Inimigos','inimigos/'+file+'.png',null);
     try{const img=await blobImg(f.blob),js=await probeJSON('inimigos/'+file+'.json')||{},q=js.quadro||[img.height,img.height],n=+js.quadros||((sheetScan(img,q[0],q[1])||[1])[0])||1;
