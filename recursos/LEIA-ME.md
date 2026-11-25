@@ -1,7 +1,6 @@
 # Pasta `recursos/`
 
 Coloque aqui os seus arquivos com **exatamente** os nomes abaixo. O site carrega tudo sozinho ao abrir, sem configurar nada.
-O que não estiver aqui continua com a versão original (arte, sons e músicas gerados pelo código).
 
 > Não apague este `LEIA-ME.md`: o site procura por ele para saber que a pasta existe.
 > Nomes sempre em minúsculas, sem acento e sem espaço.

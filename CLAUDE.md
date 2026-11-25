@@ -10,5 +10,3 @@ Este projeto é feito a quatro mãos com o dono do repositório, que também faz
 4. Ao terminar uma mudança, faça commit e push para `main` e avise o que mudou.
 5. Se mudar nomes ou formatos esperados em `recursos/`, atualize `js/08-pasta-recursos.js`,
    `recursos/LEIA-ME.md` e a aba "Pasta recursos" do Guia (`js/07-interface.js`) juntos.
-6. Personagem, criaturas, arte e músicas do código são originais. Não desenhar personagens de outros jogos;
-   material de terceiros entra só pelos arquivos que o dono coloca em `recursos/`.
