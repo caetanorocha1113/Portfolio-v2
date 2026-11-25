@@ -104,10 +104,54 @@ function spawnFx(anim,x,y,face,rot){const spr=ASSETS.player;if(!spr||!spr.anims)
 /* ---------- enemies (page coordinates) ---------- */
 const HB={crawler:[22,15,14],flyer:[16,12,0],hopper:[15,20,0],spider:[26,14,14],sentinel:[15,44,40],dropper:[12,13,0]};
 const ENEMIES=ENEMY_DEF.map((l,i)=>l.map(d=>({...d,sec:i,ph:Math.random()*2,kb:0,fl:0,x:0,y:0,vis:false,hp:3,dead:0,ox:0,oy:0,lx:null,lg:0,top:0,j:0,face:1})));
-function enemyBox(e){const ws=SC*.82,[hw,hh,cy]=HB[e.k],c=e.k==='hopper'?(20+e.j)*ws:cy*ws;return{x:e.x,y:e.y-c,hw:hw*ws,hh:hh*ws}}
+/* ---------- custom enemies from recursos/inimigos/inimigos.json (folders, regions and behaviour written by the owner) ---------- */
+const BEHAVIOURS={andar:{ground:1},pular:{ground:1},investir:{ground:1},atirar:{ground:1},parado:{ground:1},voar:{air:1},perseguir:{air:1},flutuar:{air:1},teto:{air:1}};
+const ROLE_ONCE={virar:1,atacar:1,morrer:1};
+const shots=[];
+/* screen size: same pixel scale as the custom character (so proportions match), otherwise ~48 px tall */
+function enemyPx(e){const P=ASSETS.player;return(P&&P.kind==='quadros'?84*K*(+P.cfg.scale||1)/P.refH:48*K/e.spr.refH)*(e.cfg.tamanho||1)}
+function roleOf(e,role){const A=e.spr.anims;return A[role]?role:A.andar?'andar':A.parado?'parado':Object.keys(A)[0]}
+function addCustomEnemies(def,spr,regions){let placed=0;
+  for(const[i,n]of regions){const list=ENEMIES[i];if(def.substituir)ENEMIES[i]=list.filter(e=>e.k==='custom');
+    for(let k=0;k<n;k++){const v=Math.max(.2,+def.velocidade||1),beh=BEHAVIOURS[def.comportamento]?def.comportamento:'andar';
+      ENEMIES[i].push({k:'custom',sec:i,beh,air:!!BEHAVIOURS[beh].air,spr,cfg:def,nome:def.nome||def.pasta,harmless:def.dano===false,maxHp:Math.max(1,+def.vida||3),hp:Math.max(1,+def.vida||3),
+        x0:clamp(.12+.76*(k+.5)/n+(Math.random()-.5)*.08,.08,.92),rg:beh==='parado'||beh==='teto'||beh==='flutuar'?0:clamp(.12*v,.05,.32),sp:.045*v,yf:.35+Math.random()*.35,hv:(+def.altura_voo||170)*K,
+        ph:Math.random()*2,kb:0,fl:0,x:0,y:0,vis:false,dead:0,dying:false,dieT:0,ox:0,oy:0,lx:null,lg:0,top:0,j:0,face:1,turnT:0,atkT:0,cd:1+Math.random()*2,charge:0,anim:'',animT0:0});placed++}}
+  return placed}
+function customBox(e){const f=e.spr.anims[roleOf(e,'andar')].frames[0],s=enemyPx(e),hw=(f.ow||f.w)*s*.4,hh=(f.oh||f.h)*s*.42;return{x:e.x,y:e.air?e.y:e.y-(f.oh||f.h)*s*.5-e.j,hw,hh}}
+function updateCustom(e,i,dt,gr,W,vh){
+  if(e.dead>0){if(!e.dying){e.dying=true;e.dieT=0}e.dieT+=dt;e.dead-=dt;if(e.dead<=0){e.hp=e.maxHp;e.dying=false;e.lx=null}
+    e.vis=!!e.spr.anims.morrer&&e.dieT<animLen(e.spr,'morrer');return}
+  e.kb*=Math.pow(.02,dt);e.fl=Math.max(0,e.fl-dt*4);e.turnT=Math.max(0,e.turnT-dt);e.atkT=Math.max(0,e.atkT-dt);e.cd-=dt;e.charge=Math.max(0,e.charge-dt);
+  const play=MODE==='play'&&PL.dead<=0,lastFace=e.face;
+  if(e.beh==='flutuar'){e.x=W*(e.x0+Math.sin(T*.12+e.ph*3)*.06);e.y=gr.top+gr.h*e.yf+Math.sin(T*.5+e.ph*2)*26*K}
+  else if(e.beh==='teto'){if(!REG[i].C)return;e.x=W*e.x0;e.top=gr.top+REG[i].C(e.x);e.y=e.top+(50+(1+Math.sin(T*.7+e.ph*3))*90)*K}
+  else{const p=T*e.sp+e.ph;let x=W*(e.x0+e.rg*(tri(p)-.5));if(e.rg>0)e.face=tri(p+.002)-tri(p)>=0?1:-1;
+    if(e.beh==='investir'&&play){const dx=PL.x-(x+e.ox);if(e.charge<=0&&e.cd<=0&&Math.abs(dx)<280*K&&Math.abs(PL.y-e.lg)<90*K){e.charge=.75;e.cd=2.5;e.cdir=Math.sign(dx)||1;e.atkT=animLen(e.spr,roleOf(e,'atacar'))}
+      if(e.charge>0){e.ox+=e.cdir*560*K*(+e.cfg.velocidade||1)*dt;e.face=e.cdir}else e.ox*=Math.pow(.25,dt)}
+    if(!e.air)x+=e.ox;x+=e.kb;let g=groundPage(i,x);if(g==null){if(e.lx==null)return;x=e.lx;g=e.lg;e.ox*=.5}e.lx=x;e.lg=g;e.x=x;e.y=g;
+    if(e.beh==='pular')e.j=Math.abs(Math.sin(T*2.6+e.ph*5))*34*K;
+    if(e.air){e.y=g-e.hv+Math.sin(T*2.2+e.ph*4)*14*K;
+      if(e.beh==='perseguir'&&play){const dx=PL.x-e.x,dy=PL.y-50*K-e.y,dd=Math.hypot(dx,dy);if(dd<330*K){e.ox+=(clamp(dx,-240*K,240*K)-e.ox)*Math.min(1,dt*.9);e.oy+=(clamp(dy,-200*K,200*K)-e.oy)*Math.min(1,dt*.9);if(Math.abs(dx)>4)e.face=dx>0?1:-1}else{e.ox*=Math.pow(.4,dt);e.oy*=Math.pow(.4,dt)}}
+      e.x+=e.ox;e.y+=e.oy}}
+  if(e.beh==='atirar'&&play){const dx=PL.x-e.x,dy=(PL.y-30*K)-(e.air?e.y:e.y-30*K);if(Math.hypot(dx,dy)<360*K){e.face=dx>0?1:-1;
+    if(e.cd<=0){e.cd=+e.cfg.recarga||2.2;e.atkT=animLen(e.spr,roleOf(e,'atacar'));const d=Math.hypot(dx,dy)||1,v=260*K,sx=e.x+e.face*14*K,sy=e.air?e.y:e.y-30*K;shots.push({x:sx,y:sy,vx:dx/d*v,vy:dy/d*v,t:0,spr:e.spr.anims.projetil?e.spr:null,owner:e})}}}
+  if(e.face!==lastFace&&e.spr.anims.virar)e.turnT=animLen(e.spr,'virar');
+  const sy=e.y-scrollY;e.vis=sy>-200&&sy<vh+200}
+function updateShots(dt){for(let k=shots.length-1;k>=0;k--){const b=shots[k];b.t+=dt;const py=b.y;b.x+=b.vx*dt;b.y+=b.vy*dt;
+  if(b.t>3||(b.vy>0&&findLanding(b.x,py,b.y))){shots.splice(k,1);continue}
+  if(MODE==='play'&&PL.inv<=0&&PL.dash<=0&&PL.dead<=0&&Math.abs(b.x-PL.x)<14*K&&Math.abs(b.y-(PL.y-28*K))<28*K){shots.splice(k,1);hurtPlayer(b)}}}
+function drawShots(ox,oy){for(const b of shots){const y=b.y-scrollY;if(b.spr){fc.save();fc.translate(ox,oy);drawSprite(fc,b.spr,'projetil',b.t,b.x,y,b.vx>=0?1:-1,enemyPx(b.owner)*b.spr.refH,0,true);fc.restore()}
+  else{fc.fillStyle='#2a2430';fc.beginPath();fc.arc(b.x+ox,y+oy,5*K,0,TAU);fc.fill();fc.strokeStyle='#e8e0cf';fc.lineWidth=1.2;fc.stroke()}}}
+function drawCustom(e,a,late,ox,oy){const role=e.vis&&e.dead>0?roleOf(e,'morrer'):e.atkT>0?roleOf(e,'atacar'):e.turnT>0?roleOf(e,'virar'):e.beh==='parado'?roleOf(e,'parado'):roleOf(e,'andar');
+  if(role!==e.anim){e.anim=role;e.animT0=T}const t=ROLE_ONCE[role]?T-e.animT0:T+e.ph,sy=e.y-scrollY-(e.j||0),h=enemyPx(e)*e.spr.refH;
+  const draw=c=>{c.globalAlpha=a;if(e.beh==='teto'){c.strokeStyle='rgba(207,210,190,.35)';c.lineWidth=1;c.beginPath();c.moveTo(e.x,e.top-scrollY);c.lineTo(e.x,sy);c.stroke()}drawSprite(c,e.spr,role,t,e.x,sy,e.face,h,e.fl,e.air);c.globalAlpha=1};
+  if(e.spr.cfg.ink)draw(ac);else late.push(()=>{fc.save();fc.translate(ox,oy);draw(fc);fc.restore()})}
+function enemyBox(e){if(e.k==='custom')return customBox(e);const ws=SC*.82,[hw,hh,cy]=HB[e.k],c=e.k==='hopper'?(20+e.j)*ws:cy*ws;return{x:e.x,y:e.y-c,hw:hw*ws,hh:hh*ws}}
 function updateEnemies(dt){const W=FW,vh=FH;
   for(let i=0;i<ENEMIES.length;i++){const gr=GROUNDS[i];if(!gr)continue;const near=weights[i]>.01||(MODE==='play'&&Math.abs(gr.top+gr.h*.5-(scrollY+vh/2))<vh*1.6);
     for(const e of ENEMIES[i]){e.vis=false;if(!near)continue;
+      if(e.k==='custom'){updateCustom(e,i,dt,gr,W,vh);continue}
       if(e.dead>0){e.dead-=dt;if(e.dead<=0)e.hp=3;continue}
       e.kb*=Math.pow(.02,dt);e.fl=Math.max(0,e.fl-dt*4);
       if(e.k==='jelly'){e.x=W*(e.x0+Math.sin(T*.12+e.ph*3)*e.rg);e.y=gr.top+gr.h*e.yf+Math.sin(T*.5+e.ph*2)*26}
@@ -147,7 +191,7 @@ function updateAuto(dt){const vh=FH,s=SC;
   L.sq+=(1-L.sq)*Math.min(1,dt*9);L.landT=Math.max(0,L.landT-dt);L.flut=Math.max(0,L.flut-dt*2.2);
   L.F+=((L.mode==='jump'?1:0)-L.F)*Math.min(1,dt*14);L.cd-=dt;L.atk=Math.max(0,L.atk-dt*3.2);
   if(L.mode==='idle'){L.idle+=dt;if(L.idle>3.6){L.idle=0;L.face*=-1}}else L.idle=0;
-  if((L.mode==='walk'||L.mode==='idle')&&L.cd<=0)for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='flyer'||e.k==='jelly'||e.k==='dropper')continue;
+  if((L.mode==='walk'||L.mode==='idle')&&L.cd<=0)for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.air||e.k==='flyer'||e.k==='jelly'||e.k==='dropper')continue;
     if(Math.abs(e.x-L.x)<58*K&&Math.abs(e.y-L.y)<34*K){L.atk=1;L.cd=1.2;L.face=e.x>L.x?1:-1;e.kb+=L.face*70*K;e.fl=1;heroAnimName='';if(!spawnFx('efeito_golpe',L.x+L.face*40*K,L.y-32*K,L.face)&&!customHero())slashes.push({x:L.x,y:L.y,f:L.face,d:0,t:0});burst(e.x,e.y-18*K,LC[e.sec],16,220);sfx('golpe',.6);sfx('acerto',.5);break}}
 }
 
@@ -193,7 +237,7 @@ function updatePlay(dt){const k=K,W=FW;
   PL.y=ny;
   if(PL.on&&Math.abs(PL.vx)>40*k){PL.ph+=Math.abs(PL.vx)*dt*.12/SC*1.5;PL.stepT-=dt;if(PL.stepT<=0){PL.stepT=.26;sfx('passo')}}
   const last=GROUNDS[GROUNDS.length-1];if(PL.y>last.top+last.h*.93){PL.abyss=2.2;sfx('morte',.6);toast('Lume tocou a luz do fundo. A descida recomeça na borda.')}
-  if(PL.inv<=0&&PL.dash<=0)outer:for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-PL.x)<b.hw+11*k&&Math.abs(b.y-(PL.y-24*k))<b.hh+24*k){hurtPlayer(e);break outer}}
+  if(PL.inv<=0&&PL.dash<=0)outer:for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly'||e.harmless)continue;const b=enemyBox(e);if(Math.abs(b.x-PL.x)<b.hw+11*k&&Math.abs(b.y-(PL.y-24*k))<b.hh+24*k){hurtPlayer(e);break outer}}
   PL.F+=((PL.on?0:1)-PL.F)*Math.min(1,dt*14);
 }
 function updateFrags(dt){for(let k=frags.length-1;k>=0;k--){const f=frags[k];f.t+=dt;const dx=PL.x-f.x,dy=PL.y-26*K-f.y,d=Math.hypot(dx,dy)||1;
@@ -236,7 +280,7 @@ function drawSlash(s,lc){const a=1-s.t/.18;if(a<=0)return;const y=s.y-scrollY;fc
   fc.strokeStyle=rgba('#ffffff',a*.6);fc.lineWidth=1.5;fc.beginPath();fc.arc(0,0,46*K,-1.1,1.1);fc.stroke();fc.restore();dotAt(lc,s.x+(s.d===0?s.f*40*K:0),y-32*K+(s.d<0?-40*K:s.d>0?44*K:0),60*K,a*.5)}
 function drawWorld(dt,ox,oy){const lc=LC[Math.max(0,lastIdx)],ws=SC*.82,late=[];
   ac.setTransform(FD,0,0,FD,ox*FD,oy*FD);ac.clearRect(-60,-60,FW+120,FH+120);
-  for(let i=0;i<ENEMIES.length;i++){const a=MODE==='play'?1:Math.min(1,weights[i]*2.5);for(const e of ENEMIES[i]){if(!e.vis)continue;const sy=e.y-scrollY,ph=T*6+e.ph*9,spr=ASSETS.enemy[e.k];
+  for(let i=0;i<ENEMIES.length;i++){const a=MODE==='play'?1:Math.min(1,weights[i]*2.5);for(const e of ENEMIES[i]){if(!e.vis)continue;if(e.k==='custom'){drawCustom(e,a,late,ox,oy);continue}const sy=e.y-scrollY,ph=T*6+e.ph*9,spr=ASSETS.enemy[e.k];
     if(spr&&spr.anims){const draw=c=>{c.globalAlpha=a;const yy=e.k==='hopper'?sy-e.j*ws:e.k==='flyer'||e.k==='dropper'||e.k==='jelly'?sy+24*ws:sy;drawSprite(c,spr,'parado',T+e.ph,e.x,yy,e.face,48*K,e.fl);c.globalAlpha=1;if(e.k==='dropper'){c.strokeStyle='rgba(207,210,190,.35)';c.beginPath();c.moveTo(e.x,e.top-scrollY);c.lineTo(e.x,sy-10*ws);c.stroke()}};
       if(spr.cfg.ink===false)late.push(()=>{fc.save();fc.translate(ox,oy);draw(fc);fc.restore()});else draw(ac);continue}
     ac.globalAlpha=a;
@@ -252,7 +296,7 @@ function drawWorld(dt,ox,oy){const lc=LC[Math.max(0,lastIdx)],ws=SC*.82,late=[];
     if(spr&&spr.anims){glowOn=!!spr.cfg.glow;const draw=c=>{const p=drawSprite(c,spr,an,T-heroAnimT0,H.x,Y,H.face,84*K,0);if(p)[lx,ly]=p};if(spr.cfg.ink===false)late.push(()=>{fc.save();fc.translate(ox,oy);draw(fc);fc.restore()});else draw(ac)}
     else[lx,ly]=drawLume(ac,H.x,Y,SC,H.face,H.ph,H.mv,H.F,H.atk,T,lc,H.sq,H.flut)}
   inkComposite();
-  fc.save();fc.translate(ox,oy);late.forEach(f=>f());fc.restore();
+  fc.save();fc.translate(ox,oy);late.forEach(f=>f());fc.restore();drawShots(ox,oy);
   if(onScreen&&!H.hide&&glowOn){const dark=weights[6]||0;dotAt(lc,lx,ly,(120+dark*260)*K,.35+dark*.15);dotAt(lc,lx,ly,14*SC,.9);if(!ASSETS.player)dotAt('#ffbf5e',H.x+H.face*2.3*SC,Y-33.5*SC,9*SC,.5)}
   for(let k=sfxSprites.length-1;k>=0;k--){const e=sfxSprites[k];e.t+=dt;if(!ASSETS.player||e.t>e.len+.02){sfxSprites.splice(k,1);continue}fc.save();fc.translate(ox+e.x,oy+e.y-scrollY);fc.rotate(e.rot);drawSprite(fc,ASSETS.player,e.a,e.t,0,0,e.face,84*K,0,true);fc.restore()}
   for(let k=slashes.length-1;k>=0;k--){const s=slashes[k];s.t+=dt;if(s.t>.18){slashes.splice(k,1);continue}drawSlash(s,lc)}
@@ -266,7 +310,7 @@ function game(dt){if(!ROUTE.length)return;
   if(acv.width!==fx.width||acv.height!==fx.height){acv.width=scv.width=fx.width;acv.height=scv.height=fx.height}
   const gdt=(paused&&MODE==='play')||hitstop>0?0:dt;hitstop=Math.max(0,hitstop-dt);
   if(MODE==='play')updatePlay(gdt);else updateAuto(gdt);
-  updateEnemies(gdt);
+  updateEnemies(gdt);updateShots(gdt);
   if(MODE==='play'){updateFrags(gdt);camera(dt)}
   let ox=0,oy=0;if(shake.t>0){shake.t-=dt;ox=(Math.random()-.5)*shake.a*2;oy=(Math.random()-.5)*shake.a*2}
   drawWorld(gdt,ox,oy)}

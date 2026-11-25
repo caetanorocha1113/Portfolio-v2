@@ -10,3 +10,5 @@ Este projeto é feito a quatro mãos com o dono do repositório, que também faz
 4. Ao terminar uma mudança, faça commit e push para `main` e avise o que mudou.
 5. Se mudar nomes ou formatos esperados em `recursos/`, atualize `js/08-pasta-recursos.js`,
    `recursos/LEIA-ME.md` e a aba "Pasta recursos" do Guia (`js/07-interface.js`) juntos.
+7. `recursos/indice.json` é gerado pelo GitHub (`.github/workflows/indice.yml`), que faz commits próprios:
+   sempre `git pull --rebase` antes de enviar. Não edite o índice à mão; rode `python ferramentas/gerar-indice.py`.

@@ -8,7 +8,7 @@ Cada seção é uma região, com paleta, clima e iluminação próprios.
 
 - **Poderes**: avanço, salto duplo, escalar paredes, super avanço, avanço sombrio, magias (frente, baixo, cima) e cura, liberados aos poucos conforme forem construídos. Lista e estado em `js/08b-poderes.js`; painel no site pela tecla I.
 - **Oficina**: troca fontes, sprites, fundos, sons e músicas pelo navegador.
-- **Pasta `recursos/`**: coloque arquivos com os nomes certos e eles carregam sozinhos. O personagem usa uma pasta por animação, com nomes em inglês (idle, run, jump…). Lista completa em [`recursos/LEIA-ME.md`](recursos/LEIA-ME.md).
+- **Pasta `recursos/`**: coloque arquivos com os nomes certos e eles carregam sozinhos. Inimigos próprios entram por `recursos/inimigos/inimigos.json`. O personagem usa uma pasta por animação, com nomes em inglês (idle, run, jump…). Lista completa em [`recursos/LEIA-ME.md`](recursos/LEIA-ME.md).
 
 ## Rodar
 
@@ -35,5 +35,8 @@ Abra http://localhost:8000.
 | `js/08b-poderes.js` | lista de poderes, estado (liberado/bloqueado), luz da lanterna e painel |
 | `js/09-inicio.js` | inicialização |
 | `recursos/` | seus arquivos (fontes, sprites, fundos, sons, músicas) |
+| `recursos/indice.json` | lista de todos os arquivos de `recursos/`, gerada sozinha pelo GitHub |
+| `ferramentas/gerar-indice.py` | gera o índice (o GitHub roda isso a cada envio; também dá para rodar à mão) |
+| `.github/workflows/indice.yml` | automação do GitHub que mantém o índice em dia |
 
 Os scripts são clássicos (não módulos) e compartilham o escopo global, na ordem numérica.

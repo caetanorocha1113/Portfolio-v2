@@ -119,28 +119,125 @@ Os arquivos antigos `personagem.png` e `personagem.json` **não são mais lidos*
 
 ## 3. Inimigos — `recursos/inimigos/`
 
-| Arquivo | Criatura | Onde aparece |
-|---|---|---|
-| `besouro.png` | rastejante que patrulha o chão | Cinzaraiz, Galerias, Sendas, Minas |
-| `mosca.png` | voadora que persegue no modo Jogar | quase todas as regiões |
-| `saltador.png` | pula enquanto anda | Brejo dos Esporos |
-| `aranha.png` | patrulha rápida | Ninho das Mil Patas |
-| `sentinela.png` | alta, anda devagar | Cidadela da Chuva |
-| `pendente.png` | desce do teto por um fio | Ninho das Mil Patas |
-| `agua-viva.png` | flutua, não causa dano | O Fosso Sem Luz |
+Há dois jeitos, e eles podem ser usados juntos.
 
-**Como cada folha precisa ser (sem configuração):**
+### A) Seus inimigos, descritos em `inimigos/inimigos.json`
 
-- **Uma linha só** com a animação de andar/voar.
-- **Quadros quadrados**: o lado do quadro é a **altura da imagem**. Ex.: 4 quadros de 64 px → imagem 256 × 64.
-- Olhando para a **direita**. Quem anda: pés na base do quadro. Quem voa: centralizado.
-- Tamanho 1 = cerca de 48 px de altura numa tela de 1280 px.
+1. Cada inimigo numa pasta, com uma subpasta por animação, com os nomes que você quiser:
 
-**Opcional:** `nome.json` ao lado (ex.: `mosca.json`):
+   ```
+   recursos/inimigos/
+     Minha Criatura/
+       Walk/    qualquer-nome-0001.png  qualquer-nome-0002.png …
+       Turn/    …
+       Death/   …
+     inimigos.json
+   ```
+
+   Os quadros podem ter **qualquer nome**: o site usa a ordem numérica dos nomes (2 vem antes de 10), lida no índice `recursos/indice.json`, que o GitHub gera sozinho a cada envio.
+2. No `inimigos/inimigos.json`, descreva cada inimigo: pasta, regiões, comportamento e animações.
 
 ```json
-{ "quadro": [40, 40], "quadros": 2, "fps": 14, "tamanho": 0.9, "olha_esquerda": false, "pixel": false, "contorno": false }
+{
+  "substituir_originais": true,
+  "inimigos": [
+    {
+      "nome": "Minha Criatura",
+      "pasta": "Minha Criatura",
+      "comportamento": "andar",
+      "regioes": { "cinzaraiz": 2, "galerias": 1 },
+      "animacoes": { "andar": "Walk", "virar": "Turn", "morrer": "Death" },
+      "vida": 3,
+      "velocidade": 1,
+      "tamanho": 1,
+      "olha_esquerda": true,
+      "fps": 12
+    },
+    {
+      "nome": "Voador Atirador",
+      "pasta": "Outra Pasta",
+      "comportamento": "atirar",
+      "regioes": { "minas": 2 },
+      "animacoes": { "andar": "Fly", "atacar": "Fire", "morrer": "Death", "projetil": "Bullet" },
+      "altura_voo": 200,
+      "recarga": 2.5,
+      "olha_esquerda": true
+    }
+  ]
+}
 ```
+
+**Campos de cada inimigo:**
+
+| Campo | O que é | Padrão |
+|---|---|---|
+| `nome` | nome que aparece na Oficina | a pasta |
+| `pasta` | pasta dentro de `recursos/inimigos/` | obrigatório |
+| `comportamento` | um da tabela abaixo | `andar` |
+| `regioes` | região → quantidade (até 12 por região) | obrigatório |
+| `animacoes` | papel → subpasta (veja abaixo) | precisa de `andar` ou `parado` |
+| `vida` | golpes para derrotar | 3 |
+| `velocidade` | 1 = normal; 2 = o dobro | 1 |
+| `tamanho` | multiplicador de tamanho | 1 |
+| `olha_esquerda` | `true` se os quadros olham para a esquerda | `false` |
+| `fps` | velocidade das animações (número ou `{ "andar": 12, "morrer": 10 }`) | 10 |
+| `dano` | `false` = não machuca ao encostar | `true` |
+| `altura_voo` | altura em px dos voadores acima do chão | 170 |
+| `recarga` | segundos entre tiros (`atirar`) | 2.2 |
+| `substituir` | `true` tira as criaturas originais das regiões em que este inimigo aparece | `substituir_originais` |
+
+**Regiões:** `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso` (ou os números 1 a 8).
+
+**Comportamentos:**
+
+| Nome | Movimento |
+|---|---|
+| `andar` | anda no chão de um lado para o outro e vira nas pontas |
+| `pular` | anda pulando |
+| `investir` | anda e, quando o jogador chega perto, avança rápido na direção dele |
+| `atirar` | fica de olho no jogador e atira projéteis na direção dele (no chão; com `altura_voo`, voando) |
+| `parado` | fica no lugar, só animando |
+| `voar` | voa de um lado para o outro, oscilando |
+| `perseguir` | voa e persegue o jogador quando ele chega perto |
+| `flutuar` | flutua devagar no meio da região |
+| `teto` | desce e sobe do teto por um fio |
+
+**Papéis das animações** (`animacoes`):
+
+| Papel | Quando toca |
+|---|---|
+| `andar` | movimento normal (para voadores, o voo) |
+| `parado` | comportamento `parado`, ou no lugar de `andar` se ela faltar |
+| `virar` | uma vez, quando muda de direção |
+| `atacar` | uma vez, ao investir ou atirar |
+| `morrer` | uma vez, ao ser derrotado (depois some e volta em 22 s) |
+| `projetil` | o tiro do comportamento `atirar` (sem ela, uma bolinha simples) |
+
+- O tamanho na tela usa a **mesma escala de pixels do seu personagem**: se os quadros vieram do mesmo jogo, as proporções entre personagem e inimigos ficam certas. Use `tamanho` só para ajustar.
+- Os quadros são alinhados pelos pés (voadores: pelo centro).
+- A Oficina → Pasta recursos/ mostra cada inimigo com ✓ (onde foi colocado e quantos quadros cada animação tem) ou ✕ (pasta, subpasta, região ou comportamento errados).
+
+### B) Trocar o desenho das criaturas originais do site
+
+Uma imagem por criatura, com uma linha só de quadros quadrados (o lado do quadro é a altura da imagem):
+
+| Arquivo | Criatura original |
+|---|---|
+| `besouro.png` | rastejante que patrulha o chão |
+| `mosca.png` | voadora que persegue |
+| `saltador.png` | pula enquanto anda (Brejo) |
+| `aranha.png` | patrulha rápida (Ninho) |
+| `sentinela.png` | alta, anda devagar (Cidadela) |
+| `pendente.png` | desce do teto (Ninho) |
+| `agua-viva.png` | flutua (Fosso) |
+
+Opcional: `nome.json` ao lado (ex.: `mosca.json`) com `{ "quadro": [40, 40], "quadros": 2, "fps": 14, "tamanho": 0.9, "olha_esquerda": false }`.
+
+### O índice `recursos/indice.json`
+
+- É **gerado sozinho pelo GitHub** a cada envio que muda algo em `recursos/` (aba **Actions** → "Índice de recursos"). Ele cria um commit "Atualiza recursos/indice.json": antes do próximo envio, faça `git pull`.
+- Para gerar no seu computador: `python ferramentas/gerar-indice.py`.
+- Não edite à mão. Sem o índice, o site só encontra quadros numerados `1.png`, `2.png`…
 
 ## 4. Fundos das regiões — `recursos/fundos/`
 

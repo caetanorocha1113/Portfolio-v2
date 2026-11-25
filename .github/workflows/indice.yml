@@ -1,0 +1,40 @@
+# Gera recursos/indice.json sozinho sempre que algo muda em recursos/.
+name: Índice de recursos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "recursos/**"
+      - "ferramentas/gerar-indice.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: indice-recursos
+  cancel-in-progress: false
+
+jobs:
+  indice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Gerar índice
+        run: python ferramentas/gerar-indice.py
+      - name: Salvar índice
+        run: |
+          if [ -z "$(git status --porcelain recursos/indice.json)" ]; then
+            echo "Índice já está em dia."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add recursos/indice.json
+          git commit -m "Atualiza recursos/indice.json"
+          git pull --rebase origin main
+          git push origin HEAD:main
