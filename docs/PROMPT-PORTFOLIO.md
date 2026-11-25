@@ -5,19 +5,19 @@
 
 ---
 
-Você vai reconstruir o site deste repositório para que ele se torne o **portfólio pessoal de [NOME DO DONO]**. O código atual é a **base**: reaproveite o motor visual, o jogo, o áudio e o carregamento de recursos, mas reorganize a estrutura, o conteúdo e a narrativa de acordo com este documento. Leia o `CLAUDE.md`, o `README.md` e o `recursos/LEIA-ME.md` antes de começar.
+Você vai reconstruir o site deste repositório para que ele se torne o **portfólio pessoal de [NOME DO DONO]**. O código atual é a **base**: reaproveite o motor visual, o conceito do jogo e o carregamento de recursos, mas reorganize a estrutura, o conteúdo e a narrativa de acordo com este documento. Leia o `CLAUDE.md`, o `README.md` e o `recursos/LEIA-ME.md` antes de começar.
 
 ## 1. O conceito
 
 - O site é um **portfólio** apresentado como uma **jornada por um mapa**. Rolar a página (ou jogar) é atravessar o mapa, área por área.
 - **Cada área do mapa corresponde a uma matéria/disciplina** do dono. Dentro dela ficam as atividades, os projetos e os trabalhos daquela matéria.
-- O nome antigo do projeto ("Velumbra") **sai de todo o site, dos textos e dos arquivos**. O novo nome é **[NOME DO PORTFÓLIO]**.
+- O nome antigo do projeto ("Velumbra") **sai de todo o site, dos textos e dos arquivos**. O novo nome é **ainda a ser criado, mas tem que sempre deixar claro que é o portfolio**.
 - Há duas formas de usar o site, sempre com o conteúdo do portfólio acessível:
-  1. **Navegação normal (Passeio):** um portfólio que se lê rolando a página. Ao fundo, o personagem joga sozinho (gameplay de fundo, como já existe). As músicas tocam normalmente, como uma playlist.
-  2. **Modo Jogo:** um jogo de plataforma com **história completamente original**. Cada área termina numa **luta contra um chefe**, e a **trilha sonora acompanha a jornada** (exploração, chefe, vitória, final).
+  1. **Navegação normal (Passeio):** um portfólio que se lê rolando a página. Ao fundo, o personagem joga sozinho (gameplay de fundo, como já existe). As músicas tocam normalmente, como uma playlist (ainda vão ser alteradas depois).
+  2. **Modo Jogo:** um jogo de plataforma com **história completamente original**. Cada área termina numa **luta contra um chefe que existe no hollow knight**, e a **trilha sonora acompanha a jornada** (exploração, chefe, vitória, final).
 - **Prioridade:** quem visita o portfólio (professor, recrutador, colega) precisa encontrar e ler o conteúdo sem jogar. O jogo é uma camada extra, nunca um obstáculo.
 
-## 2. O que já existe e deve ser reaproveitado
+## 2. O que já existe e deve ser reaproveitado, melhorado e incrementado, pode ser modificado também, é apenas uma base
 
 - **Tecnologia:** HTML, CSS e JavaScript puros, sem etapa de build. Os scripts são clássicos (não módulos), numerados em `js/` e compartilham o escopo global; um nome declarado duas vezes quebra o site inteiro. Publicação pelo GitHub Pages (`main`, raiz).
 - **Visual:** oito "temas" de região já pintados por código, com três camadas em parallax, partículas de clima, iluminação e acabamento de tinta e grão (`js/02-regioes.js`, `js/03-cenario.js`). Eles passam a ser **temas visuais reutilizáveis** que cada matéria escolhe. Os nomes internos atuais (cinzaraiz, galerias, sendas, brejo, cidadela, minas, ninho, fosso) podem virar nomes de tema neutros.
@@ -31,7 +31,7 @@ Você vai reconstruir o site deste repositório para que ele se torne o **portf�
 
 - **Todos os arquivos que já estão em `recursos/` continuam no repositório e continuam sendo usados.** Não apague, não mova e não renomeie nada ali sem o dono pedir.
 - O **personagem** continua vindo de `recursos/personagem/`, configurado pelo dono em `recursos/personagem/settings.json`.
-- Os **inimigos** continuam vindo de `recursos/inimigos/`, configurados pelo dono em `recursos/inimigos/inimigos.json`. Onde cada inimigo aparece é escolha do dono, nesse arquivo.
+- Os **inimigos** continuam vindo de `recursos/inimigos/`, configurados pelo dono em `recursos/inimigos/inimigos.json`. Cada inimigo aparece na sua área.
 - As **fontes** de `recursos/fontes/` continuam sendo usadas.
 - A arte desenhada por código continua existindo como reserva: aparece onde o dono ainda não colocou arquivos.
 
@@ -92,7 +92,7 @@ Hoje as oito seções estão escritas à mão no `index.html`. Troque isso por u
 
 ## 4. Estrutura do portfólio (navegação normal)
 
-1. **Abertura:** nome, título, resumo curto, foto opcional, botões "Ver matérias" e "Jogar", e um **mapa** com todas as áreas (índice clicável).
+1. **Abertura cinematografica (peça para ser explicado como o dono quer):** nome, título, resumo curto, foto opcional, botões "Ver matérias" e "Jogar", e um **mapa** com todas as áreas (índice clicável).
 2. **Uma seção por área/matéria,** na ordem do mapa, com:
    - cabeçalho: matéria, período, descrição e competências;
    - grade de **cartões de atividade** (capa, título, tipo, data, resumo; os destaques primeiro);
@@ -119,10 +119,9 @@ Hoje as oito seções estão escritas à mão no `index.html`. Troque isso por u
 
 ### História
 
-- **Completamente original.** Não use enredo, nomes, lugares, falas, criaturas, chefes nem músicas de nenhum jogo existente.
-- O protagonista é o personagem carregado de `recursos/personagem/`. Na história ele tem nome, passado e falas originais, definidos com o dono.
+- O protagonista é o personagem carregado de `recursos/personagem/`. 
 - A história amarra as matérias: cada área é um capítulo, e o chefe da área representa o desafio daquela matéria.
-- Proposta inicial (original, para o dono aprovar ou trocar): um **Atlas** que reunia todo o conhecimento do mundo se partiu, e cada página virou uma região isolada, guardada por um **Guardião** que transformou o saber daquela região num enigma vivo. O protagonista atravessa o mapa para recuperar as páginas. Vencer um Guardião devolve a página da área, que abre os destaques do portfólio daquela matéria, e concede uma habilidade necessária para seguir. No fim, o Atlas restaurado revela o mapa inteiro: o próprio portfólio.
+- Proposta inicial : um **Atlas** que reunia todo o conhecimento do mundo se partiu, e cada página virou uma região isolada, guardada por um **Guardião** que transformou o saber daquela região num enigma vivo. O protagonista atravessa o mapa para recuperar as páginas. Vencer um Guardião devolve a página da área, que abre os destaques do portfólio daquela matéria, e concede uma habilidade necessária para seguir. No fim, o Atlas restaurado revela o mapa inteiro: o próprio portfólio.
 
 ### Estrutura de cada área no modo Jogo
 
@@ -137,25 +136,20 @@ Hoje as oito seções estão escritas à mão no `index.html`. Troque isso por u
    - salva o progresso.
 6. Final do jogo depois do último chefe, com créditos e um atalho para o portfólio completo.
 
+a ser revisado
+
 ### Chefes
 
-- **Um chefe por área, com design original.** Não recrie chefes de jogos existentes.
-- **Motor genérico** de chefes (por exemplo `js/12-chefes.js`) com:
-  - barra de vida;
-  - de 2 a 4 padrões de ataque com aviso visual antes de cada um;
-  - mudança de fase a 50% da vida;
-  - invulnerabilidade curta depois de levar golpe;
-  - animação de derrota;
-  - tentar de novo a partir da entrada da arena.
+- **Um chefe por área** serão chefes do hollow knight
 - **Configuração** em `recursos/chefes/chefes.json`, no mesmo estilo do `inimigos.json`: pasta de sprites, animações por papel (ocioso, ataque A/B/C, dano, derrota), vida, padrões e tamanho.
-- Enquanto um chefe não tiver sprites, ele é **desenhado por código** com arte original no estilo do site.
+- Enquanto um chefe não tiver sprites, ele é **desenhado por código** com arte conceitual no estilo do site.
 - Dificuldade crescente ao longo das áreas, com uma opção de dificuldade fácil (mais vida, ataques mais lentos) para quem só quer ver o portfólio.
 
 ### Progressão, diálogos e salvamento
 
-- **Poderes:** os poderes existentes (avanço, salto duplo, escalar paredes, super avanço, avanço sombrio, magias e cura) são liberados pelos chefes, na ordem definida em `poder_recompensa`. Antes de liberar cada poder, termine a mecânica dele no motor; o super avanço e o escalar paredes ainda estão incompletos.
+- **Poderes:** os poderes são liberados pelos chefes, na ordem definida em `poder_recompensa`. Antes de liberar cada poder, termine a mecânica dele no motor; ainda estão incompletos.
 - **Diálogos:** caixa com texto em português, efeito de digitação que pode ser pulado, retrato opcional, avanço por tecla, clique ou toque.
-- **Salvamento:** progresso em `localStorage` (áreas vencidas, poderes, ponto de retorno), com um botão "Recomeçar jornada" que pede confirmação na própria página.
+- **Salvamento:** progresso em `localStorage` (áreas vencidas, poderes, ponto de retorno), com um botão "Recomeçar jornada" que pede confirmação na própria página. por enquanto
 
 ## 7. Trilha sonora
 
@@ -167,8 +161,10 @@ Hoje as oito seções estão escritas à mão no `index.html`. Troque isso por u
   - **final:** tema próprio;
   - **derrota:** a música do chefe recomeça na nova tentativa.
 - **Navegação normal:** playlist normal, sem troca automática.
-- Use as faixas geradas por código como padrão. Use os arquivos do dono em `recursos/musicas/` quando existirem. **Toda música precisa ser original ou ter licença de uso.**
+- Use as faixas geradas por código como padrão. Use os arquivos do dono em `recursos/musicas/` quando existirem. 
 - O player continua com tocar, pausar, avançar, voltar, volume, lista e silenciar; no modo Jogo, a lista mostra a faixa atual da jornada.
+
+a ser discutido
 
 ## 8. Arquitetura sugerida
 
@@ -183,15 +179,17 @@ Hoje as oito seções estão escritas à mão no `index.html`. Troque isso por u
   - avaliar juntar cada animação numa folha só na mesma automação do índice;
   - meta de abertura rápida no celular.
 
+A OFICINA DEVERA SER REMOVIDA POSTERIORMENTE, É SÓ UM RECURSO TEMPORARIO PARA A PRODULÇAO DO SITE
+
 ## 9. Ordem de trabalho
 
 1. Trocar o nome, criar `conteudo/portfolio.json` com marcadores e gerar as seções a partir dele, mantendo o visual atual.
-2. Interface do portfólio: abertura, mapa, cartões, detalhe de atividade, Sobre, Contato, rotas.
+2. Interface do portfólio (por enquanto): abertura, mapa, cartões, detalhe de atividade, Sobre, Contato, rotas.
 3. Passeio sobre o novo layout, e música em modo playlist.
 4. Sistema de história: diálogos, capítulos, salvamento.
 5. Motor de chefes e o primeiro chefe completo (arte por código), depois os demais.
 6. Trilha da jornada no modo Jogo.
-7. Mecânicas dos poderes restantes, liberadas pelos chefes.
+7. Mecânicas dos poderes , liberadas pelos chefes.
 8. Acessibilidade, celular, desempenho, documentação.
 9. Preencher com o portfólio atual do dono quando ele enviar.
 
@@ -201,12 +199,12 @@ Depois de cada etapa: testar no navegador (sem erros no console, celular e compu
 
 - Siga o `CLAUDE.md`. Antes de qualquer mudança, `git fetch` e `git pull --rebase`, e diga o que o dono mudou. Nunca apague nem mova nada em `recursos/`. Não sobrescreva código do dono sem perguntar.
 - Não invente dados reais do dono (atividades, notas, datas, cursos, contatos).
-- Não reproduza história, personagens, chefes, nomes, falas ou músicas de jogos ou obras existentes. Tudo que o código criar deve ser original.
 - Não decida pelo dono o que fica em cada área nem quais arquivos de `recursos/` vão em cada lugar. Ofereça o sistema e pergunte.
 - Mantenha os scripts clássicos e sem build; nenhum nome global pode ser declarado duas vezes.
 
 ## 11. Critérios de aceite
 
+- O site deve ser, em grande parte, refeito.
 - O nome antigo não aparece em lugar nenhum.
 - As áreas, matérias e atividades vêm de `conteudo/portfolio.json`; mudar o JSON muda o site.
 - Todo o conteúdo pode ser lido sem jogar, no celular e no computador, com teclado.
@@ -218,11 +216,11 @@ Depois de cada etapa: testar no navegador (sem erros no console, celular e compu
 ## Dados do dono (preencher)
 
 - Nome do portfólio: `[ … ]`
-- Nome do dono, curso ou área e instituição: `[ … ]`
+- Nome do dono, curso ou área e instituição: `[ Caetano Rocha de Oliveira (SESI-SENAI) 3 ano do ensino médio integrado ao tecnico de sistemas]`
 - Matérias, na ordem do mapa: `[ … ]`
-- Tom dos textos (formal, descontraído…): `[ … ]`
+- Tom dos textos (formal, descontraído…): `[ Simulando uma norma culta, mas com um tom suave ]`
 - Premissa da história aprovada ou outra: `[ … ]`
 - Nome e personalidade do protagonista na história: `[ … ]`
-- Qual poder cada chefe libera: `[ … ]`
+- Qual poder cada chefe libera: `[ pode decidir ]`
 - Links e contato: `[ … ]`
 - Portfólio atual (arquivo ou link): `[ … ]`

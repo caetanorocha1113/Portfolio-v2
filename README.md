@@ -1,13 +1,12 @@
 # Velumbra
 
-Conceito de site com identidade visual forte: uma descida por oito regiões de um reino subterrâneo desenhado à mão.
+Conceito de site com identidade visual forte: uma viagem por oito regiões de hollow knight.
 Cada seção é uma região, com paleta, clima e iluminação próprios.
 
-- **Passeio**: o site rola normalmente e Lume, a mariposa da lanterna, joga sozinha.
+- **Passeio**: o site rola normalmente e o personagem, joga sozinho.
 - **Jogar**: plataforma completa, com teclado ou toque.
 
-- **Poderes**: avanço, salto duplo, escalar paredes, super avanço, avanço sombrio, magias (frente, baixo, cima) e cura, liberados aos poucos conforme forem construídos. Lista e estado em `js/08b-poderes.js`; painel no site pela tecla I.
-- **Oficina**: troca fontes, sprites, fundos, sons e músicas pelo navegador.
+- **Poderes**: são os poderes do jogo original.
 - **Pasta `recursos/`**: coloque arquivos com os nomes certos e eles carregam sozinhos. Inimigos próprios entram por `recursos/inimigos/inimigos.json`. O personagem usa uma pasta por animação, com nomes em inglês (idle, run, jump…). Lista completa em [`recursos/LEIA-ME.md`](recursos/LEIA-ME.md).
 
 ## Rodar

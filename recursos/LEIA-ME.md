@@ -64,17 +64,6 @@ recursos/personagem/
 
 Os poderes são liberados aos poucos (painel **Poderes**, tecla I). As pastas podem ser preenchidas antes.
 
-| Pasta | Poder | Quando toca | Se faltar |
-|---|---|---|---|
-| `wall-slide/` | Escalar paredes | agarrado na parede, deslizando | fall |
-| `wall-jump/` | Escalar paredes | saltando da parede | jump |
-| `superdash-charge/` | Super avanço | carregando | idle |
-| `superdash/` | Super avanço | durante a corrida longa | dash |
-| `shadow-dash/` | Avanço sombrio | avanço que atravessa criaturas | dash |
-| `spell/` | Magia para frente | lançando o projétil | attack |
-| `dive/` | Magia para baixo | mergulhando | fall |
-| `spell-up/` | Magia para cima | soltando a explosão para cima | attack-up |
-| `heal/` | Cura | concentrando para se curar | idle |
 
 ### Efeitos
 
