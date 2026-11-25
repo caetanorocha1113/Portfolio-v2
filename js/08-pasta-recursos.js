@@ -16,54 +16,33 @@ async function probeJSON(path){const b=await grab(path);if(!b)return null;const 
     if(a>=0&&z>a){try{const v=JSON.parse(txt.slice(a,z+1));JSON_ISSUES.push({path,ok:true,msg:'havia texto fora das chaves { } (por exemplo ``` de um chat); foi ignorado, mas vale apagar do arquivo'});return v}catch(e2){
       const m=String(e2.message).match(/position (\d+)/),where=m?lineCol(txt,a+ +m[1]):'';JSON_ISSUES.push({path,ok:false,msg:`JSON inválido${where?' ('+where+')':''}: ${e2.message}`});return null}}
     JSON_ISSUES.push({path,ok:false,msg:'JSON inválido: não encontrei { }'});return null}}
+/* one frame from a PNG: finds the drawing inside the image and anchors it by the feet,
+   so frames cropped tight or with spare transparent space line up the same way */
+async function frameFromBlob(blob){const img=await blobImg(blob),W=img.width,H=img.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);
+  const d=x.getImageData(0,0,W,H).data;let t=H,b=-1,l=W,r=-1;for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++)if(d[(y*W+xx)*4+3]>16){if(y<t)t=y;if(y>b)b=y;if(xx<l)l=xx;if(xx>r)r=xx}
+  if(b<0)return null;const yA=b-Math.max(1,Math.round((b-t+1)*.2));let sx=0,n=0;for(let y=yA;y<=b;y++)for(let xx=l;xx<=r;xx++)if(d[(y*W+xx)*4+3]>16){sx+=xx;n++}
+  const fx=n?sx/n+.5:(l+r+1)/2;return frameOf({img,sw:W,sh:H,tw:W,th:H,w:W,h:H,px:fx/W,py:(b+1)/H,cx:(l+r+1)/2/W,cy:(t+b+1)/2/H,oh:b-t+1})}
 /* counts the non-empty frames in each row of a sprite sheet */
 function sheetScan(img,fw,fh){try{const W=img.width,H=img.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);
   const d=x.getImageData(0,0,W,H).data,cols=Math.max(1,Math.floor(W/fw)),rows=Math.max(1,Math.floor(H/fh)),out=[];
   for(let r=0;r<rows;r++){let last=-1;for(let k=0;k<cols;k++){let f=false;for(let yy=r*fh;yy<Math.min(H,(r+1)*fh)&&!f;yy+=2)for(let xx=k*fw;xx<Math.min(W,(k+1)*fw);xx+=2)if(d[(yy*W+xx)*4+3]>8){f=true;break}if(f)last=k}out.push(last+1)}return out}catch(e){return null}}
-let FOLDER_FOUND=false,SHEET=null;
+let FOLDER_FOUND=false;
 async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({grupo,arquivo,ok,nota}),jobs=[];
   FOLDER_FOUND=!!(await grab('LEIA-ME.md'));if(!FOLDER_FOUND){renderFolderStatus();return}
   for(const[name,role]of[['titulo','display'],['texto','body']])jobs.push((async()=>{const f=await probe('fontes/'+name,EXT.fonte);
     if(!f)return note('Fontes','fontes/'+name+'.woff2 (ou .woff .ttf .otf)',null);
     try{await applyFont(role,f.blob);note('Fontes',f.file,true)}catch(e){note('Fontes',f.file,false,'arquivo de fonte inválido')}})());
-  jobs.push((async()=>{const js=await probeJSON('personagem/personagem.json')||{},img0=await probe('personagem/personagem',EXT.sprite),
-    opts={scale:+js.tamanho||1,flip:!!js.olha_esquerda,pixel:!!js.pixel,ink:!!js.contorno,glow:js.lanterna!==false,altura_ref:+js.altura_ref||0,fps:js.fps,animacoes:js.animacoes},
-    resumo=spr=>Object.entries(spr.anims).map(([k,A])=>k.replace(/_/g,' ')+' '+A.frames.length).join(', ');
-    try{
-      const img=img0?await blobImg(img0.blob):null;if(img)SHEET={img,file:img0.file,json:js};
-      if(js.frames){/* packed atlas: image + coordinates (TexturePacker or Aseprite JSON) */
-        if(!img)return note('Personagem','personagem/personagem.png',false,'o personagem.json tem coordenadas, mas a imagem não foi encontrada');
-        const spr=atlasSprite(img,js,opts);
-        if(!Object.keys(spr.anims).length)return note('Personagem',img0.file,false,`${spr.count} quadros lidos, mas nenhum nome bate com as animações da lista`);
-        ASSETS.player=Object.assign(spr,{blob:img0.blob});return note('Personagem',img0.file+' + personagem.json',true,`folha empacotada, ${spr.count} quadros · ${resumo(spr)}`)}
-      if(js.modo==='figuras'){/* any layout, packed sheets included: numbered figures, optional rotation */
-        if(!img)return note('Personagem','personagem/personagem.png',false,'o personagem.json pede o modo figuras, mas a imagem não foi encontrada');
-        const det=detectSprites(img,{limiar:js.limiar,juntar:js.juntar,minimo:js.minimo});SHEET.det=det;const spr=figurasSprite(img,det,opts);
-        if(!Object.keys(spr.anims).length)return note('Personagem',img0.file+' + personagem.json',false,`${spr.count} figuras encontradas, mas nenhuma animação foi indicada em "animacoes". Use "Ver numeração da folha"`);
-        ASSETS.player=Object.assign(spr,{blob:img0.blob});(spr.warn||[]).forEach(w=>note('Personagem','personagem.json',false,w));return note('Personagem',img0.file+' + personagem.json',true,`figuras: ${spr.count} encontradas · ${resumo(spr)}`)}
-      if(js.modo==='fileiras'){/* irregular sheet in rows: figures found by transparency */
-        if(!img)return note('Personagem','personagem/personagem.png',false,'o personagem.json pede o modo fileiras, mas a imagem não foi encontrada');
-        const det=detectSprites(img,{limiar:js.limiar,juntar:js.juntar,minimo:js.minimo});SHEET.det=det;const spr=rowsSprite(img,det,opts),cont=det.rows.map((r,i)=>`F${i+1}: ${r.length}`).join(' · ');
-        if(!Object.keys(spr.anims).length)return note('Personagem',img0.file+' + personagem.json',false,`${det.rows.length} fileiras encontradas (${cont}), mas nenhuma animação foi indicada em "animacoes". Use "Ver numeração da folha"`);
-        ASSETS.player=Object.assign(spr,{blob:img0.blob});(spr.warn||[]).forEach(w=>note('Personagem','personagem.json',false,w));return note('Personagem',img0.file+' + personagem.json',true,`fileiras: ${det.rows.length} encontradas (${cont}) · ${resumo(spr)}`)}
-      const keys=[...ANIM_KEYS,...FX_KEYS],fname=k=>'personagem/'+k.replace(/_/g,'-')+'-',
-        first=await Promise.all(keys.map(async k=>[k,await probe(fname(k)+'01',EXT.sprite)]));
-      if(first.some(([,f])=>f)){/* numbered frame files */
-        const lists={};await Promise.all(first.map(async([k,f])=>{if(!f)return;const arr=[await blobImg(f.blob)];for(let i=2;i<100;i++){const g=await probe(fname(k)+String(i).padStart(2,'0'),EXT.sprite);if(!g)break;arr.push(await blobImg(g.blob))}lists[k]=arr}));
-        const spr=framesSprite(lists,opts);ASSETS.player=spr;return note('Personagem','personagem/<animação>-01.png …',true,`quadros soltos · ${resumo(spr)}`)}
-      if(!img)return note('Personagem','personagem/personagem.png',null);
-      if(js.quadro&&js.animacoes){/* flexible grid: any rows, any animation */
-        const cfg={fw:+js.quadro[0],fh:+js.quadro[1],...opts},spr=gridMapSprite(img,cfg,js.animacoes);
-        if(!Object.keys(spr.anims).length)return note('Personagem',img0.file,false,'nenhuma animação válida em "animacoes"');
-        ASSETS.player=Object.assign(spr,{blob:img0.blob});return note('Personagem',img0.file+' + personagem.json',true,`grade ${cfg.fw}×${cfg.fh} px · ${resumo(spr)}`)}
-      /* default grid: 7 rows of square frames */
-      const cell=Math.round(img.height/7),q=js.quadro||[cell,cell];
-      if(cell>400||img.width>3000||!gridLooksValid(img,q[0],q[1]))return note('Personagem',img0.file,false,`não é uma grade regular (${img.width}×${img.height} px). Para folhas assim, use o modo fileiras ou coordenadas no personagem.json; enquanto isso Lume continua no lugar`);
-      const counts=sheetScan(img,q[0],q[1])||[],anims={};
-      ANIMS.forEach(([k],i)=>{const n=counts[i]||0;anims[k]=n?{row:i,frames:n,fps:(js.fps&&+js.fps[k])||FPS_DEF[k]}:{row:0,frames:counts[0]||1,fps:FPS_DEF.parado}});
-      const cfg={fw:q[0],fh:q[1],scale:opts.scale,flip:opts.flip,pixel:opts.pixel,ink:opts.ink,glow:opts.glow,anims};ASSETS.player={...gridSprite(img,cfg),blob:img0.blob};fillPlayerForm(cfg);
-      note('Personagem',img0.file,true,`grade de 7 linhas, quadro ${q[0]}×${q[1]} px · quadros por linha: ${ANIMS.map(([k],i)=>counts[i]||0).join(', ')}`)}
-    catch(e){console.warn(e);note('Personagem',(img0&&img0.file)||'personagem/',false,'não consegui ler os arquivos')}})());
+  jobs.push((async()=>{const js=await probeJSON('personagem/ajustes.json')||{},
+    opts={scale:+js.tamanho||1,flip:!!js.olha_esquerda,pixel:!!js.pixel,ink:!!js.contorno,glow:js.lanterna!==false,altura_ref:+js.altura_ref||0,fps:js.fps,repetir:js.repetir};
+    try{const lists={},vazios=[];
+      await Promise.all([...ANIM_KEYS,...FX_KEYS].map(async k=>{const dir='personagem/'+k.replace(/_/g,'-')+'/';let pad=2,f=await probe(dir+'01',['png']);if(!f){pad=1;f=await probe(dir+'1',['png'])}
+        const arr=[];for(let i=1;f&&i<200;i++){const fr=await frameFromBlob(f.blob);if(fr)arr.push(fr);else vazios.push(f.file);f=await probe(dir+String(i+1).padStart(pad,'0'),['png'])}if(arr.length)lists[k]=arr}));
+      if(!Object.keys(lists).length)return note('Personagem','personagem/parado/01.png (uma pasta por animação)',null);
+      if(!lists.parado)note('Personagem','personagem/parado/',false,'a pasta parado é a única obrigatória; enquanto ela falta, outra animação fica no lugar');
+      vazios.forEach(v=>note('Personagem',v,false,'imagem vazia (sem nenhum pixel visível)'));
+      const spr=framesSprite(lists,opts);ASSETS.player=spr;
+      note('Personagem','personagem/<animação>/',true,Object.entries(spr.anims).map(([k,A])=>k.replace(/_/g,'-')+' '+A.frames.length).join(', '))}
+    catch(e){console.warn(e);note('Personagem','personagem/',false,'não consegui ler os quadros')}})());
   for(const[file,k]of ENEMY_FILES)jobs.push((async()=>{const f=await probe('inimigos/'+file,EXT.sprite);if(!f)return note('Inimigos','inimigos/'+file+'.png',null);
     try{const img=await blobImg(f.blob),js=await probeJSON('inimigos/'+file+'.json')||{},q=js.quadro||[img.height,img.height],n=+js.quadros||((sheetScan(img,q[0],q[1])||[1])[0])||1;
       ASSETS.enemy[k]={...gridSprite(img,{fw:q[0],fh:q[1],scale:+js.tamanho||1,flip:!!js.olha_esquerda,pixel:!!js.pixel,ink:!!js.contorno,anims:{parado:{row:0,frames:n,fps:+js.fps||8}}}),blob:f.blob};note('Inimigos',f.file,true,`${n} quadro(s) de ${q[0]}×${q[1]} px`)}catch(e){note('Inimigos',f.file,false,'não consegui ler a imagem')}})());

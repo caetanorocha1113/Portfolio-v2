@@ -22,207 +22,99 @@ Exemplo: `recursos/fontes/titulo.ttf`. Confira se a fonte tem acentos (Â, ã, �
 
 ## 2. Personagem — `recursos/personagem/`
 
-O site aceita **cinco formatos**. Use só um deles. Para uma folha empacotada **sem** arquivo de coordenadas, use o **Formato E**.
+**Uma pasta por animação**, com os quadros numerados na ordem em que tocam. Todas as pastas já estão criadas no repositório (com um `.gitkeep` para o Git guardar a pasta vazia).
 
-### Formato A · Folha empacotada + coordenadas (o da sua folha atual)
+```
+recursos/personagem/
+  parado/   01.png 02.png 03.png …
+  correr/   01.png 02.png …
+  pular/    01.png …
+  …
+```
 
-| Arquivo | O que é |
+**Regras dos quadros:**
+
+- PNG com **fundo transparente**.
+- Numeração `01.png`, `02.png`, `03.png`… ou `1.png`, `2.png`, `3.png`… A contagem **para no primeiro número que faltar**: não pule números.
+- O site encontra o desenho dentro de cada imagem e **alinha todos os quadros pelos pés** (a parte de baixo do desenho). Quadros recortados justos ou com sobra transparente funcionam igual.
+- Personagem olhando para a **direita**. Se olhar para a esquerda, use `"olha_esquerda": true` no `ajustes.json`.
+- Efeitos (pastas `efeito-…`) são desenhados **centralizados** no ponto do golpe ou do poder e devem apontar para a **direita**.
+- Só a pasta `parado` é obrigatória. Pasta vazia ou faltando usa a animação da coluna "se faltar".
+
+### Animações básicas
+
+| Pasta | Quando toca | Repete? | Se faltar |
+|---|---|---|---|
+| `parado/` | sem andar | sim | — |
+| `correr/` | andando | sim | parado |
+| `pular/` | subindo no ar | sim | parado |
+| `cair/` | descendo no ar | sim | pular |
+| `golpe/` | ataque para frente | não | parado |
+| `golpe-cima/` | ataque para cima (W + golpe) | não | golpe |
+| `golpe-baixo/` | ataque para baixo no ar (S + golpe) | não | golpe |
+| `avanco/` | avanço rápido | sim | correr |
+| `dano/` | ao ser atingido | não | parado |
+| `morte/` | ao perder todas as chamas | não | dano |
+| `salto-duplo/` | segundo pulo no ar | não | pular |
+| `pouso/` | ao tocar o chão e ao se preparar para pular | não | parado |
+| `olhar-cima/` | parado segurando W | sim | parado |
+| `olhar-baixo/` | parado segurando S | sim | parado |
+
+### Animações dos poderes
+
+Os poderes são liberados aos poucos (painel **Poderes**, tecla I). As pastas podem ser preenchidas antes.
+
+| Pasta | Poder | Quando toca | Se faltar |
+|---|---|---|---|
+| `parede/` | Garras de Raiz | agarrado na parede, deslizando | cair |
+| `salto-parede/` | Garras de Raiz | saltando da parede | pular |
+| `carregar/` | Corrida de Âmbar | carregando a corrida | parado |
+| `disparo/` | Corrida de Âmbar | durante a corrida longa | avanco |
+| `passo-nevoa/` | Passo de Névoa | avanço que atravessa criaturas | avanco |
+| `lancar/` | Faísca da Lanterna | lançando a faísca | golpe |
+| `mergulho/` | Queda de Cinza | mergulhando para baixo | cair |
+| `clarao/` | Clarão | explosão para cima | golpe-cima |
+| `acender/` | Reacender | concentrando luz para se curar | parado |
+
+### Efeitos (opcionais)
+
+Substituem os efeitos de luz desenhados pelo site.
+
+| Pasta | Onde aparece |
 |---|---|
-| `personagem.png` (ou `.webp`) | a folha empacotada, do jeito que está (quadros de tamanhos diferentes, alguns girados) |
-| `personagem.json` | as coordenadas de cada quadro, no formato **JSON do TexturePacker** (Hash ou Array) ou **JSON do Aseprite** |
+| `efeito-golpe/` | arco do golpe, à frente do personagem |
+| `efeito-golpe-cima/`, `efeito-golpe-baixo/` | arcos para cima e para baixo (se faltarem, o `efeito-golpe` é girado) |
+| `efeito-salto-duplo/` | no segundo pulo |
+| `efeito-avanco/` | no início do avanço |
+| `efeito-faisca/` | a faísca voando |
+| `efeito-mergulho/` | o impacto do mergulho no chão |
+| `efeito-clarao/` | a explosão para cima |
+| `efeito-acender/` | o brilho da cura |
+| `efeito-disparo/` | o rastro da corrida longa |
+| `efeito-passo-nevoa/` | o rastro de névoa |
 
-- O site lê `frame`, `rotated` (quadro girado 90°), `trimmed` / `spriteSourceSize` / `sourceSize` (quadro recortado) e `pivot` (ponto que pisa no chão).
-- **Sem `personagem.json`, uma folha empacotada não é usada** (a Oficina mostra ✕ e a Lume continua no lugar).
-- O `personagem.json` não vem pronto: ele é gerado por um programa de atlas (TexturePacker, Free Texture Packer, Aseprite…). Para uma folha que já está empacotada, primeiro separe os quadros com uma ferramenta de "sprite unpacker / extract sprites" e depois reempacote, ou use o Formato C.
-
-**Como o site sabe qual quadro é de qual animação** (escolha um):
-
-1. **Pelo nome do quadro.** Nomeie os quadros com o nome da animação + número: `parado-01`, `correr-03`, `golpe-cima-02`, `efeito-golpe-01`… (hífen, sublinhado ou nada antes do número; extensão é ignorada).
-2. **Pelas tags do Aseprite** (`meta.frameTags`), com os nomes da tabela abaixo.
-3. **Por uma lista no próprio `personagem.json`**, quando os nomes não seguem o padrão:
+### Ajustes opcionais — `personagem/ajustes.json`
 
 ```json
 {
-  "frames": { "...": "gerado pelo programa de atlas" },
-  "meta":   { "...": "gerado pelo programa de atlas" },
-
-  "animacoes": {
-    "parado": ["idle_0", "idle_1", "idle_2"],
-    "correr": "run_",
-    "golpe":  { "quadros": ["slash_0", "slash_1", "slash_2"], "fps": 20 },
-    "pouso":  { "prefixo": "land", "repetir": false }
-  },
   "tamanho": 1,
-  "altura_ref": 128,
-  "fps": { "correr": 14 },
   "olha_esquerda": false,
   "pixel": false,
   "contorno": false,
-  "lanterna": true
+  "lanterna": true,
+  "fps": { "correr": 14, "golpe": 20 },
+  "repetir": { "morte": false }
 }
 ```
 
-- Lista de nomes → esses quadros, nessa ordem. Texto → todos os quadros que começam com ele, em ordem numérica.
-- `altura_ref`: altura (px) que corresponde a `tamanho` 1 (~84 px numa tela de 1280). Padrão: altura do 1º quadro de `parado`.
+- `tamanho`: 1 = o desenho do `parado` com cerca de 84 px de altura numa tela de 1280 px.
+- `altura_ref`: troca essa referência por uma altura fixa em px.
+- `fps`: velocidade de cada animação, pelo nome da pasta.
+- `repetir`: força uma animação a tocar uma vez (`false`) ou em loop (`true`).
+- `pixel`: `true` para pixel art. `contorno`: `true` desenha a linha de tinta do site em volta.
+- O arquivo precisa conter só o JSON. Se estiver quebrado, a Oficina mostra a linha do erro.
 
-### Formato B · Grade (qualquer número de linhas)
-
-Para folhas com **células de tamanho fixo** (cada quadro dentro da sua célula, sem invadir a vizinha).
-
-- **Sem `personagem.json`:** 7 linhas na ordem parado, correr, pular, cair, golpe, avanço, dano, quadros quadrados (lado = altura ÷ 7).
-- **Com `personagem.json`:** quantas linhas quiser, em qualquer ordem, e todas as animações da tabela abaixo:
-
-```json
-{
-  "quadro": [96, 96],
-  "animacoes": {
-    "parado":      [1, 9],
-    "correr":      [2, 12, 14],
-    "golpe":       [5, 6, 20, 1],
-    "golpe-cima":  [5, 5, 20, 7]
-  }
-}
-```
-
-Cada animação é `[linha, quadros, fps, coluna]`, **contando a partir de 1**; `fps` e `coluna` são opcionais.
-No exemplo, `golpe` usa os quadros 1–6 da linha 5 e `golpe-cima` usa os quadros 7–11 da mesma linha.
-
-Se alguma figura atravessar a borda das células, o site recusa a grade (✕ na Oficina) e sugere o Formato D.
-
-### Formato C · Quadros soltos numerados (o mais simples)
-
-Um PNG por quadro, com o nome da animação + número de 2 dígitos, começando em `01`:
-
-```
-personagem/parado-01.png  parado-02.png  parado-03.png
-personagem/correr-01.png  …  correr-08.png
-personagem/golpe-cima-01.png …
-personagem/efeito-golpe-01.png …
-```
-
-Salve todos os quadros com o **mesmo tamanho de tela** e o personagem **com os pés na borda de baixo, no centro**.
-Opcional `personagem.json` com `tamanho`, `altura_ref`, `fps`, `olha_esquerda`, `pixel`, `contorno`, `lanterna`.
-
-### Formato D · Fileiras (folha organizada em fileiras, espaçamento livre)
-
-Para folhas em que os quadros estão **em fileiras, mas com espaçamentos e tamanhos diferentes**. O site encontra cada figura sozinho pelo fundo transparente e numera: fileiras de cima para baixo, quadros da esquerda para a direita.
-
-1. Coloque a folha em `personagem/personagem.png` (fundo **transparente**).
-2. Crie `personagem/personagem.json` com `"modo": "fileiras"`. O botão **Copiar modelo do JSON** (Oficina → Pasta recursos/) copia um modelo com todas as animações.
-3. Abra **Oficina → Pasta recursos/ → Ver numeração da folha**. Cada figura aparece com a etiqueta `fileira·quadro`.
-4. Preencha no JSON qual fileira e quais quadros formam cada animação:
-
-```json
-{
-  "modo": "fileiras",
-  "tamanho": 1,
-  "juntar": 4,
-  "animacoes": {
-    "parado":       { "fileira": 1, "de": 1, "quantidade": 9 },
-    "correr":       { "fileira": 2, "de": 1, "quantidade": 12, "fps": 14 },
-    "golpe":        [4, 1, 5],
-    "salto-duplo":  { "quadros": [[6, 3], [6, 4], [7, 1]] },
-    "pouso":        { "fileira": 3, "de": 8, "quantidade": 4, "inverter": true }
-  }
-}
-```
-
-- O arquivo precisa conter **só o JSON**: sem ``` nem textos copiados de chat. Se sobrar algo, o site ignora e avisa na Oficina; se o JSON estiver quebrado, a Oficina mostra a linha do erro.
-- `fileira`, `de` (primeiro quadro) e `quantidade` contam **a partir de 1**. A forma curta é `[fileira, de, quantidade, fps]`.
-- `quadros`: lista de `[fileira, quadro]` para montar uma animação com quadros de fileiras diferentes.
-- `inverter: true` toca os quadros de trás para frente. `repetir: false/true` força tocar uma vez ou em loop.
-- Animações com `fileira: 0` ou `quantidade: 0` são ignoradas (é assim que o modelo vem).
-- Quadros que não aparecem em nenhuma animação (ícones, objetos soltos) são simplesmente ignorados.
-- O ponto que pisa no chão é calculado sozinho: o centro da parte de baixo de cada figura.
-
-**Se a numeração sair errada:**
-
-| Problema | Ajuste no JSON |
-|---|---|
-| Uma figura se partiu em duas (ex.: uma espada separada do corpo) | aumente `"juntar"` (padrão 4 px) |
-| Duas figuras vizinhas viraram uma só | diminua `"juntar"` (pode ser 0) |
-| Poeira ou pontinhos viraram "quadros" | aumente `"minimo"` (padrão 40 pixels) |
-| Bordas semitransparentes somem ou sobram | ajuste `"limiar"` (padrão 16, de 0 a 255) |
-| Personagem grande ou pequeno demais | `"tamanho"` ou `"altura_ref"` |
-
-### Formato E · Figuras numeradas (qualquer folha, inclusive empacotada)
-
-Para folhas em que os quadros estão em **qualquer lugar**, com tamanhos diferentes e alguns **deitados**. O site encontra cada figura pelo fundo transparente e dá um número a cada uma, em ordem de leitura.
-
-1. `personagem.png` com fundo transparente + `personagem.json` com `"modo": "figuras"`.
-2. **Oficina → Pasta recursos/ → Ver numeração da folha → Numerar figuras** mostra o número de cada figura.
-3. Cada animação é uma lista desses números, na ordem em que deve tocar:
-
-```json
-{
-  "modo": "figuras",
-  "juntar": 4,
-  "animacoes": {
-    "parado": [1, 2, 3, 4],
-    "correr": { "quadros": [7, 8, 9, 10, 11, 12], "fps": 14 },
-    "pular":  { "de": 15, "ate": 17 },
-    "golpe-cima": { "quadros": [[25, "horario"], [26, "horario"]] },
-    "lancar": { "quadros": [48, 49, 50], "girada": "anti-horario" }
-  }
-}
-```
-
-- `"girada": "horario"` para figuras deitadas com a cabeça apontando para a **direita** na folha; `"anti-horario"` para a cabeça apontando para a **esquerda**. Pode valer para a animação inteira ou para uma figura só: `[25, "horario"]`.
-- `de` / `ate`: faixa contínua de números.
-- Os números dependem de `juntar`, `minimo` e `limiar`: ajuste esses valores **antes** de montar as listas.
-- Há um prompt pronto para pedir a uma IA que monte esse JSON a partir da imagem numerada: [`docs/PROMPT-personagem-json.md`](../docs/PROMPT-personagem-json.md).
-
-### Animações que o site usa
-
-Só `parado` é obrigatória. As que faltarem usam a da coluna "se faltar".
-
-| Nome | Quando toca | Repete? | Se faltar |
-|---|---|---|---|
-| `parado` | sem andar | sim | — |
-| `correr` | andando | sim | parado |
-| `pular` | subindo no ar | sim | parado |
-| `cair` | descendo no ar | sim | pular |
-| `golpe` | ataque para frente | não | parado |
-| `golpe-cima` | ataque para cima (W + golpe) | não | golpe |
-| `golpe-baixo` | ataque para baixo no ar (S + golpe) | não | golpe |
-| `avanco` | avanço rápido | sim | correr |
-| `dano` | ao ser atingido | não | parado |
-| `morte` | ao perder todas as chamas | não | dano |
-| `salto-duplo` | segundo pulo no ar | não | pular |
-| `pouso` | ao tocar o chão e ao se preparar para pular | não | parado |
-| `olhar-cima` | parado segurando W | sim | parado |
-| `olhar-baixo` | parado segurando S | sim | parado |
-
-**Animações dos poderes** (os poderes são liberados aos poucos; as animações podem entrar no JSON antes):
-
-| Nome | Poder | Quando toca | Se faltar |
-|---|---|---|---|
-| `parede` | Garras de Raiz | agarrado na parede | cair |
-| `salto-parede` | Garras de Raiz | saltando da parede | pular |
-| `carregar` | Corrida de Âmbar | carregando a corrida | parado |
-| `disparo` | Corrida de Âmbar | durante a corrida longa | avanco |
-| `passo-nevoa` | Passo de Névoa | avanço que atravessa criaturas | avanco |
-| `lancar` | Faísca da Lanterna | lançando a faísca | golpe |
-| `mergulho` | Queda de Cinza | mergulhando para baixo | cair |
-| `clarao` | Clarão | explosão para cima | golpe-cima |
-| `acender` | Reacender | concentrando luz para se curar | parado |
-
-**Efeitos (opcionais, desenhados centralizados):** substituem os efeitos de luz do site.
-
-| Nome | Onde aparece |
-|---|---|
-| `efeito-golpe` | arco do golpe, à frente do personagem |
-| `efeito-golpe-cima` / `efeito-golpe-baixo` | arcos para cima e para baixo (se faltarem, o `efeito-golpe` é girado) |
-| `efeito-salto-duplo` | no segundo pulo |
-| `efeito-avanco` | no início do avanço |
-| `efeito-faisca` | a faísca voando |
-| `efeito-mergulho` | o impacto do mergulho no chão |
-| `efeito-clarao` | a explosão para cima |
-| `efeito-acender` | o brilho da cura |
-| `efeito-disparo` | o rastro da corrida longa |
-| `efeito-passo-nevoa` | o rastro de névoa |
-
-Regras de desenho para qualquer formato: personagem olhando para a **direita**; pés na base do quadro (ou use `pivot`); efeitos apontando para a **direita**.
+Os arquivos antigos `personagem.png` e `personagem.json`, se existirem, **não são mais lidos**.
 
 ## 3. Inimigos — `recursos/inimigos/`
 

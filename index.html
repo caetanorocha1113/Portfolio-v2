@@ -89,7 +89,6 @@
   <details open><summary>Pasta recursos/</summary>
     <p class="note">Arquivos colocados em <code>recursos/</code> carregam sozinhos ao abrir o site. ✓ encontrado · ainda não colocado · ✕ com problema. A lista está no <button type="button" class="lnk" data-guide="pasta">Guia</button>.</p>
     <ul class="flist" id="folderList"><li class="off">Procurando arquivos…</li></ul>
-    <div class="btns"><button type="button" id="detOpen">Ver numeração da folha</button><button type="button" class="ghost" id="detCopy">Copiar modelo do JSON</button></div>
   </details>
 
   <details><summary>Fontes</summary>
@@ -101,7 +100,7 @@
   </details>
 
   <details><summary>Personagem</summary>
-    <p class="note">Folha de sprites (PNG com fundo transparente). Cada linha da folha é uma animação.</p>
+    <p class="note">Para testar rápido neste navegador: folha em grade (PNG transparente), uma animação por linha. No projeto, o personagem vem das pastas em <code>recursos/personagem/</code>.</p>
     <div class="row"><label for="pImg">Folha</label><input type="file" id="pImg" accept="image/*"></div>
     <div class="grid3"><label>Largura do quadro<input type="number" id="pFw" value="64" min="1"></label><label>Altura do quadro<input type="number" id="pFh" value="64" min="1"></label><label>Tamanho<input type="number" id="pSc" value="1" step="0.1" min="0.1"></label></div>
     <table class="anims"><thead><tr><th>Animação</th><th>Linha</th><th>Quadros</th><th>FPS</th></tr></thead><tbody id="pAnims"></tbody></table>
@@ -150,15 +149,6 @@
     <header><h3 id="powT">Poderes</h3><button type="button" class="x" data-close="pow" aria-label="Fechar poderes">×</button></header>
     <p class="note" id="powInfo"></p>
     <div class="powgrid" id="powGrid"></div>
-  </div>
-</div>
-
-<div class="modal" id="detModal" hidden>
-  <div class="panel detp" role="dialog" aria-modal="true" aria-labelledby="detT">
-    <header><h3 id="detT">Numeração da folha</h3><button type="button" class="x" data-close="det" aria-label="Fechar numeração">×</button></header>
-    <div class="btns"><button type="button" class="ghost" data-detmode="figuras">Numerar figuras</button><button type="button" class="ghost" data-detmode="fileiras">Numerar por fileiras</button><button type="button" id="detCopy2">Copiar modelo deste modo</button></div>
-    <p class="note" id="detInfo"></p>
-    <div class="detwrap"><canvas id="detCv" aria-label="Folha do personagem com fileiras e quadros numerados"></canvas></div>
   </div>
 </div>
 

@@ -224,9 +224,6 @@ h2 small{display:block;font-family:var(--body);font-style:italic;font-weight:400
 .powst{position:absolute;left:14px;bottom:12px;font-family:var(--label);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim)}
 .powst::before{content:"";display:inline-block;width:7px;height:7px;margin-right:6px;transform:rotate(45deg);border:1px solid currentColor}
 .pow.on .powst{color:#cfe8b0}.pow.on .powst::before{background:currentColor}
-.detp{width:min(1200px,100%);max-height:100%;display:flex;flex-direction:column;gap:10px;padding:16px 18px;overflow:hidden}
-.detwrap{overflow:auto;min-height:0;border:1px solid var(--line);background:repeating-conic-gradient(#15121b 0 25%,#1c1824 0 50%) 0 0/16px 16px}
-.detwrap canvas{display:block}
 .guide{width:min(820px,100%);max-height:100%;display:flex;flex-direction:column;padding:16px 18px;gap:12px;overflow:hidden}
 .gtabs{display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--line);padding-bottom:10px}
 .gtabs button{background:none!important;color:var(--ink-dim)!important;border:1px solid transparent!important}

@@ -57,7 +57,7 @@ function drawHole(c,i,w,h,u){const gr=GROUNDS[i];if(!gr)return;const r=rng(777+i
 
 /* ---------- custom assets (filled by the recursos/ folder and by the workshop) ---------- */
 const ASSETS={player:null,enemy:{},bg:{},sfx:{}};
-/* sprite sets: one structure for grid sheets, packed atlases (TexturePacker / Aseprite JSON) and numbered frame files */
+/* sprite sets: one structure for grid sheets (workshop, enemies) and one-folder-per-animation frames (character) */
 const ANIM_KEYS=['parado','correr','pular','cair','golpe','golpe_cima','golpe_baixo','avanco','dano','morte','salto_duplo','pouso','olhar_cima','olhar_baixo',
   'parede','salto_parede','lancar','acender','carregar','disparo','mergulho','clarao','passo_nevoa'];
 const FX_KEYS=['efeito_golpe','efeito_golpe_cima','efeito_golpe_baixo','efeito_salto_duplo','efeito_avanco',
@@ -71,82 +71,24 @@ const normKey=s=>String(s).toLowerCase().replace(/\.[a-z0-9]+$/,'').trim();
 const animKey=s=>normKey(s).replace(/[-\s]+/g,'_');
 const trailNum=s=>{const m=String(s).match(/(\d+)\D*$/);return m?+m[1]:-1};
 const natSort=(a,b)=>trailNum(a)-trailNum(b)||a.localeCompare(b);
-function frameOf(o){return Object.assign({img:null,sx:0,sy:0,sw:1,sh:1,tw:1,th:1,ox:0,oy:0,w:1,h:1,px:.5,py:1,rot:false,pivot:false},o)}
-function finishSprite(spr){const A=spr.anims,p=A.parado||Object.values(A)[0];spr.refH=+spr.cfg.altura_ref||(p&&p.frames[0]&&p.frames[0].h)||64;return spr}
+function frameOf(o){return Object.assign({img:null,sx:0,sy:0,sw:1,sh:1,tw:1,th:1,ox:0,oy:0,w:1,h:1,px:.5,py:1,pivot:false},o)}
+function finishSprite(spr){const A=spr.anims,p=A.parado||Object.values(A)[0];let ref=+spr.cfg.altura_ref;if(!ref&&p&&p.frames.length){const hs=p.frames.map(f=>f.oh||f.h).sort((a,b)=>a-b);ref=hs[hs.length>>1]}spr.refH=ref||64;return spr}
 function gridSprite(img,cfg){const fw=+cfg.fw||img.width,fh=+cfg.fh||img.height,anims={};
   for(const[k,a]of Object.entries(cfg.anims||{})){const fr=[];for(let i=0;i<Math.max(1,+a.frames||1);i++)fr.push(frameOf({sx:i*fw,sy:(+a.row||0)*fh,sw:fw,sh:fh,tw:fw,th:fh,w:fw,h:fh}));anims[k]={frames:fr,fps:+a.fps||FPS_DEF[k]||8,loop:a.loop}}
   return finishSprite({kind:'grade',img,cfg,anims})}
-/* flexible grid: any number of rows; animacoes {nome:[linha, quadros, fps, coluna]} counted from 1 */
-function gridMapSprite(img,cfg,map){const fw=+cfg.fw,fh=+cfg.fh,anims={};
-  for(const[k0,v]of Object.entries(map)){const k=animKey(k0),o=Array.isArray(v)?{linha:v[0],quadros:v[1],fps:v[2],coluna:v[3]}:v||{},row=Math.max(1,+o.linha||1)-1,col=Math.max(1,+o.coluna||1)-1,n=Math.max(1,+o.quadros||1),fr=[];
-    for(let i=0;i<n;i++)fr.push(frameOf({sx:(col+i)*fw,sy:row*fh,sw:fw,sh:fh,tw:fw,th:fh,w:fw,h:fh}));anims[k]={frames:fr,fps:+o.fps||(cfg.fps&&+cfg.fps[k])||FPS_DEF[k]||10,loop:o.repetir}}
-  return finishSprite({kind:'grade',img,cfg,anims})}
-/* true when no figure crosses the cell borders, i.e. the sheet really is a grid of fw×fh cells */
-function gridLooksValid(img,fw,fh){try{const W=img.width,H=img.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);const d=x.getImageData(0,0,W,H).data;let hit=0,tot=0;
-  for(let gx=fw;gx<W;gx+=fw)for(let y=0;y<H;y+=2){tot++;if(d[(y*W+gx)*4+3]>16)hit++}for(let gy=fh;gy<H;gy+=fh)for(let xx=0;xx<W;xx+=2){tot++;if(d[(gy*W+xx)*4+3]>16)hit++}return!tot||hit/tot<.015}catch(e){return true}}
-/* finds every figure on a transparent sheet (connected pixels, nearby pieces merged) and groups them into rows, left to right */
-function detectSprites(img,opt={}){const W=img.width,H=img.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);const d=x.getImageData(0,0,W,H).data;
-  const thr=+opt.limiar||16,N=W*H,m=new Uint8Array(N);for(let i=0;i<N;i++)m[i]=d[i*4+3]>thr?1:0;
-  const lab=new Int32Array(N),st=new Int32Array(N);let boxes=[];
-  for(let i=0;i<N;i++){if(!m[i]||lab[i])continue;const id=boxes.length+1;let sp=0,x0=W,y0=H,x1=0,y1=0,n=0;st[sp++]=i;lab[i]=id;
-    while(sp){const p=st[--sp],px=p%W,py=(p-px)/W;n++;if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py;
-      for(let dy=-1;dy<=1;dy++){const yy=py+dy;if(yy<0||yy>=H)continue;for(let dx=-1;dx<=1;dx++){const xx=px+dx;if(xx<0||xx>=W)continue;const q=yy*W+xx;if(m[q]&&!lab[q]){lab[q]=id;st[sp++]=q}}}}
-    boxes.push({x0,y0,x1,y1,n})}
-  const g=opt.juntar==null?4:+opt.juntar;let merged=true;
-  while(merged){merged=false;boxes.sort((a,b)=>a.x0-b.x0);for(let i=0;i<boxes.length;i++){const a=boxes[i];if(!a)continue;for(let j=i+1;j<boxes.length;j++){const b=boxes[j];if(!b)continue;if(b.x0>a.x1+g)break;
-    if(b.y0<=a.y1+g&&b.y1>=a.y0-g){a.x0=Math.min(a.x0,b.x0);a.y0=Math.min(a.y0,b.y0);a.x1=Math.max(a.x1,b.x1);a.y1=Math.max(a.y1,b.y1);a.n+=b.n;boxes[j]=null;merged=true}}}boxes=boxes.filter(Boolean)}
-  const minN=opt.minimo==null?40:+opt.minimo;boxes=boxes.filter(b=>b.n>=minN);if(!boxes.length)return{rows:[],W,H};
-  const hs=boxes.map(b=>b.y1-b.y0+1).sort((a,b)=>a-b),hm=hs[hs.length>>1];
-  for(const b of boxes){b.cy=(b.y0+b.y1)/2;const h=b.y1-b.y0+1,w=b.x1-b.x0+1,yA=b.y1-Math.max(2,Math.round(h*.2)),xL=b.x0+Math.max(2,Math.round(w*.2)),xR=b.x1-Math.max(2,Math.round(w*.2));let sx=0,cn=0,sl=0,cl=0,sr=0,cr=0;
-    for(let yy=b.y0;yy<=b.y1;yy++)for(let xx=b.x0;xx<=b.x1;xx++)if(m[yy*W+xx]){if(yy>=yA){sx+=xx;cn++}if(xx<=xL){sl+=yy;cl++}if(xx>=xR){sr+=yy;cr++}}
-    b.fx=cn?sx/cn:(b.x0+b.x1)/2;b.fyL=cl?sl/cl:(b.y0+b.y1)/2;b.fyR=cr?sr/cr:(b.y0+b.y1)/2}
-  const rows=[];boxes.sort((a,b)=>a.cy-b.cy);for(const b of boxes){const r=rows.find(r=>Math.abs(r.cy-b.cy)<hm*.5);if(r){r.items.push(b);r.cy=r.items.reduce((s,q)=>s+q.cy,0)/r.items.length}else rows.push({cy:b.cy,items:[b]})}
-  rows.sort((a,b)=>a.cy-b.cy);return{rows:rows.map(r=>r.items.sort((a,b)=>a.x0-b.x0)),W,H}}
-/* any layout (packed sheets included): every figure gets a number in reading order; animacoes {nome:[n,...]} or {nome:{quadros:[n|[n,"horario"]...], de, ate, girada, fps}} */
-function figureFrame(b,rot){const sw=b.x1-b.x0+1,sh=b.y1-b.y0+1;
-  if(rot===1){const tw=sh,th=sw;return frameOf({sx:b.x0,sy:b.y0,sw,sh,tw,th,w:tw,h:th,px:(b.fyL-b.y0+.5)/tw,py:1,rot:1})}
-  if(rot===-1){const tw=sh,th=sw;return frameOf({sx:b.x0,sy:b.y0,sw,sh,tw,th,w:tw,h:th,px:(tw-1-(b.fyR-b.y0)+.5)/tw,py:1,rot:-1})}
-  return frameOf({sx:b.x0,sy:b.y0,sw,sh,tw:sw,th:sh,w:sw,h:sh,px:(b.fx-b.x0+.5)/sw,py:1})}
-const rotOf=v=>v==='horario'||v===90||v===true?1:v==='anti-horario'||v===-90?-1:0;
-function figurasSprite(img,det,cfg){const all=det.rows.flat(),N=all.length,anims={},warn=[];
-  for(const[k0,v]of Object.entries(cfg.animacoes||{})){const k=animKey(k0),o=Array.isArray(v)?{quadros:v}:v||{},base=rotOf(o.girada);let ids=[];
-    if(Array.isArray(o.quadros))ids=o.quadros;else if(o.de){const a=+o.de,z=+(o.ate||o.de);for(let n=a;a<=z?n<=z:n>=z;n+=a<=z?1:-1)ids.push(n)}
-    if(!ids.length)continue;const fr=[],miss=[];
-    for(const it of ids){const n=Array.isArray(it)?+it[0]:+it,r=Array.isArray(it)&&it.length>1?rotOf(it[1]):base,b=all[n-1];if(!b){miss.push(n);continue}fr.push(figureFrame(b,r))}
-    if(miss.length)warn.push(`${k0}: as figuras ${miss.join(', ')} não existem (a folha tem ${N})`);
-    if(o.inverter)fr.reverse();if(fr.length)anims[k]={frames:fr,fps:+o.fps||(cfg.fps&&+cfg.fps[k])||FPS_DEF[k]||10,loop:o.repetir}}
-  const spr=finishSprite({kind:'figuras',img,cfg,anims,det,warn,count:N});if(!cfg.altura_ref&&anims.parado){const hs=anims.parado.frames.map(f=>f.h).sort((a,b)=>a-b);spr.refH=hs[hs.length>>1]}return spr}
-/* irregular sheet: animacoes {nome:{fileira, de, quantidade, fps}} or {nome:[fileira, de, quantidade, fps]} or {nome:{quadros:[[fileira,quadro],...]}}, counted from 1 */
-function rowsSprite(img,det,cfg){const anims={},warn=[],R=det.rows.length,fr=b=>{const w=b.x1-b.x0+1,h=b.y1-b.y0+1;return frameOf({sx:b.x0,sy:b.y0,sw:w,sh:h,tw:w,th:h,w,h,px:(b.fx-b.x0+.5)/w,py:1})};
-  for(const[k0,v]of Object.entries(cfg.animacoes||{})){const k=animKey(k0),o=Array.isArray(v)?{fileira:v[0],de:v[1],quantidade:v[2],fps:v[3]}:v||{};let list=[];
-    const nm=k0;if(Array.isArray(o.quadros)){list=o.quadros.map(([r,i])=>det.rows[r-1]&&det.rows[r-1][i-1]);const miss=o.quadros.filter((q,n)=>!list[n]).map(q=>q.join('·'));if(miss.length)warn.push(`${nm}: os quadros ${miss.join(', ')} não existem`);list=list.filter(Boolean)}
-    else{if(+o.fileira===0||+o.quantidade===0)continue;const fi=+o.fileira||1,row=det.rows[fi-1];if(!row){warn.push(`${nm}: a fileira ${fi} não existe (a folha tem ${R})`);continue}const from=Math.max(1,+o.de||1)-1,n=o.quantidade==null?row.length-from:+o.quantidade;list=row.slice(from,from+n);if(from+n>row.length)warn.push(`${nm}: pede os quadros ${from+1}–${from+n} da fileira ${fi}, mas ela tem ${row.length}${list.length?'; usei '+list.length:''}`)}
-    if(o.inverter)list.reverse();if(list.length)anims[k]={frames:list.map(fr),fps:+o.fps||(cfg.fps&&+cfg.fps[k])||FPS_DEF[k]||10,loop:o.repetir}}
-  const spr=finishSprite({kind:'fileiras',img,cfg,anims,det,warn});if(!cfg.altura_ref&&anims.parado){const hs=anims.parado.frames.map(f=>f.h).sort((a,b)=>a-b);spr.refH=hs[hs.length>>1]}return spr}
-/* data: TexturePacker JSON (hash or array) or Aseprite JSON; cfg: our options (tamanho, animacoes, fps...) */
-function atlasSprite(img,data,cfg){const raw=Array.isArray(data.frames)?data.frames.map(f=>[f.filename||f.name,f]):Object.entries(data.frames||{}),frames={},order=[];
-  for(const[name,d]of raw){const r=d.frame||d,rot=!!d.rotated,ss=d.spriteSourceSize||{x:0,y:0,w:r.w,h:r.h},src=d.sourceSize||{w:ss.w,h:ss.h},pv=d.pivot||d.anchor;const key=normKey(name);
-    frames[key]=frameOf({sx:r.x,sy:r.y,sw:rot?r.h:r.w,sh:rot?r.w:r.h,tw:r.w,th:r.h,ox:ss.x,oy:ss.y,w:src.w,h:src.h,px:pv?+pv.x:.5,py:pv?+pv.y:1,rot,pivot:!!pv});order.push(key)}
-  const anims={},fpsOf=k=>(cfg.fps&&+cfg.fps[k])||FPS_DEF[k]||10;
-  for(const[k0,v]of Object.entries(cfg.animacoes||{})){const k=animKey(k0);let names=[],o=v&&typeof v==='object'&&!Array.isArray(v)?v:{};
-    if(Array.isArray(v))names=v.map(normKey);else if(typeof v==='string')names=order.filter(n=>n.startsWith(normKey(v))).sort(natSort);
-    else if(o.quadros)names=o.quadros.map(normKey);else if(o.prefixo)names=order.filter(n=>n.startsWith(normKey(o.prefixo))).sort(natSort);
-    const fr=names.map(n=>frames[n]).filter(Boolean);if(fr.length)anims[k]={frames:fr,fps:+o.fps||fpsOf(k),loop:o.repetir}}
-  for(const tg of(data.meta&&data.meta.frameTags)||[]){const k=animKey(tg.name);if(anims[k])continue;const fr=order.slice(tg.from,tg.to+1).map(n=>frames[n]).filter(Boolean);if(fr.length)anims[k]={frames:fr,fps:fpsOf(k)}}
-  for(const k of[...ANIM_KEYS,...FX_KEYS]){if(anims[k])continue;const re=new RegExp('^'+k.replace(/_/g,'[-_ ]')+'(?:[-_ ]?\\d+)?$');const names=order.filter(n=>re.test(n)).sort(natSort);if(names.length)anims[k]={frames:names.map(n=>frames[n]),fps:fpsOf(k)}}
-  return finishSprite({kind:'atlas',img,cfg,anims,count:order.length})}
-/* frames: {animKey:[ImageBitmap,...]} from numbered files */
-function framesSprite(lists,cfg){const anims={};for(const[k,imgs]of Object.entries(lists)){if(!imgs.length)continue;anims[k]={frames:imgs.map(im=>frameOf({img:im,sw:im.width,sh:im.height,tw:im.width,th:im.height,w:im.width,h:im.height})),fps:(cfg.fps&&+cfg.fps[k])||FPS_DEF[k]||10}}
+/* frames: {animKey:[frame,...]} from one folder per animation (recursos/personagem/<animação>/01.png ...);
+   each frame already carries its feet anchor (px, py) and the height of the drawing (oh) */
+function framesSprite(lists,cfg){const norm=o=>Object.fromEntries(Object.entries(o||{}).map(([k,v])=>[animKey(k),v])),fps=norm(cfg.fps),rep=norm(cfg.repetir),anims={};
+  for(const[k,fr]of Object.entries(lists)){if(!fr.length)continue;anims[k]={frames:fr,fps:+fps[k]||FPS_DEF[k]||10,loop:rep[k]}}
   return finishSprite({kind:'quadros',img:null,cfg,anims})}
 function pickAnim(spr,a){let k=a,g=0;while(k&&!spr.anims[k]&&g++<8)k=ANIM_FALLBACK[k];return spr.anims[k]||spr.anims.parado||Object.values(spr.anims)[0]}
 function animLen(spr,k){const A=spr.anims[k];return A?A.frames.length/A.fps:0}
 /* draws one frame anchored at (x,y): the pivot (default: bottom centre; effects: centre) lands on that point */
 function drawSprite(c,spr,anim,t,x,y,face,hRef,flash,center){const A=center?spr.anims[anim]:pickAnim(spr,anim);if(!A||!A.frames.length)return null;
   const n=A.frames.length,once=A.loop===false||(A.loop==null&&ANIM_ONCE[anim]),i=once?Math.min(n-1,Math.floor(t*A.fps)):Math.floor(t*A.fps)%n,f=A.frames[i],cfg=spr.cfg||{},s=hRef*(+cfg.scale||1)/spr.refH,img=f.img||spr.img;
-  const px=center&&!f.pivot?.5:f.px,py=center&&!f.pivot?.5:f.py,ox=f.ox-px*f.w,oy=f.oy-py*f.h;
+  const px=center&&!f.pivot?(f.cx??.5):f.px,py=center&&!f.pivot?(f.cy??.5):f.py,ox=f.ox-px*f.w,oy=f.oy-py*f.h;
   c.save();c.imageSmoothingEnabled=!cfg.pixel;c.translate(x,y);c.scale(face*(cfg.flip?-1:1)*s,s);if(flash>0)c.filter=`brightness(${1+flash*2.5})`;
-  if(f.rot===-1){c.translate(ox+f.tw,oy);c.rotate(Math.PI/2);c.drawImage(img,f.sx,f.sy,f.sw,f.sh,0,0,f.th,f.tw)}
-  else if(f.rot){c.translate(ox,oy+f.th);c.rotate(-Math.PI/2);c.drawImage(img,f.sx,f.sy,f.sw,f.sh,0,0,f.th,f.tw)}else c.drawImage(img,f.sx,f.sy,f.sw,f.sh,ox,oy,f.tw,f.th);
+  c.drawImage(img,f.sx,f.sy,f.sw,f.sh,ox,oy,f.tw,f.th);
   c.restore();return[x+face*f.w*s*.3,y-f.h*s*.45]}
 /* sprite effects (slash, wings, dash) when the player's set has them */
 const sfxSprites=[];
