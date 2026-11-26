@@ -62,7 +62,7 @@ function animLen(spr,k){const A=spr.anims[k];return A?A.frames.length/A.fps:0}
 function drawSprite(c,spr,anim,t,x,y,face,hRef,flash,center){const A=center?spr.anims[anim]:pickAnim(spr,anim);if(!A||!A.frames.length)return null;
   const n=A.frames.length,once=A.loop===false||(A.loop==null&&ANIM_ONCE[anim]),i=once?Math.min(n-1,Math.floor(t*A.fps)):Math.floor(t*A.fps)%n,f=A.frames[i],cfg=spr.cfg||{},s=hRef*(+cfg.scale||1)/spr.refH,img=f.img||spr.img;
   const px=center&&!f.pivot?(f.cx??.5):f.px,py=center&&!f.pivot?(f.cy??.5):f.py,ox=f.ox-px*f.w,oy=f.oy-py*f.h;
-  c.save();c.imageSmoothingEnabled=!cfg.pixel;c.translate(x,y);c.scale(face*(cfg.flip?-1:1)*s,s);if(flash>0)c.filter=`brightness(${1+flash*2.5})`;
+  c.save();c.imageSmoothingEnabled=!cfg.pixel;c.translate(x,y);c.scale(face*((A.flip??cfg.flip)?-1:1)*s,s);if(flash>0)c.filter=`brightness(${1+flash*2.5})`;
   c.drawImage(img,f.sx,f.sy,f.sw,f.sh,ox,oy,f.tw,f.th);
   c.restore();return[x+face*f.w*s*.3,y-f.h*s*.45]}
 /* sprite effects (slash, wings, dash) when the player's set has them */

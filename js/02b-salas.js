@@ -93,7 +93,18 @@ function pintarBloco(c,X,Y,S,rs,salas,rapido){
   for(const s of salas){const dx=Math.max(s.x-cx,0,cx-s.x-s.w),dy=Math.max(s.y-cy,0,cy-s.y-s.h),d=dx*dx+dy*dy;if(d<pd){pd=d;perto=s}}
   const TB=ROCHA_TEMA[perto?temaDe(perto.tema):'cinzaraiz'];
   c.fillStyle=TB.fundo;c.fillRect(X-2,Y-2,S+4,S+4);
-  if(rapido){c.globalCompositeOperation='destination-out';c.beginPath();for(const s of salas)tracarContorno(c,contornoSala(s).pts);c.fill();c.globalCompositeOperation='source-over';return}
+  /* versão rápida (enquanto a completa é pintada): pedras, recorte, traço de tinta e aro do chão, sem veios, sombra nem enfeites */
+  if(rapido){
+    for(const s of salas){const T=ROCHA_TEMA[temaDe(s.tema)],P=T.pedra;
+      for(const p of pedrasDaSala(s)){if(p.f>1||p.x<X-p.rx-20||p.x>X+S+p.rx+20||p.y<Y-p.rx-20||p.y>Y+S+p.rx+20)continue;const r=rng(p.s);
+        c.beginPath();bolha(c,r,p.x,p.y,p.rx,p.ry,p.a,5+(p.s%2));c.fillStyle=p.f===0?mix(P.base,P.light,.08):mix(P.base,P.dark,.5);c.fill();c.strokeStyle=T.tinta;c.lineWidth=p.f===0?3.2:2.4;c.stroke()}}
+    c.globalCompositeOperation='destination-out';c.beginPath();for(const s of salas)tracarContorno(c,contornoSala(s).pts);c.fill();c.globalCompositeOperation='source-over';
+    c.lineJoin='round';c.lineCap='round';
+    for(const s of salas){const T=ROCHA_TEMA[temaDe(s.tema)],C=contornoSala(s);if(C.caixa[0]>X+S+40||C.caixa[2]<X-40||C.caixa[1]>Y+S+40||C.caixa[3]<Y-40)continue;
+      c.strokeStyle=T.tinta;c.lineWidth=6.5;c.beginPath();for(const tr of trechosBorda(C))tracarTrecho(c,tr);c.stroke();
+      c.strokeStyle=T.aro;c.lineWidth=3;c.globalAlpha=.85;c.beginPath();for(const tr of trechosBorda(C,t=>t==='chao'))tracarTrecho(c,tr.map(p=>[p[0],p[1]+3.5]));c.stroke();c.globalAlpha=1;
+      for(const p of s.plataformas){if(p.x<X-300||p.x>X+S+300||p.y<Y-300||p.y>Y+S+200)continue;pintarPlataforma(c,p,temaDe(s.tema),rng(4441+((p.x*7+p.y)|0)))}}
+    return}
   /* veios na rocha funda (sorteados por célula do mundo, para continuarem de um bloco para o outro) */
   {const CEL=512;c.strokeStyle=mix(TB.fundo,TB.pedra.base,.5);c.lineCap='round';c.globalAlpha=.5;
     for(let gy=Math.floor((Y-400)/CEL);gy<=Math.floor((Y+S+400)/CEL);gy++)for(let gx=Math.floor((X-400)/CEL);gx<=Math.floor((X+S+400)/CEL);gx++){const r=rng((gx*73856093)^(gy*19349663)^5);

@@ -39,7 +39,10 @@ async function loadCustomEnemies(note){const js=await probeJSON('inimigos/inimig
     bad.forEach(f=>erros.push(`imagem vazia ou não encontrada: ${f}`));
     if(!anims.andar&&!anims.parado){erros.forEach(m=>note('Inimigos',nome,false,m));return note('Inimigos',nome,false,'precisa de pelo menos a animação "andar" ou "parado"')}
     const base=(anims.andar||anims.parado).frames.map(f=>f.oh).sort((a,b)=>a-b);
-    const spr={kind:'inimigo',img:null,cfg:{scale:1,flip:!!d.olha_esquerda,pixel:!!d.pixel,ink:!!d.contorno},anims,refH:base[base.length>>1]||48};
+    /* olha_esquerda: true/false para todas as animações, ou por papel: { "padrao": true, "atacar": false } (quadros que viram para lados diferentes) */
+    const oe=d.olha_esquerda,porPapel=oe&&typeof oe==='object',flip=porPapel?!!oe.padrao:!!oe;
+    if(porPapel)for(const[k,v]of Object.entries(oe)){if(k==='padrao')continue;if(!ENEMY_ROLES.includes(k))erros.push(`olha_esquerda: papel "${k}" não existe`);else if(anims[k])anims[k].flip=!!v}
+    const spr={kind:'inimigo',img:null,cfg:{scale:1,flip,pixel:!!d.pixel,ink:!!d.contorno},anims,refH:base[base.length>>1]||48};
     const placed=regions.length?addCustomEnemies(d,spr,regions):0;erros.forEach(m=>note('Inimigos',nome,false,m));
     note('Inimigos',nome,placed>0,`${placed} em ${regions.map(([i,q])=>secs[i].id+'×'+q).join(', ')||'—'} · ${d.comportamento||'andar'} · `+Object.entries(anims).map(([k,a])=>k+' '+a.frames.length).join(', '))}))}
 /* one frame from a PNG: finds the drawing inside the image and anchors it by the feet,

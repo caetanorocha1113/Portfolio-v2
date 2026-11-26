@@ -2,14 +2,14 @@
   "substituir_originais": true,
   "inimigos": [
     { "nome": "Crawlid", "pasta": "Crawlid", "comportamento": "andar",
-      "regioes": { "inicio": 2, "linguagens": 2 },
+      "regioes": { "inicio": 2, "humanas": 2, "linguagens": 2 },
       "animacoes": { "andar": "walk", "virar": "turn", "morrer": "death" },
       "vida": 2, "velocidade": 0.8, "olha_esquerda": true, "fps": 10 },
 
     { "nome": "Great Husk Sentry", "pasta": "Great Husk Sentry", "comportamento": "investir",
-      "regioes": { "humanas": 1 },
+      "regioes": { "tecnico": 1 },
       "animacoes": { "andar": "Walk", "virar": "Turn", "alerta": "Startle", "preparar": "Attack1 (Anticipate)", "atacar": "Attack1", "recuperar": "Attack1 (Recover)", "morrer": "Death (Land)" },
-      "vida": 5, "velocidade": 0.8, "olha_esquerda": true, "fps": { "andar": 10, "preparar": 12, "atacar": 14, "recuperar": 10, "morrer": 10, "alerta": 12 } },
+      "vida": 5, "velocidade": 0.8, "olha_esquerda": { "padrao": true, "preparar": false, "atacar": false, "recuperar": false }, "fps": { "andar": 10, "preparar": 12, "atacar": 14, "recuperar": 10, "morrer": 10, "alerta": 12 } },
     { "nome": "Lance Sentry", "pasta": "Lance Sentry", "comportamento": "atirar",
       "regioes": { "humanas": 1 },
       "animacoes": { "andar": "Idle", "virar": "Turn", "atacar": "Throw Attack", "morrer": "Death (Air)", "projetil": "Javelin" },

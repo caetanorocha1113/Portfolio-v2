@@ -19,9 +19,11 @@ function viewSetup(){const old=RS;VH=innerWidth>=innerHeight?820:1000;ZOOM=inner
   if(Math.abs(old-RS)>.04){limparBlocos();limparFundos()}}
 
 /* ---------- the painter (Web Worker) ---------- */
-let PINTOR=null,PINTOR_F=null,emVoo=0,fundoEmVoo=0;
+let PINTOR=null,PINTOR_F=null,PINTORES=[],emVoo=0,fundoEmVoo=0,vezPintor=0;
+/* blocos guardados: menos em celular (cada bloco pintado ocupa alguns MB) */
+const MAX_BLOCOS=matchMedia('(pointer:coarse)').matches?26:44;
 function criarPintor(){try{if(typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined'||location.protocol==='file:')return null;
-    const w=new Worker('js/02c-pintor.js');w.onmessage=recebePintor;w.onerror=e=>{console.warn('Portfólio: pintor indisponível, pintando na página',e.message||e);PINTOR=PINTOR_F=null;emVoo=fundoEmVoo=0;blocos.forEach(b=>{b.pedido=false});fundos.forEach(f=>{f.pedido=false})};
+    const w=new Worker('js/02c-pintor.js');w.onmessage=recebePintor;w.onerror=e=>{console.warn('Portfólio: pintor indisponível, pintando na página',e.message||e);PINTOR=PINTOR_F=null;PINTORES=[];emVoo=fundoEmVoo=0;blocos.forEach(b=>{b.pedido=false});fundos.forEach(f=>{f.pedido=false})};
     w.postMessage({tipo:'mundo',regioes:REGS.map(g=>({id:g.id,nome:g.nome,tema:g.tema,variante:g.variante})),semente:7});return w}catch(e){return null}}
 function recebePintor(e){const m=e.data;
   if(m.tipo==='bloco'){emVoo=Math.max(0,emVoo-1);const b=blocos.get(m.chave);if(b&&Math.abs(m.rs-RS)<.001){b.img=m.bmp;b.pronto=true;b.rapido=null}else if(m.bmp.close)m.bmp.close()}
@@ -37,7 +39,7 @@ const salasPerto=(X,Y,S,m)=>WORLD.salas.filter(s=>s.x-m<X+S&&s.x+s.w+m>X&&s.y-m<
 function limparBlocos(){blocos.forEach(b=>{if(b.img&&b.img.close)b.img.close()});blocos.clear();emVoo=0}
 function blocoEm(bx,by){const k=bx+','+by;let b=blocos.get(k);
   if(!b){b={k,bx,by,img:null,rapido:null,pronto:false,pedido:false,uso:0};blocos.set(k,b);
-    if(blocos.size>40){const v=[...blocos.values()].sort((a,c)=>a.uso-c.uso);for(let q=0;q<blocos.size-40;q++){const o=v[q];if(o.img&&o.img.close)o.img.close();blocos.delete(o.k)}}}
+    if(blocos.size>MAX_BLOCOS){const v=[...blocos.values()].sort((a,c)=>a.uso-c.uso);for(let q=0;q<blocos.size-MAX_BLOCOS;q++){const o=v[q];if(o.img&&o.img.close)o.img.close();blocos.delete(o.k)}}}
   b.uso=usoTick;return b}
 /* quick stand-in: just the rock silhouette, until the painted block arrives */
 function provisorio(b){if(b.rapido)return b.rapido;const rr=Math.min(RS,.5),cv=novoCanvas(BLOCO*rr,BLOCO*rr);try{pintarBloco(cv.getContext('2d'),b.bx*BLOCO,b.by*BLOCO,BLOCO,rr,salasPerto(b.bx*BLOCO,b.by*BLOCO,BLOCO,420),true)}catch(e){console.warn('bloco',e)}return b.rapido=cv}
@@ -59,12 +61,13 @@ function rerenderRegion(i){for(const s of WORLD.salas)if(s.regiao===i){const f=f
 function pedirPintura(x0,y0,x1,y1){
   const salasVis=WORLD.salas.filter(s=>!(s.x>x1+VW*.5||s.x+s.w<x0-VW*.5||s.y>y1+VH*.5||s.y+s.h<y0-VH*.5)).sort((a,b)=>Math.hypot(a.x+a.w/2-CAM.x,a.y+a.h/2-CAM.y)-Math.hypot(b.x+b.w/2-CAM.x,b.y+b.h/2-CAM.y));
   const faltam=[...blocos.values()].filter(b=>!b.pronto&&!b.pedido&&!b.falhou&&b.uso>=usoTick-1).sort((a,b)=>Math.hypot((a.bx+.5)*BLOCO-CAM.x,(a.by+.5)*BLOCO-CAM.y)-Math.hypot((b.bx+.5)*BLOCO-CAM.x,(b.by+.5)*BLOCO-CAM.y));
-  if(PINTOR){
-    for(const b of faltam){if(emVoo>=3)break;b.pedido=true;emVoo++;PINTOR.postMessage({tipo:'bloco',chave:b.k,bx:b.bx,by:b.by,S:BLOCO,rs:RS})}
+  if(PINTOR){const lim=2*Math.max(1,PINTORES.length),manda=b=>{b.pedido=true;emVoo++;const w=PINTORES.length?PINTORES[vezPintor++%PINTORES.length]:PINTOR;w.postMessage({tipo:'bloco',chave:b.k,bx:b.bx,by:b.by,S:BLOCO,rs:RS})};
+    for(const b of faltam){if(emVoo>=lim)break;manda(b)}
     for(const s of salasVis){if(fundoEmVoo>=1)break;const f=fundoDe(s);if(f.pronto||f.pedido||f.falhou)continue;f.pedido=true;fundoEmVoo++;
       (PINTOR_F||PINTOR).postMessage({tipo:'fundo',sala:s.id,rs:RS,longe:medidasFundo(s,PAR_LONGE),perto:medidasFundo(s,PAR_PERTO)})}
-    /* blocks just outside the view, painted ahead */
-    if(emVoo<2){const mx=VW*.6,my=VH*.6;for(let by=Math.floor((y0-my)/BLOCO);by<=Math.floor((y1+my)/BLOCO)&&emVoo<2;by++)for(let bx=Math.floor((x0-mx)/BLOCO);bx<=Math.floor((x1+mx)/BLOCO)&&emVoo<2;bx++){const b=blocoEm(bx,by);if(b.pronto||b.pedido||b.falhou)continue;b.pedido=true;emVoo++;PINTOR.postMessage({tipo:'bloco',chave:b.k,bx,by,S:BLOCO,rs:RS})}}
+    /* blocks around the view, painted ahead (nearest first): walking into the next room finds it ready */
+    if(emVoo<lim){const mx=VW*1.0,my=VH*.9,perto=[];for(let by=Math.floor((y0-my)/BLOCO);by<=Math.floor((y1+my)/BLOCO);by++)for(let bx=Math.floor((x0-mx)/BLOCO);bx<=Math.floor((x1+mx)/BLOCO);bx++){const X=bx*BLOCO,Y=by*BLOCO;if(!salasPerto(X,Y,BLOCO,200).length)continue;const k=bx+','+by,b0=blocos.get(k);if(b0){b0.uso=usoTick;if(b0.pronto||b0.pedido||b0.falhou)continue}perto.push([bx,by,Math.hypot(X+BLOCO/2-CAM.x,Y+BLOCO/2-CAM.y)])}
+      perto.sort((a,b)=>a[2]-b[2]);for(const[bx,by]of perto){if(emVoo>=lim)break;manda(blocoEm(bx,by))}}
     return}
   for(const s of salasVis){const f=fundoDe(s);if(!f.pronto){pintarFundoAqui(s,f);return}}
   if(faltam[0])detalharAqui(faltam[0])}
@@ -95,7 +98,7 @@ function prepararVista(){const x0=CAM.x-VW/2,y0=CAM.y-VH/2,x1=x0+VW,y1=y0+VH;uso
   for(let by=Math.floor(y0/BLOCO);by<=Math.floor(y1/BLOCO);by++)for(let bx=Math.floor(x0/BLOCO);bx<=Math.floor(x1/BLOCO);bx++){const b=blocoEm(bx,by);if(!PINTOR&&!b.pronto)detalharAqui(b)}
   if(PINTOR){pedirPintura(x0,y0,x1,y1);pedirPintura(x0,y0,x1,y1)}
   else for(const s of WORLD.salas)if(!(s.x>x1||s.x+s.w<x0||s.y>y1||s.y+s.h<y0)){const f=fundoDe(s);if(!f.pronto)pintarFundoAqui(s,f)}}
-PINTOR=criarPintor();if(PINTOR)PINTOR_F=criarPintor();
+PINTOR=criarPintor();if(PINTOR){PINTOR_F=criarPintor();PINTORES=[PINTOR];if((navigator.hardwareConcurrency||2)>=4){const w2=criarPintor();if(w2)PINTORES.push(w2)}}
 
 /* ---------- HUD, side map and minimap ---------- */
 function romanNum(n){let s='';for(const[v,r]of[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']])while(n>=v){s+=r;n-=v}return s}

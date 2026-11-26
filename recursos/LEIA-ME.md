@@ -168,7 +168,7 @@ Há dois jeitos, e eles podem ser usados juntos.
 | `vida` | golpes para derrotar | 3 |
 | `velocidade` | 1 = normal; 2 = o dobro | 1 |
 | `tamanho` | multiplicador de tamanho | 1 |
-| `olha_esquerda` | `true` se os quadros olham para a esquerda | `false` |
+| `olha_esquerda` | `true` se os quadros olham para a esquerda. Se algumas animações olham para um lado e outras para o outro, use um objeto por papel: `{ "padrao": true, "atacar": false }` | `false` |
 | `fps` | velocidade das animações (número ou `{ "andar": 12, "morrer": 10 }`) | 10 |
 | `dano` | `false` = não machuca ao encostar | `true` |
 | `altura_voo` | altura em px dos voadores acima do chão | 170 |

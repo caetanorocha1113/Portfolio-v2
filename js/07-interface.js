@@ -211,7 +211,7 @@ personagem:['Personagem',`<h4>Folha de teste (Oficina)</h4>
 <li>Tamanho 1 deixa o quadro com cerca de 84 px de altura numa tela de 1280 px.</li>
 <li>Para arte em pixel, marque "Pixel art".</li></ul>`],
 inimigos:['Inimigos',`<h4>Os inimigos do dono</h4>
-<p>Ficam em <code>recursos/inimigos/inimigos.json</code>: pasta, áreas, comportamento (andar, pular, investir, atirar, parado, voar, perseguir, flutuar, teto) e as animações por papel (andar, parado, virar, alerta, preparar, atacar, recuperar, morrer, projetil). Eles percebem o jogador dentro do <code>alcance</code> e com linha de visão, viram para ele antes de atacar e, no Passeio, reagem sem machucar. A lista completa está em <code>recursos/LEIA-ME.md</code>.</p>
+<p>Ficam em <code>recursos/inimigos/inimigos.json</code>: pasta, áreas, comportamento (andar, pular, investir, atirar, parado, voar, perseguir, flutuar, teto) e as animações por papel (andar, parado, virar, alerta, preparar, atacar, recuperar, morrer, projetil). Se as animações olham para lados diferentes, <code>olha_esquerda</code> pode ser por papel: <code>{ "padrao": true, "atacar": false }</code>. Eles percebem o jogador dentro do <code>alcance</code> e com linha de visão, viram para ele antes de atacar e, no Passeio, reagem sem machucar. A lista completa está em <code>recursos/LEIA-ME.md</code>.</p>
 <h4>As criaturas desenhadas em código</h4>
 <p>Aparecem onde ainda não há inimigos do dono (com <code>"substituir_originais": true</code>, somem das áreas que já têm).</p>
 <div class="tw"><table><tr><th>Tipo</th><th>Tema</th><th>Comportamento</th></tr>
