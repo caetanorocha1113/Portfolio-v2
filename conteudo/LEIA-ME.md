@@ -40,6 +40,17 @@ Cada área aparece **resumida**: o nome, a primeira frase de `descricao`, a cont
 
 Temas disponíveis: `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso`. Duas matérias podem usar o mesmo tema: a cor muda sozinha.
 
+## Segredos (opcional)
+
+No modo Jogo, cada matéria esconde uma sala secreta atrás de uma parede falsa, com uma relíquia. Para deixar um recado seu em alguma delas, acrescente um bloco `segredos` com a chave da área (`vila` para o porão do início, ou o `id` da matéria):
+
+```json
+"segredos": {
+  "vila": "Uma curiosidade sobre mim que pouca gente sabe.",
+  "tecnico": "O primeiro programa que eu escrevi foi…"
+}
+```
+
 ## Abertura
 
 `abertura.falas` são os três textos da abertura de cinema (desenhada a tinta: a gota, o livro, as páginas que viram o mapa e o título). `abertura.mostrar` pode ser `sempre`, `uma_vez_por_sessao` ou `nunca`.

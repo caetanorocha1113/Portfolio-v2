@@ -43,10 +43,14 @@ const temaDe=nome=>ROCHA_TEMA[nome]?nome:'cinzaraiz';
 /* o mapa que está sendo pintado (o da página ou, no pintor, o mesmo mapa gerado de novo) */
 let MAPA_P=null;
 function usarMapa(m){MAPA_P=m;CONTORNOS.clear();PEDRAS.clear()}
+/* sala secreta ainda fechada: para a pintura ela é rocha (a parede da vizinha fica inteira, com traço de tinta) */
+function salaFechada(s){if(!s.secreta||!MAPA_P||!MAPA_P.segredos)return false;for(const g of MAPA_P.segredos)if(g.sala===s.id)return!g.aberto;return false}
+/* quando um segredo abre, o contorno da sala e o da vizinha mudam */
+function abrirSegredoPintura(id){const g=MAPA_P&&MAPA_P.segredos&&MAPA_P.segredos.find(q=>q.sala===id);if(!g)return;g.aberto=true;for(const k of[g.sala,g.viz]){CONTORNOS.delete(k);PEDRAS.delete(k)}}
 
 /* ---------- contorno orgânico de cada sala ---------- */
 const CONTORNOS=new Map(),PEDRAS=new Map();
-function dentroDeOutra(s,x,y){for(const o of MAPA_P.salas){if(o===s||x<o.x-.5||x>o.x+o.w+.5)continue;const f=MUNDO.chaoEm(o,x),t=MUNDO.tetoEm(o,x),fl=f!==f?o.y+o.h+2:f;if(y>=t-.5&&y<=fl+.5)return true}return false}
+function dentroDeOutra(s,x,y){for(const o of MAPA_P.salas){if(o===s||x<o.x-.5||x>o.x+o.w+.5||salaFechada(o))continue;const f=MUNDO.chaoEm(o,x),t=MUNDO.tetoEm(o,x),fl=f!==f?o.y+o.h+2:f;if(y>=t-.5&&y<=fl+.5)return true}return false}
 function contornoSala(s){let C=CONTORNOS.get(s.id);if(C)return C;
   const P=[],r=rng(s.id*7717+3),n1=noise(r),n2=noise(r),n3=noise(r);
   const topoY=x=>s.ceu?s.y-2600:MUNDO.tetoEm(s,x),abertoT=x=>s.buracosTeto.some(([a,b])=>x>=a-1&&x<=b+1);

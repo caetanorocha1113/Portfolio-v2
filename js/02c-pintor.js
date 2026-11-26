@@ -2,12 +2,12 @@
    A pintura pesada (pedras, tinta, papel, névoa) acontece aqui, fora da página: o jogo continua
    rodando liso e só cola as imagens prontas (js/03-cenario.js). Recebe a mesma lista de regiões e a
    mesma semente e gera exatamente o mesmo mapa de js/00a-mundo.js.
-   Mensagens: {tipo:'mundo'|'imagem'|'bloco'|'fundo'} → responde {tipo:'bloco'|'fundo'|'erro'}. */
+   Mensagens: {tipo:'mundo'|'segredos'|'imagem'|'bloco'|'fundo'} → responde {tipo:'bloco'|'fundo'|'erro'}. */
 self.window = self;
 importScripts('01-base.js', '02-regioes.js', '00a-mundo.js', '02b-salas.js');
 let M = null, VAR = [];
 const FUNDOS_DONO = {};
-const perto = (X, Y, S, m) => M.salas.filter(s => s.x - m < X + S && s.x + s.w + m > X && s.y - m < Y + S && s.y + s.h + m > Y);
+const perto = (X, Y, S, m) => M.salas.filter(s => !salaFechada(s) && s.x - m < X + S && s.x + s.w + m > X && s.y - m < Y + S && s.y + s.h + m > Y);
 onmessage = e => {
   const m = e.data;
   try {
@@ -18,6 +18,8 @@ onmessage = e => {
       usarMapa(M);
       return;
     }
+    /* segredos já abertos (guardados no navegador) e os que o jogador abre agora */
+    if (m.tipo === 'segredos') { if (M) for (const id of m.abertos) abrirSegredoPintura(id); return; }
     if (m.tipo === 'imagem') { FUNDOS_DONO[m.regiao] = m.bmp ? { img: m.bmp, cfg: m.cfg || {} } : null; return; }
     if (!M) return;
     if (m.tipo === 'bloco') {

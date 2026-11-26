@@ -26,7 +26,7 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `css/portfolio.css` | estilos do portfólio (abertura, início, áreas resumidas e registro, detalhe, sobre, HUD, poderes) |
 | `conteudo/portfolio.json` | o conteúdo do portfólio |
 | `conteudo/` | imagens e arquivos das atividades |
-| `js/00a-mundo.js` | gera o mapa 2D (salas, portas, poços, chão e teto, plataformas, caminho do Passeio) |
+| `js/00a-mundo.js` | gera o mapa 2D (salas, portas, poços, alas, grutas, salas secretas, chão e teto, plataformas, caminho do Passeio) |
 | `js/00b-conteudo.js` | lê o conteúdo, monta as seções (área resumida + registro que abre), a lista de atividades, o detalhe e as rotas (`#area/atividade`), o mapa do início, e carrega o motor |
 | `js/00c-abertura.js` | abertura de cinema desenhada a tinta (gota, gavinhas, livro, páginas, mapa do mundo, título) |
 | `js/01-base.js` | utilitários e kit de pintura (formas, folhagem, cristais, luz) |
@@ -35,6 +35,7 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `js/02c-pintor.js` | pintor em segundo plano (Web Worker): pinta os blocos do mapa e os fundos sem travar o jogo |
 | `js/03-cenario.js` | câmera, blocos pintados do mundo, fundos com parallax, tinta e papel, minimapa, HUD, partículas, criaturas desenhadas |
 | `js/04-jogo.js` | colisão com o mapa, modo Passeio (rolagem → caminho), modo Jogo, inimigos (percepção, alerta, preparo, ataque), combate |
+| `js/04b-segredos.js` | o portfólio dentro do jogo: placa de cada matéria, páginas das atividades, paredes falsas, salas secretas e easter eggs |
 | `js/05-audio.js` | trilha gerada, efeitos sonoros, motor do player |
 | `js/06-loop.js` | laço de animação e parallax |
 | `js/07-interface.js` | player, modos, controles, Oficina, Guia |

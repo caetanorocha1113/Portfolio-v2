@@ -258,6 +258,7 @@ function playerAttack(){const f=PL.face,d=PL.atkDir;let box;
   heroAnimName='';if(!spawnFx(d<0?'efeito_golpe_cima':d>0?'efeito_golpe_baixo':'efeito_golpe',PL.x+(d===0?f*40:0),PL.y-32+(d<0?-50:d>0?44:0),f,d<0?-Math.PI/2*f:d>0?Math.PI/2*f:0)&&!customHero())slashes.push({x:PL.x,y:PL.y,f,d,t:0});let hit=false;
   for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-box.x)<b.hw+box.hw&&Math.abs(b.y-box.y)<b.hh+box.hh){hit=true;e.hp--;e.fl=1;PL.luz=Math.min(LUZ_MAX,PL.luz+LUZ_POR_ACERTO);const kd=d===0?f:(e.x>PL.x?1:-1);e.kbv=kd*280;if(e.air){e.vx+=kd*220;e.vy-=60}if(!spawnFx('efeito_acerto',b.x,b.y,f))burst(b.x,b.y,lcOf(e.sec),14,240);sfx('acerto');
     if(e.hp<=0){e.dead=22;e.vx=e.vy=0;burst(b.x,b.y,'#ffffff',26,340);sfx('inimigo_morre');dropFrags(b.x,b.y,3+(Math.random()*3|0))}}}
+  if(typeof atacarParedes==='function'&&atacarParedes(box))hit=true;
   if(hit){hitstop=.06;shake.t=.14;shake.a=4;if(d>0){PL.vy=-760;PL.jumps=0}else if(d===0)PL.vx-=f*160}}
 function updatePlay(dt){const k=K;
   PL.inv=Math.max(0,PL.inv-dt);PL.landT=Math.max(0,PL.landT-dt);PL.dashCD-=dt;PL.atkCD-=dt;PL.atk=Math.max(0,PL.atk-dt);PL.coy-=dt;jumpQ-=dt;atkQ-=dt;dashQ-=dt;poderQ-=dt;acenderQ-=dt;corridaQ-=dt;PL.flut=Math.max(0,PL.flut-dt*2.5);PL.sq+=(1-PL.sq)*Math.min(1,dt*12);PL.spellT=Math.max(0,PL.spellT-dt);PL.healT=Math.max(0,PL.healT-dt);PL.wallJumpT=Math.max(0,PL.wallJumpT-dt);
@@ -349,6 +350,8 @@ function drawWorld(dt,ox,oy){const lc=lcOf(lastIdx),ws=SC*.82,Z=ZOOM*FD,TX=FW*FD
   for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.air)continue;const g=e.noChao===false?chaoInimigo(e,e.x):e.y;if(g==null)continue;const w=e.k==='custom'?enemyBox(e).hw*2.6:50,f=clamp(1-(g-e.y)/400,.3,1);fc.globalAlpha=f;sombra(e.x,g+3,w*f)}
   if(onScreen&&HERO_PRONTO&&!(MODE==='play'&&PL.abyss>0)){const g=WORLD.chaoAbaixo(H.x,H.y-4,H.y+520);if(g){const f=clamp(1-(g.y-H.y)/520,.25,1);fc.globalAlpha=f;sombra(H.x,g.y+3,72*f)}}
   fc.restore();
+  /* placas, páginas e relíquias (js/04b-segredos.js) */
+  if(typeof desenharCoisas==='function')desenharCoisas(Z,TX,TY);
   /* enemies */
   for(const list of ENEMIES)for(const e of list){if(!e.vis)continue;
     if(e.k==='custom'){const role=papelInimigo(e);if(role!==e.anim){e.anim=role;e.animT0=T}const t=ROLE_ONCE[role]?T-e.animT0:T+e.bob,ah=alturaInimigo(e);
@@ -393,6 +396,7 @@ function game(dt){if(!ROUTE.length)return 0;
   if(acv.width!==fx.width||acv.height!==fx.height){acv.width=scv.width=acv2.width=fx.width;acv.height=scv.height=acv2.height=fx.height;caixaTintaAntes=caixaSprAntes=null}
   const gdt=(paused&&MODE==='play')||hitstop>0?0:dt;hitstop=Math.max(0,hitstop-dt);
   if(MODE==='play')updatePlay(gdt);else updateAuto(gdt);
+  if(typeof atualizarCoisas==='function')atualizarCoisas(gdt);
   updateEnemies(gdt);updateShots(gdt);
   if(MODE==='play')updateFrags(gdt);
   const hx=MODE==='play'?PL.x:L.x,hy=MODE==='play'?PL.y:L.y,sala=WORLD.salaEm(hx,hy-40);if(sala)visitadas.add(sala.id);

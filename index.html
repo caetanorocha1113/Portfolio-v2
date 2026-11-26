@@ -220,6 +220,25 @@
 </main>
 <noscript><p class="sem-js">Este portfólio monta as páginas com JavaScript. Ative o JavaScript para ver as matérias e as atividades.</p></noscript>
 
+<!-- modo Jogo: o resumo da matéria (placa), as relíquias das salas secretas e o aviso de página encontrada (js/04b-segredos.js) -->
+<div class="modal painel-jogo" id="painelJogo" hidden>
+  <div class="panel pj" role="dialog" aria-modal="true" aria-label="Resumo da matéria">
+    <button type="button" class="x" aria-label="Fechar">×</button>
+    <div class="pj-corpo"></div>
+  </div>
+</div>
+<div class="modal ovo-modal" id="ovoModal" hidden>
+  <div class="panel ovo" role="dialog" aria-modal="true" aria-labelledby="ovoT">
+    <header><h3 class="ovo-t" id="ovoT"></h3><button type="button" class="x" aria-label="Fechar">×</button></header>
+    <div class="ovo-corpo"></div>
+    <div class="ovo-term" hidden><div class="term-saida" aria-live="polite"></div><label class="term-linha"><span aria-hidden="true">&gt;</span><input type="text" autocomplete="off" spellcheck="false" aria-label="Comando"></label></div>
+  </div>
+</div>
+<div class="achado" id="achado" role="status" hidden>
+  <p class="ac-n"></p><p class="ac-t"></p>
+  <div class="ac-acoes"><button type="button" class="ac-ler">▲ Ler agora</button><button type="button" class="ac-x" aria-label="Fechar aviso">×</button></div>
+</div>
+
 <div class="modal detalhe-fundo" id="detalhe" hidden>
   <article class="panel detalhe" role="dialog" aria-modal="true" aria-labelledby="detT" tabindex="-1">
     <button type="button" class="x det-x" id="detFechar" aria-label="Fechar atividade">×</button>

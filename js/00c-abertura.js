@@ -187,7 +187,7 @@
     const esc = Math.min(W * (estreito ? .9 : .78) / (x1 - x0), H * (estreito ? .58 : .56) / (y1 - y0));
     const ox = W / 2 - (x0 + x1) / 2 * esc, oy = H * .43 - (y0 + y1) / 2 * esc, P = ([x, y]) => [ox + x * esc, oy + y * esc];
     const torto = (pts, sd) => pts.map(([x, y]) => [x + Math.sin(y * .045 + sd) * 1.6 + Math.sin(y * .11 + sd * 2) * .7, y + Math.sin(x * .05 + sd * 3) * 1.4]);
-    const salas = m.salas.map((s, k) => ({ p: torto(chaikin(chaikin(contorno(s).map(P), true), true), k * 1.7), w: 1.7, sd: Math.random() * 100, aberto: true }));
+    const salas = m.salas.map((s, k) => s.secreta ? null : ({ p: torto(chaikin(chaikin(contorno(s).map(P), true), true), k * 1.7), w: 1.7, sd: Math.random() * 100, aberto: true }));
     const regs = m.regioes.map((g, i) => {
       const p = m.salas[g.principal];
       return { salas: g.salas, centro: P([p.x + p.w / 2, p.ceu ? p.y + p.h * .72 : p.y + p.h * .58]), ini: R.mapa + i * .27 };
@@ -412,6 +412,7 @@
         if (a <= 0) return;
         for (const k of g.salas) {
           const s = mapa.salas[k];
+          if (!s) continue;
           ctx.globalAlpha = .07 * p * dimMapa; ctx.fillStyle = COR;
           if (p > .98) { ctx.beginPath(); s.p.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.fill(); }
           traco(s, p, a * .9 * dimMapa);

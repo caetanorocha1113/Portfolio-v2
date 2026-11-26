@@ -1,7 +1,9 @@
 /* ---------- mundo: o mapa 2D do portfólio ----------
    Gera, a partir da lista de regiões (início, uma por matéria, fim), um mapa de salas ligadas
    como num metroidvania: cada região é uma fileira de salas (poço de entrada, salão, corredor, câmara,
-   às vezes uma gruta embaixo) e as fileiras se alternam para a direita e para a esquerda, descendo.
+   uma gruta embaixo do salão) e as fileiras se alternam para a direita e para a esquerda, descendo.
+   Depois da câmara, uma ala para explorar no modo Jogo (passagem e galeria) termina numa parede falsa:
+   atrás dela fica uma sala secreta (m.segredos). O Passeio segue só pela fileira principal.
 
    Cada sala é um retângulo com um chão e um teto desenhados como curvas (amostradas a cada PASSO).
    O espaço livre do mapa é a união dos interiores das salas; o resto é rocha. As portas nascem sozinhas
@@ -48,7 +50,11 @@
     regs[0].dir = 1;
     let buracoX = V.x + V.w - 560, acima = V, fundoMax = 0, dir = -1;
     V.buracosChao.push([buracoX - BURACO / 2, buracoX + BURACO / 2]);
-    const filas = [[V]];
+    const filas = [[V]], segredos = [];
+    /* porão secreto à esquerda da vila, atrás de uma parede falsa */
+    const SV = add(novaSala('segredo', 0, V.x - 1150, -600, 1150, 600));
+    liga(SV, V, 1); SV.secreta = true;
+    segredos.push({ chave: 'vila', sala: SV.id, viz: V.id, x: V.x });
 
     for (let i = 1; i < N; i++) {
       const r = rng((semente || 7) * 1000 + i * 77), fim = i === N - 1;
@@ -76,30 +82,42 @@
         const F = anterior;
         F.abismo = dir > 0 ? [F.x + 1050, F.x + F.w + 1] : [F.x - 1, F.x + F.w - 1050];
       } else {
-        /* gruta sob o salão, em regiões alternadas: um desvio para explorar no modo Jogo */
-        if (i % 2 === 0) {
+        /* gruta sob o salão: um desvio para explorar no modo Jogo (lado alternado) */
+        {
           const H = fila.find(s => s.tipo === 'salao'), gw = 1200, gh = 680;
-          const gx = Math.round(H.x + H.w * .5 - gw / 2 + (r() - .5) * H.w * .25), hx = gx + gw / 2;
+          const gx = Math.round(H.x + H.w * (i % 2 ? .32 : .62) - gw / 2 + (r() - .5) * H.w * .12), hx = gx + gw / 2;
           const G = add(novaSala('gruta', i, gx, H.y + H.h, gw, gh));
           H.buracosChao.push([hx - 130, hx + 130]);
           G.buracosTeto.push([hx - 130, hx + 130]);
           fundoMax = Math.max(fundoMax, G.y + G.h);
         }
-        /* buraco no fim da câmara: o poço da próxima região começa aqui */
+        /* buraco no fim da câmara: o poço da próxima região começa aqui (longe da porta da ala) */
         const A = anterior;
-        buracoX = dir > 0 ? A.x + A.w - 430 : A.x + 430;
+        buracoX = dir > 0 ? A.x + A.w - 700 : A.x + 700;
         A.buracosChao.push([buracoX - BURACO / 2, buracoX + BURACO / 2]);
         acima = A;
+        /* a ala depois da câmara: passagem, galeria e, atrás de uma parede falsa, a sala secreta */
+        let c2 = dir > 0 ? A.x + A.w : A.x, ant = A;
+        const ala = [['passagem', Math.round(entre(700, 1000, r)), 450], ['galeria', Math.round(entre(2200, 2800, r)), Math.round(entre(900, Math.min(1100, maxH), r))], ['segredo', Math.round(entre(1000, 1300, r)), Math.round(entre(560, 680, r))]];
+        for (const [t, w, h] of ala) {
+          const x = dir > 0 ? c2 : c2 - w, s2 = add(novaSala(t, i, x, base - h, w, h));
+          c2 = dir > 0 ? x + w : x;
+          liga(ant, s2, dir);
+          if (t === 'segredo') { s2.secreta = true; segredos.push({ chave: regs[i].id || 'r' + i, sala: s2.id, viz: ant.id, x: dir > 0 ? x : x + w }); }
+          ant = s2;
+        }
       }
       filas.push(fila);
       dir = -dir;
     }
 
     for (const s of salas) moldar(s, rng(5000 + s.id * 31));
+    /* paredes falsas: tapam a porta da sala secreta até o jogador quebrar (o motor marca .aberto) */
+    for (const g of segredos) { const S = salas[g.sala], base = S.y + S.h; g.parede = { x0: g.x - 46, x1: g.x + 46, y0: base - PORTA - 30, y1: base + 6 }; g.aberto = false; }
     for (const s of salas) plataformas(s, rng(9000 + s.id * 17));
     for (const s of salas) vagas(s, rng(13000 + s.id * 29));
 
-    const m = { salas, regioes: regs, PASSO, PORTA };
+    const m = { salas, regioes: regs, PASSO, PORTA, segredos };
     m.rota = rota(m, filas);
     let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     for (const s of salas) { x0 = Math.min(x0, s.x); y0 = Math.min(y0, s.y); x1 = Math.max(x1, s.x + s.w); y1 = Math.max(y1, s.y + s.h); }
@@ -117,7 +135,7 @@
   function moldar(s, r) {
     const n = Math.ceil(s.w / PASSO) + 1, base = s.y + s.h, topo = s.y;
     s.n = n; s.chao = new Float32Array(n); s.teto = new Float32Array(n);
-    const amp = { vila: [70, 0], salao: [80, 120], corredor: [16, 34], camara: [55, 90], poco: [0, 40], gruta: [45, 80], fim: [40, 70] }[s.tipo] || [40, 60];
+    const amp = { vila: [70, 0], salao: [80, 120], corredor: [16, 34], passagem: [22, 40], camara: [55, 90], galeria: [70, 110], segredo: [30, 60], poco: [0, 40], gruta: [45, 80], fim: [40, 70] }[s.tipo] || [40, 60];
     const nc = ruido(r), nt = ruido(r), nt2 = ruido(r);
     const dist = (x, [a, b]) => x < a ? a - x : x > b ? x - b : 0;
     for (let k = 0; k < n; k++) {
@@ -144,8 +162,8 @@
     if (s.tipo === 'poco') {
       const base = s.y + s.h;
       for (let y = s.y + 175, k = 0; y < base - 140; y += 165, k++) P.push({ x: s.x + s.w * (k % 2 ? .7 : .3), y, w: 150 });
-    } else if (s.tipo === 'salao' || s.tipo === 'camara' || s.tipo === 'fim') {
-      const q = s.tipo === 'salao' ? 4 : 3;
+    } else if (s.tipo === 'salao' || s.tipo === 'camara' || s.tipo === 'fim' || s.tipo === 'galeria') {
+      const q = s.tipo === 'salao' || s.tipo === 'galeria' ? 4 : 3;
       for (let k = 0; k < q; k++) {
         const x = s.x + s.w * (.15 + .7 * (k + .25 + r() * .5) / q);
         if (!longe(x, 160) || (s.abismo && x > s.abismo[0] - 200 && x < s.abismo[1] + 200)) continue;
@@ -164,8 +182,8 @@
     const V = s.vagas, perto = x => s.buracosChao.some(([a, b]) => x > a - 70 && x < b + 70) || (s.abismo && x > s.abismo[0] - 40 && x < s.abismo[1] + 40);
     const margem = 90;
     /* um ou dois marcos grandes nos salões e na vila */
-    if (s.tipo === 'salao' || s.tipo === 'vila' || s.tipo === 'fim' || s.tipo === 'camara') {
-      const q = s.tipo === 'vila' ? 4 : s.tipo === 'salao' ? 2 : 1;
+    if (s.tipo === 'salao' || s.tipo === 'vila' || s.tipo === 'fim' || s.tipo === 'camara' || s.tipo === 'galeria' || s.tipo === 'gruta') {
+      const q = s.tipo === 'vila' ? 4 : s.tipo === 'salao' || s.tipo === 'galeria' ? 3 : 1;
       for (let k = 0; k < q; k++) {
         const x = s.x + s.w * (.12 + .76 * (k + .2 + r() * .6) / q);
         if (perto(x) || x < s.x + (s.ligE ? 420 : 200) || x > s.x + s.w - (s.ligD ? 420 : 200)) continue;
@@ -173,18 +191,18 @@
         V.push({ tipo: 'grande', x, y: c, s: .85 + r() * .35, seed: (r() * 1e9) | 0 });
       }
     }
-    for (let x = s.x + margem + r() * 200; x < s.x + s.w - margem; x += 230 + r() * 260) {
+    for (let x = s.x + margem + r() * 160; x < s.x + s.w - margem; x += 170 + r() * 190) {
       if (perto(x)) continue;
       const c = chaoEm(s, x); if (c !== c) continue;
       V.push({ tipo: 'chao', x, y: c, s: .7 + r() * .6, seed: (r() * 1e9) | 0 });
     }
-    if (!s.ceu) for (let x = s.x + margem + r() * 240; x < s.x + s.w - margem; x += 280 + r() * 320) {
+    if (!s.ceu) for (let x = s.x + margem + r() * 200; x < s.x + s.w - margem; x += 220 + r() * 260) {
       const t = tetoEm(s, x); if (t !== t || t < s.y) continue;
       V.push({ tipo: 'teto', x, y: t, s: .7 + r() * .6, seed: (r() * 1e9) | 0 });
     }
     /* lugares para inimigos: ao longo do chão, longe de portas e buracos, espaçados */
     s.vagasInimigo = [];
-    if (s.tipo !== 'poco') for (let x = s.x + (s.ligE ? 360 : 200) + r() * 120; x < s.x + s.w - (s.ligD ? 360 : 200); x += 260 + r() * 160) {
+    if (s.tipo !== 'poco' && s.tipo !== 'segredo') for (let x = s.x + (s.ligE ? 360 : 200) + r() * 120; x < s.x + s.w - (s.ligD ? 360 : 200); x += 260 + r() * 160) {
       if (perto(x)) continue;
       const c = chaoEm(s, x); if (c !== c) continue;
       s.vagasInimigo.push({ x, y: c });
@@ -258,7 +276,9 @@
   function consultas(m) {
     const S = m.salas;
     const emX = x => S.filter(s => x >= s.x - .5 && x <= s.x + s.w + .5);
+    const G = m.segredos || [];
     function dentro(x, y) {
+      for (const g of G) { const p = g.parede; if (!g.aberto && p && x >= p.x0 && x <= p.x1 && y >= p.y0 && y <= p.y1) return false; }
       for (const s of S) {
         if (x < s.x - .5 || x > s.x + s.w + .5) continue;
         const f = chaoEm(s, x), t = tetoEm(s, x), fl = f !== f ? s.y + s.h + 2 : f;

@@ -124,7 +124,7 @@ $('resetYes').onclick=async()=>{await IDB.clear();ASSETS.player=null;ASSETS.enem
 /* panels */
 function openShop(){$('shop').hidden=false;paused=true;previewLoop()}
 function openGuide(tab){$('guide').hidden=false;paused=true;showTab(tab||'comeco');$('guide').querySelector('.x').focus()}
-function closePanels(){$('shop').hidden=true;$('guide').hidden=true;$('powModal').hidden=true;$('plistbox').hidden=true;$('plist').setAttribute('aria-expanded','false');paused=false}
+function closePanels(){$('shop').hidden=true;$('guide').hidden=true;$('powModal').hidden=true;for(const id of['painelJogo','ovoModal']){const m=$(id);if(m)m.hidden=true}$('plistbox').hidden=true;$('plist').setAttribute('aria-expanded','false');paused=false}
 $('openShop').onclick=()=>$('shop').hidden?openShop():closePanels();$('openGuide').onclick=()=>openGuide();
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closePanels);
 document.querySelectorAll('[data-guide]').forEach(b=>b.onclick=()=>openGuide(b.dataset.guide));
@@ -248,8 +248,10 @@ controles:['Controles',`<h4>Passeio</h4>
 <tr><td>Andar</td><td>A D ou ← →</td><td>◀ ▶</td></tr><tr><td>Pular</td><td>Espaço ou Z (segure para pular mais alto)</td><td>⤒</td></tr>
 <tr><td>Salto duplo</td><td>pular de novo no ar</td><td>⤒ no ar</td></tr><tr><td>Golpe</td><td>J ou X</td><td>✦</td></tr>
 <tr><td>Golpe para cima</td><td>W ou ↑ + golpe</td><td>▲ + ✦</td></tr><tr><td>Golpe para baixo (quica)</td><td>S ou ↓ + golpe no ar</td><td>▼ + ✦</td></tr>
-<tr><td>Avanço</td><td>K, C ou Shift</td><td>»</td></tr><tr><td>Poderes</td><td>I (ou Tab, só no Jogo)</td><td>botão Poderes</td></tr><tr><td>Ir para uma área</td><td>clique no mapa à direita</td><td>Passeio, rolar, Jogo</td></tr></table></div>
-<ul><li>Você tem 5 máscaras de vida. Ao perder todas, volta ao último chão firme.</li>
+<tr><td>Avanço</td><td>K, C ou Shift</td><td>»</td></tr><tr><td>Ler uma placa, examinar uma relíquia, abrir a página que acabou de pegar</td><td>W, ↑ ou E</td><td>▲</td></tr><tr><td>Poderes</td><td>I (ou Tab, só no Jogo)</td><td>botão Poderes</td></tr><tr><td>Ir para uma área</td><td>clique no mapa à direita</td><td>Passeio, rolar, Jogo</td></tr></table></div>
+<ul><li>Cada matéria tem uma <b>placa de pedra</b> no salão (o resumo da área) e as atividades viram <b>páginas soltas</b> pelas salas: encoste para pegar.</li>
+<li>Depois da câmara de cada área, uma ala segue para os lados. No fim dela há uma <b>parede com trincas</b>: golpeie três vezes. O que você acha fica guardado neste navegador.</li>
+<li>Você tem 5 máscaras de vida. Ao perder todas, volta ao último chão firme.</li>
 <li>Criaturas derrotadas soltam fragmentos de luz, contados no painel.</li>
 <li>Para descer, procure a fenda brilhante no chão de cada área.</li>
 <li>Com a Oficina, o Guia ou os Poderes abertos, o jogo pausa.</li></ul>`]};

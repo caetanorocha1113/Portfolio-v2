@@ -171,7 +171,7 @@
       const acento = girarCor(ACENTO[g.tema] || '#e8d3a2', g.variante), p = m.salas[g.principal];
       const ty = p.ceu ? p.y + p.h * .75 : p.y + p.h * .62;
       const grupo = sv('a', { href: '#' + g.id, class: 'mapa-reg', style: '--accent:' + acento, 'aria-label': romano(i + 1) + ' · ' + g.nome },
-        sv('g', { filter: 'url(#tinta-mapa)' }, g.salas.map(k => sv('path', { d: caminhoSala(m.salas[k]), class: 'mapa-sala' }))),
+        sv('g', { filter: 'url(#tinta-mapa)' }, g.salas.filter(k => !m.salas[k].secreta).map(k => sv('path', { d: caminhoSala(m.salas[k]), class: 'mapa-sala' }))),
         sv('text', { x: p.x + p.w / 2, y: ty, class: 'mapa-n' }, romano(i + 1)),
         sv('text', { x: p.x + p.w / 2, y: ty + 330, class: 'mapa-nome' }, g.nome));
       svg.append(grupo);
@@ -247,13 +247,14 @@
   const ORNAMENTO = '<svg class="orn-tinta" viewBox="0 0 320 22" aria-hidden="true"><path d="M3 13 C48 6 92 17 138 11 C146 10 150 9 152 8 M168 8 C172 9 178 10 186 11 C232 17 276 6 317 12"/><path class="orn-losango" d="M160 3 L166.5 9.5 L160 16 L153.5 9.5 Z"/></svg>';
   const CHEVRON = '<svg viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 2 8 8.5 14.5 2"/></svg>';
 
-  function montarArea(d, a, i) {
+  function montarArea(d, a, i, sufixo) {
+    sufixo = sufixo || '';
     const n = i + 2, lado = i % 2 ? 'r' : 'l';
     const sec = secao(a.id, a.tema, texto(a.materia), d._temas.variantes[i + 1], 'area', Math.round(n === 1 ? 0 : (n - 1) * 380));
     const visiveis = Math.max(1, +d.site.atividades_visiveis || 4);
     const total = a.atividades.length, extra = total - visiveis, destaques = a.atividades.filter(t => t.destaque).length;
     const resumo = primeiraFrase(a.descricao, 170);
-    const idMais = 'reg-' + a.id;
+    const idMais = 'reg-' + a.id + sufixo;
     const num = (q, um, varios) => el('li', null, el('b', null, String(q)), ' ' + (q === 1 ? um : varios));
     const trilha = total ? el('ol', { class: 'trilha', 'aria-label': 'Atividades de ' + texto(a.materia) },
       a.atividades.map((t, k) => itemTrilha(a, t, k, visiveis)),
@@ -268,7 +269,7 @@
       el('span', { class: 'ab-txt' }, 'Abrir registro'), el('span', { class: 'ab-ic', html: CHEVRON }));
     const partes = [
       el('p', { class: 'eyebrow' }, `Área ${romano(n)}`, a.titulo_area ? ' · ' : '', a.titulo_area ? comMarcadores(a.titulo_area) : null),
-      el('h2', { id: 't-' + a.id }, texto(a.materia), a.periodo ? el('small', null, comMarcadores(a.periodo)) : null),
+      el('h2', { id: 't-' + a.id + sufixo }, texto(a.materia), a.periodo ? el('small', null, comMarcadores(a.periodo)) : null),
       el('div', { class: 'orn', html: ORNAMENTO }),
       resumo ? el('p', { class: 'area-resumo' }, comMarcadores(resumo)) : null,
       el('ul', { class: 'area-num', 'aria-label': 'Resumo da área' }, num(total, 'atividade', 'atividades'),
@@ -466,7 +467,7 @@
   }
 
   /* ---------- motor (cenários e jogo) ---------- */
-  const MOTOR = ['js/01-base.js', 'js/02-regioes.js', 'js/02b-salas.js', 'js/03-cenario.js', 'js/04-jogo.js', 'js/05-audio.js', 'js/06-loop.js', 'js/07-interface.js', 'js/08-pasta-recursos.js', 'js/08b-poderes.js', 'js/09-inicio.js'];
+  const MOTOR = ['js/01-base.js', 'js/02-regioes.js', 'js/02b-salas.js', 'js/03-cenario.js', 'js/04-jogo.js', 'js/04b-segredos.js', 'js/05-audio.js', 'js/06-loop.js', 'js/07-interface.js', 'js/08-pasta-recursos.js', 'js/08b-poderes.js', 'js/09-inicio.js'];
   function carregarMotor() {
     for (const src of MOTOR) {
       const s = document.createElement('script');
@@ -522,6 +523,8 @@
       return;
     }
     C.dados = dados;
+    /* o resumo de uma matéria montado de novo (o modo Jogo mostra numa janela, js/04b-segredos.js) */
+    C.painelArea = j => { const sec = montarArea(dados, dados.areas[j], j, '-jogo'), copy = sec.querySelector('.copy'); copy.style.setProperty('--accent', sec.style.getPropertyValue('--accent')); copy.classList.remove('l', 'r'); copy.classList.add('visto', 'no-jogo'); return copy; };
     montar(dados);
     pronto(dados);
     rota(true);
