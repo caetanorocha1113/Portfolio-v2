@@ -25,6 +25,7 @@
 <link rel="stylesheet" href="css/estilo.css">
 <link rel="stylesheet" href="css/portfolio.css">
 <!-- 00a: mapa do mundo · 00b: conteúdo · 00c: abertura. O motor (01 a 09) é carregado por js/00b-conteudo.js depois que as seções e o mapa existem. -->
+<script defer src="js/00-tinta.js"></script>
 <script defer src="js/00a-mundo.js"></script>
 <script defer src="js/00b-conteudo.js"></script>
 <script defer src="js/00c-abertura.js"></script>
@@ -186,30 +187,7 @@
 <canvas class="fx" id="fx" aria-hidden="true"></canvas>
 <canvas class="minimapa" id="minimapa" aria-hidden="true"></canvas>
 
-<div class="hud" id="hud" aria-hidden="true">
-  <svg class="hud-selo" viewBox="0 0 140 120">
-    <defs>
-      <filter id="tremor" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence id="tremorRuido" type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="1"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
-      <clipPath id="vclip"><circle cx="70" cy="60" r="27"/></clipPath>
-      <radialGradient id="vlight" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#fff8e6"/><stop offset=".55" stop-color="#f1d79c"/><stop offset="1" stop-color="#b48a46"/></radialGradient>
-    </defs>
-    <g class="selo-tinta" filter="url(#tremor)">
-      <path class="floreio-l" d="M36 63 C25 62 15 55 10 43 C17 49 25 51 31 48 C23 42 21 33 25 24 C27 35 33 41 39 45 M30 70 C22 74 18 82 20 90 C24 84 28 81 34 80"/>
-      <path class="floreio-r" d="M104 63 C115 62 125 55 130 43 C123 49 115 51 109 48 C117 42 119 33 115 24 C113 35 107 41 101 45 M110 70 C118 74 122 82 120 90 C116 84 112 81 106 80"/>
-      <circle cx="70" cy="60" r="35" class="anel"/>
-      <circle cx="70" cy="60" r="30.5" class="anel-fino"/>
-      <path class="pontas" d="M70 12 L74.5 25 L70 21 L65.5 25 Z M70 108 L74.5 95 L70 99 L65.5 95 Z M22 60 L35 55.5 L31 60 L35 64.5 Z M118 60 L105 55.5 L109 60 L105 64.5 Z"/>
-    </g>
-    <circle cx="70" cy="60" r="27" fill="#0b0a10"/>
-    <g clip-path="url(#vclip)"><rect id="vfill" x="40" y="33" width="60" height="56" fill="url(#vlight)"/></g>
-    <path class="rosa" filter="url(#tremor)" d="M70 37 L73.6 56.4 L93 60 L73.6 63.6 L70 83 L66.4 63.6 L47 60 L66.4 56.4 Z"/>
-    <circle cx="70" cy="60" r="27" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="1.2"/>
-  </svg>
-  <div class="hud-txt">
-    <span class="hud-region" id="hudRegion">I · Início</span>
-    <div class="ghud"><span class="hpbar" id="hpbar" aria-label="Vida"></span><span class="fragc" id="fragc" aria-label="Fragmentos de luz">0</span></div>
-  </div>
-</div>
+<div class="hud" id="hud" aria-hidden="true"><canvas class="hud-tinta" id="hudTinta"></canvas></div>
 
 <div class="titulo-area" id="tituloArea" aria-hidden="true"><p class="ta-n" id="taN"></p><p class="ta-nome" id="taNome"></p><svg class="ta-orn" viewBox="0 0 400 24"><path d="M10 12 H170 M230 12 H390 M200 3 L209 12 L200 21 L191 12 Z M170 12 q12 -10 21 0 M230 12 q-12 -10 -21 0"/></svg><p class="ta-sub" id="taSub"></p></div>
 

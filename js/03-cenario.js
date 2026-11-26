@@ -108,19 +108,29 @@ PINTOR=criarPintor();if(PINTOR){PINTOR_F=criarPintor();PINTORES=[PINTOR];if((nav
 function romanNum(n){let s='';for(const[v,r]of[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']])while(n>=v){s+=r;n-=v}return s}
 const roman=REGS.map((g,i)=>romanNum(i+1));
 const map=document.getElementById('map'),mapEls=[...map.querySelectorAll('a')];
-const hudRegion=document.getElementById('hudRegion'),vfillEl=document.getElementById('vfill');
+
 let lastIdx=-1,maxIdx=0;
 const visitadas=new Set(),caminhoMini=new Map();
 const mini=document.getElementById('minimapa'),mic=mini?mini.getContext('2d'):null;
+/* minimapa a tinta: contorno das salas com o traço da abertura (js/00-tinta.js), a área atual em dourado e o viajante como uma luz */
+let miniTam='',miniMoldura=null,miniFerv=0;
 function desenharMinimapa(px,py,reg){if(!mic||!mini.clientWidth)return;const D=Math.min(devicePixelRatio||1,2),W=mini.clientWidth,H=mini.clientHeight;if(mini.width!==Math.round(W*D)){mini.width=Math.round(W*D);mini.height=Math.round(H*D)}
-  const L=WORLD.limites,esc=Math.min((W-16)/(L.x1-L.x0),(H-16)/(L.y1-L.y0)),ox=(W-(L.x1-L.x0)*esc)/2-L.x0*esc,oy=(H-(L.y1-L.y0)*esc)/2-L.y0*esc;
-  mic.setTransform(D,0,0,D,0,0);mic.clearRect(0,0,W,H);mic.setTransform(D*esc,0,0,D*esc,D*ox,D*oy);mic.lineJoin='round';
-  /* the rooms with their drawn outline (simplified), like a map sketched in ink */
-  for(const s of WORLD.salas){if(salaFechada(s))continue;const vis=visitadas.has(s.id),cur=s.regiao===reg;let P=caminhoMini.get(s.id);
-    if(!P){P=new Path2D();const pts=contornoSala(s).pts.filter((p,k)=>k%5===0).map(([x,y])=>[x,s.ceu?Math.max(y,s.y+s.h*.55):y]);P.moveTo(pts[0][0],pts[0][1]);for(const[x,y]of pts)P.lineTo(x,y);P.closePath();caminhoMini.set(s.id,P)}
-    mic.fillStyle=cur?'rgba(232,224,207,.3)':vis?'rgba(232,224,207,.14)':'rgba(232,224,207,.04)';mic.strokeStyle=cur?'rgba(242,212,155,.95)':vis?'rgba(232,224,207,.6)':'rgba(232,224,207,.22)';mic.lineWidth=1.2/esc;mic.fill(P);mic.stroke(P)}
-  mic.setTransform(D,0,0,D,0,0);mic.lineWidth=1;
-  mic.fillStyle='#fff6dc';mic.beginPath();mic.arc(ox+px*esc,oy+py*esc,2.6,0,TAU);mic.fill();mic.strokeStyle='rgba(255,246,220,.5)';mic.beginPath();mic.arc(ox+px*esc,oy+py*esc,5.5,0,TAU);mic.stroke()}
+  const L=WORLD.limites,esc=Math.min((W-22)/(L.x1-L.x0),(H-22)/(L.y1-L.y0)),ox=(W-(L.x1-L.x0)*esc)/2-L.x0*esc,oy=(H-(L.y1-L.y0)*esc)/2-L.y0*esc,tam=W+'x'+H;
+  if(tam!==miniTam){miniTam=tam;caminhoMini.clear();const{bez}=TINTA,m=4;
+    miniMoldura=[{p:bez([m,m+1],[W*.35,m-1],[W*.65,m+2],[W-m,m],10),w:1.8,sd:31},{p:bez([W-m+1,m-2],[W-m-1,H*.35],[W-m+2,H*.65],[W-m,H-m+2],10),w:1.8,sd:32},
+      {p:bez([W-m+2,H-m],[W*.65,H-m+1],[W*.35,H-m-1],[m-2,H-m],10),w:1.8,sd:33},{p:bez([m,H-m+2],[m+1,H*.65],[m-1,H*.35],[m+1,m-2],10),w:1.8,sd:34}]}
+  if(!hudCalmo&&Math.random()<.6)miniFerv++;
+  mic.setTransform(D,0,0,D,0,0);mic.clearRect(0,0,W,H);
+  mic.globalAlpha=1;mic.fillStyle='rgba(6,5,10,.62)';mic.beginPath();mic.moveTo(5,6);mic.lineTo(W-5,5);mic.lineTo(W-6,H-5);mic.lineTo(6,H-6);mic.closePath();mic.fill();
+  for(const T of miniMoldura)TINTA.traco(mic,T,1,.6,'#e8e0cf',miniFerv,hudCalmo);
+  for(const s of WORLD.salas){if(salaFechada(s))continue;const vis=visitadas.has(s.id),cur=s.regiao===reg;let M=caminhoMini.get(s.id);
+    if(!M){const pts=contornoSala(s).pts.filter((p,k)=>k%5===0).map(([x,y])=>[ox+x*esc,oy+(s.ceu?Math.max(y,s.y+s.h*.55):y)*esc]),q=TINTA.chaikin(pts,true),P=new Path2D();q.forEach(([x,y],k)=>k?P.lineTo(x,y):P.moveTo(x,y));P.closePath();
+      M={P,T:{p:q,w:1.15,sd:s.id*3.7,aberto:true,trem:.35}};caminhoMini.set(s.id,M)}
+    mic.globalAlpha=1;mic.fillStyle=cur?'rgba(242,212,155,.2)':vis?'rgba(232,224,207,.1)':'rgba(232,224,207,.035)';mic.fill(M.P);
+    TINTA.traco(mic,M.T,1,cur?.95:vis?.6:.28,cur?'#f2d49b':'#e8e0cf',miniFerv,hudCalmo)}
+  const x=ox+px*esc,y=oy+py*esc,g=mic.createRadialGradient(x,y,0,x,y,9);g.addColorStop(0,'rgba(255,246,220,.95)');g.addColorStop(.35,'rgba(255,236,190,.45)');g.addColorStop(1,'rgba(255,236,190,0)');
+  mic.globalAlpha=1;mic.fillStyle=g;mic.beginPath();mic.arc(x,y,9,0,TAU);mic.fill();mic.fillStyle='#fffaf0';mic.beginPath();mic.arc(x,y,2.2,0,TAU);mic.fill()}
+
 
 /* ---------- particles ---------- */
 const fx=document.getElementById('fx'),fc=fx.getContext('2d');let FW=0,FH=0,FD=1;

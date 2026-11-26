@@ -2,7 +2,7 @@
 const $=id=>document.getElementById(id);
 const ICON={play:'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',pause:'<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>',vol:'<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>',mute:'<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zm16.6 0-1.4-1.4L17 9.8l-2.2-2.2-1.4 1.4 2.2 2.2-2.2 2.2 1.4 1.4 2.2-2.2 2.2 2.2 1.4-1.4-2.2-2.2z"/></svg>'};
 function toast(msg,ms=2800){const t=$('toast');t.textContent=msg;t.hidden=false;requestAnimationFrame(()=>t.classList.add('on'));clearTimeout(toast.h);toast.h=setTimeout(()=>{t.classList.remove('on');setTimeout(()=>{if(!t.classList.contains('on'))t.hidden=true},400)},ms)}
-function hudGame(){const hp=$('hpbar');if(hp.children.length!==PL.max){hp.innerHTML='';for(let k=0;k<PL.max;k++)hp.appendChild(document.createElement('i'))}[...hp.children].forEach((el,k)=>el.classList.toggle('on',k<PL.hp));$('fragc').textContent=PL.frags}
+function hudGame(){hudVida(PL.hp,PL.max);HUDT.frags=PL.frags;if(typeof paginasAchadas==='function')HUDT.pag=[paginasAchadas(),totalPaginas()]}
 function updateModeUI(){$('mAuto').setAttribute('aria-pressed',MODE==='auto');$('mPlay').setAttribute('aria-pressed',MODE==='play')}
 /* the name of the area, big and ornamented, when the player enters it (Jogo) */
 function mostrarTituloArea(i){const el=$('tituloArea');if(!el)return;const g=REGS[i],a=CONTEUDO.dados&&CONTEUDO.dados.areas.find(x=>x.id===g.id);

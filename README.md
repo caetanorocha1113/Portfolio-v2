@@ -26,6 +26,7 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `css/portfolio.css` | estilos do portfólio (abertura, início, áreas resumidas e registro, detalhe, sobre, HUD, poderes) |
 | `conteudo/portfolio.json` | o conteúdo do portfólio |
 | `conteudo/` | imagens e arquivos das atividades |
+| `js/00-tinta.js` | o traço de tinta desenhado à mão (fita de largura variável que "ferve"), usado pela abertura, pelo HUD e pelo minimapa |
 | `js/00a-mundo.js` | gera o mapa 2D (salas, portas, poços, alas, grutas, salas secretas, chão e teto, plataformas, caminho do Passeio) |
 | `js/00b-conteudo.js` | lê o conteúdo, monta as seções (área resumida + registro que abre), a lista de atividades, o detalhe e as rotas (`#area/atividade`), o mapa do início, e carrega o motor |
 | `js/00c-abertura.js` | abertura de cinema desenhada a tinta (gota, gavinhas, livro, páginas, mapa do mundo, título) |
@@ -35,6 +36,7 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `js/02d-enfeites.js` | objetos de cada matéria (colunas, bustos, poliedros, quadro-negro, estantes, livros, árvores, frascos, servidores, robôs…), desenhados no estilo do cenário |
 | `js/02c-pintor.js` | pintor em segundo plano (Web Worker): pinta os blocos do mapa e os fundos sem travar o jogo |
 | `js/03-cenario.js` | câmera, blocos pintados do mundo, fundos com parallax, tinta e papel, minimapa, HUD, partículas, criaturas desenhadas |
+| `js/03b-hud.js` | HUD desenhado a tinta: medalhão com a luz líquida, nome da área com floreio, páginas de vida, fragmentos e páginas do Atlas |
 | `js/04-jogo.js` | colisão com o mapa, modo Passeio (rolagem → caminho), modo Jogo, inimigos (percepção, alerta, preparo, ataque), combate |
 | `js/04b-segredos.js` | o portfólio dentro do jogo: placa de cada matéria, páginas das atividades, paredes falsas, salas secretas e easter eggs |
 | `js/05-audio.js` | trilha gerada, efeitos sonoros, motor do player |
@@ -49,6 +51,6 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `.github/workflows/indice.yml` | automação do GitHub que mantém o índice em dia |
 | `docs/PROMPT-PORTFOLIO.md` | o plano de reconstrução do site |
 
-Os scripts são clássicos (não módulos) e compartilham o escopo global, na ordem numérica: um nome declarado duas vezes quebra o site. `js/00a-mundo.js`, `js/00b-conteudo.js` e `js/00c-abertura.js` ficam dentro de funções e só expõem `MUNDO`, `CONTEUDO` e `ABERTURA`. O conteúdo aparece mesmo se o motor do jogo falhar. A pintura pesada do cenário roda em `js/02c-pintor.js` (Web Worker, que carrega `01-base.js`, `02-regioes.js`, `00a-mundo.js`, `02b-salas.js` e `02d-enfeites.js`); aberto direto do disco (`file://`) ou num navegador sem `OffscreenCanvas`, a pintura volta para a página, um pedaço por quadro.
+Os scripts são clássicos (não módulos) e compartilham o escopo global, na ordem numérica: um nome declarado duas vezes quebra o site. `js/00-tinta.js`, `js/00a-mundo.js`, `js/00b-conteudo.js` e `js/00c-abertura.js` ficam dentro de funções e só expõem `TINTA`, `MUNDO`, `CONTEUDO` e `ABERTURA`. O conteúdo aparece mesmo se o motor do jogo falhar. A pintura pesada do cenário roda em `js/02c-pintor.js` (Web Worker, que carrega `01-base.js`, `02-regioes.js`, `00a-mundo.js`, `02b-salas.js` e `02d-enfeites.js`); aberto direto do disco (`file://`) ou num navegador sem `OffscreenCanvas`, a pintura volta para a página, um pedaço por quadro.
 
 A Oficina é uma ferramenta temporária de produção e sai do site quando ele ficar pronto.
