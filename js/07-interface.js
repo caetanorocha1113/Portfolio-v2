@@ -4,6 +4,12 @@ const ICON={play:'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',paus
 function toast(msg,ms=2800){const t=$('toast');t.textContent=msg;t.hidden=false;requestAnimationFrame(()=>t.classList.add('on'));clearTimeout(toast.h);toast.h=setTimeout(()=>{t.classList.remove('on');setTimeout(()=>{if(!t.classList.contains('on'))t.hidden=true},400)},ms)}
 function hudGame(){const hp=$('hpbar');if(hp.children.length!==PL.max){hp.innerHTML='';for(let k=0;k<PL.max;k++)hp.appendChild(document.createElement('i'))}[...hp.children].forEach((el,k)=>el.classList.toggle('on',k<PL.hp));$('fragc').textContent=PL.frags}
 function updateModeUI(){$('mAuto').setAttribute('aria-pressed',MODE==='auto');$('mPlay').setAttribute('aria-pressed',MODE==='play')}
+/* the name of the area, big and ornamented, when the player enters it (Jogo) */
+function mostrarTituloArea(i){const el=$('tituloArea');if(!el)return;const g=REGS[i],a=CONTEUDO.dados&&CONTEUDO.dados.areas.find(x=>x.id===g.id);
+  $('taN').textContent=(i===0||i===REGS.length-1?'':'Área ')+roman[i];$('taNome').textContent=g.nome;$('taSub').textContent=a&&a.titulo_area&&!/^\[/.test(a.titulo_area)?a.titulo_area:'';
+  el.classList.remove('on');void el.offsetWidth;el.classList.add('on');clearTimeout(mostrarTituloArea.t);mostrarTituloArea.t=setTimeout(()=>el.classList.remove('on'),3600)}
+/* hand-drawn lines tremble a little, like drawn animation (about 8 times a second) */
+{const tr=document.getElementById('tremorRuido');if(tr&&!reduce){let k=0;setInterval(()=>{if(document.hidden)return;k=(k+1)%4;tr.setAttribute('seed',String(k+1))},125)}}
 function showHint(on){$('hint').hidden=!on;clearTimeout(showHint.h);if(on)showHint.h=setTimeout(()=>{$('hint').hidden=true},9000)}
 $('hintClose').onclick=()=>showHint(false);
 $('mAuto').onclick=()=>setMode('auto');$('mPlay').onclick=e=>{audioWake(e);setMode('play')};
@@ -205,7 +211,7 @@ personagem:['Personagem',`<h4>Folha de teste (Oficina)</h4>
 <li>Tamanho 1 deixa o quadro com cerca de 84 px de altura numa tela de 1280 px.</li>
 <li>Para arte em pixel, marque "Pixel art".</li></ul>`],
 inimigos:['Inimigos',`<h4>Os inimigos do dono</h4>
-<p>Ficam em <code>recursos/inimigos/inimigos.json</code>: pasta, áreas, comportamento (andar, pular, investir, atirar, parado, voar, perseguir, flutuar, teto) e as animações por papel (andar, parado, virar, atacar, morrer, projetil). A lista completa está em <code>recursos/LEIA-ME.md</code>.</p>
+<p>Ficam em <code>recursos/inimigos/inimigos.json</code>: pasta, áreas, comportamento (andar, pular, investir, atirar, parado, voar, perseguir, flutuar, teto) e as animações por papel (andar, parado, virar, alerta, preparar, atacar, recuperar, morrer, projetil). Eles percebem o jogador dentro do <code>alcance</code> e com linha de visão, viram para ele antes de atacar e, no Passeio, reagem sem machucar. A lista completa está em <code>recursos/LEIA-ME.md</code>.</p>
 <h4>As criaturas desenhadas em código</h4>
 <p>Aparecem onde ainda não há inimigos do dono (com <code>"substituir_originais": true</code>, somem das áreas que já têm).</p>
 <div class="tw"><table><tr><th>Tipo</th><th>Tema</th><th>Comportamento</th></tr>

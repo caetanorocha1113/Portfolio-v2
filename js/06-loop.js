@@ -6,10 +6,10 @@ function frame(now){
   if(document.documentElement.classList.contains('abertura-cobrindo')){last=now;requestAnimationFrame(frame);return}
   const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;
   const cur=clamp(game(dt)|0,0,REGS.length-1);
-  if(cur!==lastIdx){lastIdx=cur;musicRegion(cur);maxIdx=Math.max(maxIdx,cur);hudRegion.textContent=roman[cur]+' · '+REGS[cur].nome;mapEls.forEach((a,i)=>a.classList.toggle('on',i===cur));pipEls.forEach((p,i)=>p.classList.toggle('on',i<=maxIdx))}
+  if(cur!==lastIdx){const antes=lastIdx;lastIdx=cur;musicRegion(cur);maxIdx=Math.max(maxIdx,cur);hudRegion.textContent=roman[cur]+' · '+REGS[cur].nome;mapEls.forEach((a,i)=>{a.classList.toggle('on',i===cur);a.classList.toggle('visto',i<=maxIdx)});
+    if(MODE==='play'&&antes>=0)mostrarTituloArea(cur)}
   const hy=MODE==='play'?PL.y:L.y,prof=Math.max(0,hy)/10;
-  hudDepth.textContent=(prof<1?'0':'−'+Math.round(prof).toLocaleString('pt-BR'))+' m';
-  const light=MODE==='play'?PL.luz/LUZ_MAX:1-clamp(prof/1100,0,1)*.82;vfillEl.setAttribute('y',(17+(1-light)*30).toFixed(1));
+  const light=MODE==='play'?PL.luz/LUZ_MAX:1-clamp(prof/1100,0,1)*.82;vfillEl.setAttribute('y',(33+(1-light)*54).toFixed(1));
   desenharMundo(true);
   /* weather of the current region (screen space), cross-faded between regions */
   fc.setTransform(FD,0,0,FD,0,0);fc.globalCompositeOperation='source-over';fc.globalAlpha=1;fc.clearRect(0,0,FW,FH);

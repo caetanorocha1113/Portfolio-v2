@@ -12,7 +12,7 @@
    Global exposto: MUNDO. */
 (function () {
   'use strict';
-  const PASSO = 10, PORTA = 400, ROCHA = 300, BURACO = 300;
+  const PASSO = 10, PORTA = 330, ROCHA = 300, BURACO = 300;
 
   function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   function ruido(r) { const v = Array.from({ length: 256 }, r); return x => { const i = Math.floor(x), f = x - i, a = v[((i % 256) + 256) % 256], b = v[(((i + 1) % 256) + 256) % 256], t = (1 - Math.cos(f * Math.PI)) / 2; return a + (b - a) * t; }; }
@@ -54,7 +54,7 @@
       const r = rng((semente || 7) * 1000 + i * 77), fim = i === N - 1;
       regs[i].dir = dir;
       const Hw = fim ? 2900 : Math.round(entre(3000, 3800, r)), Hh = fim ? 1450 : Math.round(entre(1080, 1300, r));
-      const Cw = Math.round(entre(850, 1350, r)), Ch = 470;
+      const Cw = Math.round(entre(850, 1350, r)), Ch = 400;
       const Aw = Math.round(entre(1500, 2000, r)), Ah = Math.round(entre(900, 1100, r));
       const ordem = fim ? ['fim'] : r() < .5 ? ['salao', 'corredor', 'camara'] : ['corredor', 'salao', 'camara'];
       const maxH = fim ? Hh : Math.max(Hh, Ah, Ch);
@@ -182,7 +182,18 @@
       const t = tetoEm(s, x); if (t !== t || t < s.y) continue;
       V.push({ tipo: 'teto', x, y: t, s: .7 + r() * .6, seed: (r() * 1e9) | 0 });
     }
-    /* frente: silhuetas escuras entre o jogador e a câmera */
+    /* lugares para inimigos: ao longo do chão, longe de portas e buracos, espaçados */
+    s.vagasInimigo = [];
+    if (s.tipo !== 'poco') for (let x = s.x + (s.ligE ? 360 : 200) + r() * 120; x < s.x + s.w - (s.ligD ? 360 : 200); x += 260 + r() * 160) {
+      if (perto(x)) continue;
+      const c = chaoEm(s, x); if (c !== c) continue;
+      s.vagasInimigo.push({ x, y: c });
+    }
+    /* frente: silhuetas escuras entre o jogador e a câmera, e mato na frente dos pés */
+    for (let x = s.x + 60 + r() * 120; x < s.x + s.w - 40; x += 120 + r() * 170) {
+      const c = chaoEm(s, x);
+      if (c === c && !perto(x)) s.frente.push({ tipo: 'grama', x, y: c + 4, s: .8 + r() * .5, seed: (r() * 1e9) | 0 });
+    }
     for (let x = s.x + r() * 400; x < s.x + s.w; x += 520 + r() * 520) {
       const c = chaoEm(s, x);
       if (c === c) s.frente.push({ tipo: 'baixo', x, y: c + 30, s: .8 + r() * .5, seed: (r() * 1e9) | 0 });

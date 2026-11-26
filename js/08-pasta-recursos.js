@@ -25,7 +25,7 @@ async function loadFramesFrom(dir,bad){const out=[],files=listDir(dir);
   let pad=2,f=await probe(dir+'/01',['png']);if(!f){pad=1;f=await probe(dir+'/1',['png'])}
   for(let i=1;f&&i<200;i++){const fr=await frameFromBlob(f.blob);if(fr)out.push(fr);else bad.push(f.file);f=await probe(dir+'/'+String(i+1).padStart(pad,'0'),['png'])}return out}
 function aliasSecs(r){const k=String(r).toLowerCase().trim(),out=[];secs.forEach((s,i)=>{if(s.id===k||String(i+1)===k||s.dataset.name.toLowerCase()===k||s.dataset.tema===k)out.push(i)});return out}
-const ENEMY_ROLES=['andar','parado','virar','atacar','morrer','projetil'];
+const ENEMY_ROLES=['andar','parado','virar','alerta','preparar','atacar','recuperar','morrer','projetil'];
 async function loadCustomEnemies(note){const js=await probeJSON('inimigos/inimigos.json');
   if(!js)return note('Inimigos','inimigos/inimigos.json',null,'arquivo opcional: descreve os seus inimigos (veja o LEIA-ME)');
   const list=Array.isArray(js)?js:js.inimigos;if(!Array.isArray(list))return note('Inimigos','inimigos/inimigos.json',false,'precisa ter uma lista "inimigos": [ … ]');
@@ -103,6 +103,7 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
     for(const[n,i,t,f]of found){if(!f)continue;achou++;addUserTrack(f.blob,tit[n]||(i>=0?secs[i].dataset.name+' (sua faixa)':n),i,'pasta:'+n,t);note('Músicas',f.file,true,i>=0?'área '+secs[i].dataset.name:t!=null?'tema '+n:'só na lista')}
     if(!achou)note('Músicas','musicas/<área ou tema>.mp3 (ou .ogg .m4a)',null,'sem faixas próprias: tocam as trilhas geradas')})());
   await Promise.all(jobs);
+  redistribuirInimigos();
   const grp=p=>p.startsWith('personagem/')?'Personagem':p.startsWith('inimigos/')?'Inimigos':p.startsWith('fundos/')?'Fundos':p.startsWith('musicas/')?'Músicas':'Personagem';
   for(const q of JSON_ISSUES)note(grp(q.path),q.path,q.ok?null:false,q.msg);
   renderFolderStatus();sfxStatus();fillEnemyForm($('eKind').value);
@@ -124,7 +125,7 @@ const PODER_ACAO={
       if(!e.vis||e.dead>0||e.k==='jelly')continue;
       const b=enemyBox(e);
       if(Math.sign(b.x-PL.x)===PL.face&&Math.abs(b.x-PL.x)<260*K&&Math.abs(b.y-(PL.y-32*K))<54*K){
-        e.hp-=2;e.fl=1;e.kb+=PL.face*120*K;spawnFx('efeito_acerto',b.x,b.y,PL.face);
+        e.hp-=2;e.fl=1;e.kbv=PL.face*320;spawnFx('efeito_acerto',b.x,b.y,PL.face);
         if(e.hp<=0){e.dead=22;e.lx=null;sfx('inimigo_morre');dropFrags(b.x,b.y,4)}
       }
     }

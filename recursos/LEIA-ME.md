@@ -173,6 +173,11 @@ Há dois jeitos, e eles podem ser usados juntos.
 | `dano` | `false` = não machuca ao encostar | `true` |
 | `altura_voo` | altura em px dos voadores acima do chão | 170 |
 | `recarga` | segundos entre tiros (`atirar`) | 2.2 |
+| `alcance` | distância (px) em que ele percebe o jogador; precisa também ter linha de visão | depende do comportamento (veja abaixo) |
+| `disparo` | em que ponto da animação `atacar` o tiro sai (0 = no começo, 0.5 = no meio) | 0 |
+| `vel_projetil` | multiplicador da velocidade do tiro | 1 |
+| `projetil_olha_esquerda` | `true` se os quadros do projétil apontam para a esquerda (o projétil voa de ponta, girado na direção do voo) | `false` |
+| `projetil_gira` | `true` para projéteis que giram no ar (uma picareta, por exemplo) | `false` |
 | `substituir` | `true` tira as criaturas desenhadas das áreas em que este inimigo aparece | `substituir_originais` |
 
 **Onde aparece (`regioes`):** aceita três jeitos, que podem ser misturados:
@@ -185,26 +190,31 @@ O comportamento `teto` só funciona em temas com teto (todos menos `cinzaraiz`).
 
 **Comportamentos:**
 
-| Nome | Movimento |
-|---|---|
-| `andar` | anda no chão de um lado para o outro e vira nas pontas |
-| `pular` | anda pulando |
-| `investir` | anda e, quando o jogador chega perto, avança rápido na direção dele |
-| `atirar` | fica de olho no jogador e atira projéteis na direção dele (no chão; com `altura_voo`, voando) |
-| `parado` | fica no lugar, só animando |
-| `voar` | voa de um lado para o outro, oscilando |
-| `perseguir` | voa e persegue o jogador quando ele chega perto |
-| `flutuar` | flutua devagar no meio da área |
-| `teto` | desce e sobe do teto por um fio |
+| Nome | Movimento | `alcance` padrão |
+|---|---|---|
+| `andar` | anda no chão de um lado para o outro e vira nas pontas | não reage |
+| `pular` | anda pulando; quando vê o jogador, pula na direção dele | 340 |
+| `investir` | patrulha; quando vê o jogador, vira para ele, se prepara, avança rápido e se recupera | 440 |
+| `atirar` | quando vê o jogador, vira para ele, se prepara e atira (no chão; com `altura_voo`, voando) | 560 |
+| `parado` | fica no lugar, vira para quem chega perto e, com `atacar`, golpeia | 260 |
+| `voar` | voa de um lado para o outro, oscilando | não reage |
+| `perseguir` | voa perto de casa; quando vê o jogador, persegue e (com `atacar`) dá um bote; ricocheteia ao encostar | 540 |
+| `flutuar` | flutua devagar no meio da área | não reage |
+| `teto` | fica pendurado no teto e cai quando o jogador passa embaixo | 170 |
+
+Os inimigos só percebem o jogador com linha de visão (paredes escondem). No modo Passeio eles reagem ao personagem que caminha, mas não machucam.
 
 **Papéis das animações** (`animacoes`):
 
 | Papel | Quando toca |
 |---|---|
 | `andar` | movimento normal (para voadores, o voo) |
-| `parado` | comportamento `parado`, ou no lugar de `andar` se ela faltar |
+| `parado` | comportamento `parado`, mirando, ou no lugar de `andar` se ela faltar |
 | `virar` | uma vez, quando muda de direção |
-| `atacar` | uma vez, ao investir ou atirar |
+| `alerta` | uma vez, quando percebe o jogador pela primeira vez (opcional) |
+| `preparar` | uma vez, antes do ataque: o "aviso" de que vai atacar (opcional) |
+| `atacar` | no ataque: investida, tiro ou bote |
+| `recuperar` | uma vez, depois do ataque (opcional) |
 | `morrer` | uma vez, ao ser derrotado (depois some e volta em 22 s) |
 | `projetil` | o tiro do comportamento `atirar` (sem ela, uma bolinha simples) |
 

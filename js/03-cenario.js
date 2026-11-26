@@ -1,106 +1,118 @@
-/* ---------- hand-drawn grime ---------- */
-const GRAIN=(()=>{const g=document.createElement('canvas');g.width=g.height=256;const x=g.getContext('2d'),r=rng(99);
-  for(let i=0;i<9000;i++){const v=r();x.fillStyle=v<.55?`rgba(0,0,0,${r()*.35})`:`rgba(255,238,215,${r()*.08})`;x.fillRect(r()*256,r()*256,r()*1.8+.4,r()*1.8+.4)}
-  for(let i=0;i<46;i++){x.strokeStyle=`rgba(0,0,0,${.05+r()*.14})`;x.lineWidth=.6;x.beginPath();const a=r()*256,b=r()*256;x.moveTo(a,b);x.quadraticCurveTo(a+(r()-.5)*40,b+(r()-.5)*40,a+(r()-.5)*70,b+(r()-.5)*70);x.stroke()}return g})();
-/* scratch canvas for pixel readback (CPU-backed); the painted blocks stay GPU-friendly */
-const TMP=document.createElement('canvas'),TMPc=TMP.getContext('2d',{willReadFrequently:true});
-/* paper and ink: desaturates, adds grain and smudges, and (for 'meio') draws a wobbly ink outline around everything opaque */
-function postFX(cv,c,d,l,seed,hue){const W=cv.width,H=cv.height;if(W<4)return;TMP.width=W;TMP.height=H;const t=TMPc;t.drawImage(cv,0,0);
-  c.save();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,W,H);c.filter=(l==='back'?'saturate(.62) contrast(1.08) brightness(.9)':'saturate(.74) contrast(1.06) brightness(.95)')+(hue?` hue-rotate(${hue}deg)`:'');c.drawImage(TMP,0,0);c.filter='none';
-  const r=rng(313*(seed+1)+l.length*7);
-  c.globalCompositeOperation='source-atop';c.fillStyle=c.createPattern(GRAIN,'repeat');c.globalAlpha=l==='back'?.75:.9;c.fillRect(0,0,W,H);c.globalAlpha=1;
-  for(let k=0;k<22;k++){const x=r()*W,y=r()*H,rad=(80+r()*280)*d,g=c.createRadialGradient(x,y,0,x,y,rad);g.addColorStop(0,`rgba(6,4,8,${.1+r()*.16})`);g.addColorStop(1,'rgba(6,4,8,0)');c.fillStyle=g;c.fillRect(x-rad,y-rad,rad*2,rad*2)}
-  if(l!=='back'){c.strokeStyle='rgba(6,5,9,.38)';c.lineWidth=1.2*d;for(let k=0;k<110;k++){const x=r()*W,y=r()*H,n=4+(r()*6|0),L=(7+r()*16)*d,a=-1+r()*.35;for(let m=0;m<n;m++){const ox=x+m*3.4*d;c.beginPath();c.moveTo(ox,y);c.lineTo(ox+Math.cos(a)*L,y+Math.sin(a)*L);c.stroke()}}}
-  c.strokeStyle='rgba(230,220,200,.05)';c.lineWidth=.8*d;for(let k=0;k<12;k++){c.beginPath();const x=r()*W;c.moveTo(x,0);c.lineTo(x+(r()-.5)*90*d,H);c.stroke()}
-  if(l!=='back'){t.setTransform(1,0,0,1,0,0);t.clearRect(0,0,W,H);t.drawImage(cv,0,0);const im=t.getImageData(0,0,W,H),px=new Uint32Array(im.data.buffer),ink=(255<<24)|(9<<16)|(5<<8)|6;for(let k=0;k<px.length;k++)px[k]=(px[k]>>>24)>190?ink:0;t.putImageData(im,0,0);
-    c.globalCompositeOperation='destination-over';const o=3.1*d;for(let k=0;k<12;k++){const a=k/12*TAU,oo=o*(.75+r()*.55);c.drawImage(TMP,Math.cos(a)*oo,Math.sin(a)*oo)}}
-  c.restore()}
-
 /* ---------- the world: one map (js/00a-mundo.js), seen through a camera ----------
    The page still scrolls (the portfolio is read normally); the world is a fixed backdrop behind the text.
-   Layers: far background of each room (parallax), painted blocks of rock and decoration (cached, 1024 units each),
-   then particles, characters and blurred foreground silhouettes on the .fx canvas. */
+   Layers: far and near backgrounds of each room (two parallax depths), painted blocks of rock and decoration
+   (1024 units each), then particles, characters and blurred foreground silhouettes on the .fx canvas.
+   Painting is heavy, so it happens in a Web Worker (js/02c-pintor.js); until a block arrives, a quick
+   silhouette of the rock stands in. Without a Worker, blocks are painted here, one per frame. */
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const secs=[...document.querySelectorAll('.realm')];/* one section per region, same order */
 const WORLD=CONTEUDO.mundo,REGS=WORLD.regioes;
 const TEMA=REGS.map(g=>Math.max(0,TEMA_IDS.indexOf(g.tema)));
 const VARIANTE=REGS.map(g=>+g.variante||0);
 WORLD.salas.forEach(s=>{s.tema=REGS[s.regiao].tema});
+usarMapa(WORLD);
 const mcv=document.getElementById('mundo'),mc=mcv.getContext('2d');
-const CAM={x:0,y:0,ok:false};let ZOOM=1,VW=1440,VH=900,RS=1;
-const PAR=.55,PFRENTE=1.22;
-function viewSetup(){const old=RS;VH=innerWidth>=innerHeight?900:1120;ZOOM=innerHeight/VH;VW=innerWidth/ZOOM;RS=clamp(ZOOM*FD,.55,1.2);
+const CAM={x:0,y:0,ok:false};let ZOOM=1,VW=1440,VH=820,RS=1;
+const PAR_LONGE=.35,PAR_PERTO=.62,PFRENTE=1.22;
+function viewSetup(){const old=RS;VH=innerWidth>=innerHeight?820:1000;ZOOM=innerHeight/VH;VW=innerWidth/ZOOM;RS=clamp(ZOOM*FD,.55,1.2);
   mcv.width=Math.round(innerWidth*FD);mcv.height=Math.round(innerHeight*FD);
-  if(Math.abs(old-RS)>.04){blocos.clear();fundos.clear()}}
+  if(Math.abs(old-RS)>.04){limparBlocos();limparFundos()}}
 
-/* painted blocks of the middle layer */
+/* ---------- the painter (Web Worker) ---------- */
+let PINTOR=null,PINTOR_F=null,emVoo=0,fundoEmVoo=0;
+function criarPintor(){try{if(typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined'||location.protocol==='file:')return null;
+    const w=new Worker('js/02c-pintor.js');w.onmessage=recebePintor;w.onerror=e=>{console.warn('Portfólio: pintor indisponível, pintando na página',e.message||e);PINTOR=PINTOR_F=null;emVoo=fundoEmVoo=0;blocos.forEach(b=>{b.pedido=false});fundos.forEach(f=>{f.pedido=false})};
+    w.postMessage({tipo:'mundo',regioes:REGS.map(g=>({id:g.id,nome:g.nome,tema:g.tema,variante:g.variante})),semente:7});return w}catch(e){return null}}
+function recebePintor(e){const m=e.data;
+  if(m.tipo==='bloco'){emVoo=Math.max(0,emVoo-1);const b=blocos.get(m.chave);if(b&&Math.abs(m.rs-RS)<.001){b.img=m.bmp;b.pronto=true;b.rapido=null}else if(m.bmp.close)m.bmp.close()}
+  else if(m.tipo==='fundo'){fundoEmVoo=Math.max(0,fundoEmVoo-1);const f=fundos.get(m.sala);if(f&&Math.abs(m.rs-RS)<.001){f.longe=m.longe;f.perto=m.perto;f.pronto=true}else{m.longe.bmp.close&&m.longe.bmp.close();m.perto.bmp.close&&m.perto.bmp.close()}}
+  else if(m.tipo==='erro'){console.warn('Portfólio: pintor',m.msg);if(m.chave){emVoo=Math.max(0,emVoo-1);const b=blocos.get(m.chave);if(b)b.falhou=true}else{fundoEmVoo=Math.max(0,fundoEmVoo-1);const f=fundos.get(m.sala);if(f)f.falhou=true}}}
+/* the owner's background images (recursos/fundos) go to the painter too */
+function enviarFundoDono(i){const b=ASSETS.bg[i],P=PINTOR_F||PINTOR;if(!P)return;if(!b||!b.img){P.postMessage({tipo:'imagem',regiao:i,bmp:null});return}
+  createImageBitmap(b.img).then(bmp=>P.postMessage({tipo:'imagem',regiao:i,bmp,cfg:b.cfg},[bmp])).catch(()=>{})}
+
+/* ---------- painted blocks of the middle layer ---------- */
 const BLOCO=1024,blocos=new Map();let usoTick=0;
 const salasPerto=(X,Y,S,m)=>WORLD.salas.filter(s=>s.x-m<X+S&&s.x+s.w+m>X&&s.y-m<Y+S&&s.y+s.h+m>Y);
+function limparBlocos(){blocos.forEach(b=>{if(b.img&&b.img.close)b.img.close()});blocos.clear();emVoo=0}
 function blocoEm(bx,by){const k=bx+','+by;let b=blocos.get(k);
-  if(!b){const cv=document.createElement('canvas');cv.width=cv.height=Math.ceil(BLOCO*RS);b={bx,by,cv,c:cv.getContext('2d'),pronto:false,uso:0};
-    try{pintarBloco(b.c,bx*BLOCO,by*BLOCO,BLOCO,RS,salasPerto(bx*BLOCO,by*BLOCO,BLOCO,360),true)}catch(e){console.warn('bloco',e)}blocos.set(k,b);
-    if(blocos.size>30){const v=[...blocos.values()].sort((a,c)=>a.uso-c.uso);for(let q=0;q<blocos.size-30;q++)blocos.delete(v[q].bx+','+v[q].by)}}
+  if(!b){b={k,bx,by,img:null,rapido:null,pronto:false,pedido:false,uso:0};blocos.set(k,b);
+    if(blocos.size>40){const v=[...blocos.values()].sort((a,c)=>a.uso-c.uso);for(let q=0;q<blocos.size-40;q++){const o=v[q];if(o.img&&o.img.close)o.img.close();blocos.delete(o.k)}}}
   b.uso=usoTick;return b}
-function detalhar(b){const X=b.bx*BLOCO,Y=b.by*BLOCO,ss=salasPerto(X,Y,BLOCO,360);
-  try{b.c.setTransform(1,0,0,1,0,0);b.c.clearRect(0,0,b.cv.width,b.cv.height);pintarBloco(b.c,X,Y,BLOCO,RS,ss,false);postFX(b.cv,b.c,RS,'meio',b.bx*73+b.by*131+999,ss[0]?VARIANTE[ss[0].regiao]:0)}catch(e){console.warn('bloco',e)}
-  b.pronto=true}
-/* far background of a room, larger than the room so the parallax never shows its edge */
+/* quick stand-in: just the rock silhouette, until the painted block arrives */
+function provisorio(b){if(b.rapido)return b.rapido;const rr=Math.min(RS,.5),cv=novoCanvas(BLOCO*rr,BLOCO*rr);try{pintarBloco(cv.getContext('2d'),b.bx*BLOCO,b.by*BLOCO,BLOCO,rr,salasPerto(b.bx*BLOCO,b.by*BLOCO,BLOCO,420),true)}catch(e){console.warn('bloco',e)}return b.rapido=cv}
+function detalharAqui(b){const X=b.bx*BLOCO,Y=b.by*BLOCO,ss=salasPerto(X,Y,BLOCO,420),cv=novoCanvas(BLOCO*RS,BLOCO*RS),c=cv.getContext('2d');
+  try{pintarBloco(c,X,Y,BLOCO,RS,ss,false);postFX(cv,c,RS,'meio',b.bx*73+b.by*131+999,ss[0]?VARIANTE[ss[0].regiao]:0)}catch(e){console.warn('bloco',e)}
+  b.img=cv;b.pronto=true;b.rapido=null}
+/* ---------- far and near background of each room (bigger than the room, so parallax never shows an edge) ---------- */
 const fundos=new Map();
-function fundoDe(s,criar){let f=fundos.get(s.id);if(f||!criar)return f||null;
-  const PX=Math.max(80,(1-PAR)*(VW-s.w)/2+90),PY=Math.max(80,(1-PAR)*(VH-s.h)/2+90),bw=s.w+2*PX,bh=s.h+2*PY,rb=RS*.42,cv=document.createElement('canvas');
-  cv.width=Math.ceil(bw*rb);cv.height=Math.ceil(bh*rb);const c=cv.getContext('2d');
-  try{pintarFundo(c,s,bw,bh,rb,ASSETS.bg[s.regiao]);postFX(cv,c,rb,'back',s.id*7+3,VARIANTE[s.regiao])}catch(e){console.warn('fundo',e)}
-  f={cv,bw,bh,uso:0};fundos.set(s.id,f);
-  if(fundos.size>12){const v=[...fundos.entries()].sort((a,b)=>a[1].uso-b[1].uso);for(let q=0;q<fundos.size-12;q++)fundos.delete(v[q][0])}
-  return f}
-function rerenderRegion(i){for(const s of WORLD.salas)if(s.regiao===i)fundos.delete(s.id)}
-/* one heavy job per frame at most (a background or a detailed block); the rest waits */
-function trabalhoPendente(x0,y0,x1,y1){
-  for(const s of WORLD.salas){if(s.x>x1+40||s.x+s.w<x0-40||s.y>y1+40||s.y+s.h<y0-40)continue;if(!fundos.get(s.id)){fundoDe(s,true);return true}}
-  /* nothing visible is missing: paint ahead the background of a room that is about to appear */
-  const mx=VW*.6,my=VH*.6;for(const s of WORLD.salas){if(s.x>x1+mx||s.x+s.w<x0-mx||s.y>y1+my||s.y+s.h<y0-my)continue;if(!fundos.get(s.id)){fundoDe(s,true);return true}}
-  let best=null,bd=1e18;for(const b of blocos.values()){if(b.pronto||b.uso!==usoTick)continue;const d=Math.hypot((b.bx+.5)*BLOCO-CAM.x,(b.by+.5)*BLOCO-CAM.y);if(d<bd){bd=d;best=b}}
-  if(best){detalhar(best);return true}return false}
+function limparFundos(){fundos.forEach(f=>{for(const k of['longe','perto'])if(f[k]&&f[k].bmp&&f[k].bmp.close)f[k].bmp.close()});fundos.clear();fundoEmVoo=0}
+function medidasFundo(s,par){const PX=Math.max(90,(1-par)*(VW-s.w)/2+120),PY=Math.max(90,(1-par)*(VH-s.h)/2+120);return{bw:s.w+2*PX,bh:s.h+2*PY,rb:RS*.42}}
+function fundoDe(s){let f=fundos.get(s.id);if(!f){f={pronto:false,pedido:false,uso:0,longe:null,perto:null};fundos.set(s.id,f);
+    if(fundos.size>14){const v=[...fundos.entries()].sort((a,b)=>a[1].uso-b[1].uso);for(let q=0;q<fundos.size-14;q++){const[id,o]=v[q];for(const k of['longe','perto'])if(o[k]&&o[k].bmp&&o[k].bmp.close)o[k].bmp.close();fundos.delete(id)}}}
+  f.uso=usoTick;return f}
+function pintarFundoAqui(s,f){const out={};for(const camada of['longe','perto']){const d=medidasFundo(s,camada==='longe'?PAR_LONGE:PAR_PERTO),cv=novoCanvas(d.bw*d.rb,d.bh*d.rb),c=cv.getContext('2d');
+    try{if(camada==='longe'){pintarFundoLonge(c,s,d.bw,d.bh,d.rb,ASSETS.bg[s.regiao]);postFX(cv,c,d.rb,'back',s.id*7+3,VARIANTE[s.regiao])}else pintarFundoPerto(c,s,d.bw,d.bh,d.rb)}catch(e){console.warn('fundo',e)}
+    out[camada]={bmp:cv,bw:d.bw,bh:d.bh}}f.longe=out.longe;f.perto=out.perto;f.pronto=true}
+function rerenderRegion(i){for(const s of WORLD.salas)if(s.regiao===i){const f=fundos.get(s.id);if(f){for(const k of['longe','perto'])if(f[k]&&f[k].bmp&&f[k].bmp.close)f[k].bmp.close();fundos.delete(s.id)}}enviarFundoDono(i)}
+/* ask for what the camera needs (nearest first); without a Worker, paint one thing per frame here */
+function pedirPintura(x0,y0,x1,y1){
+  const salasVis=WORLD.salas.filter(s=>!(s.x>x1+VW*.5||s.x+s.w<x0-VW*.5||s.y>y1+VH*.5||s.y+s.h<y0-VH*.5)).sort((a,b)=>Math.hypot(a.x+a.w/2-CAM.x,a.y+a.h/2-CAM.y)-Math.hypot(b.x+b.w/2-CAM.x,b.y+b.h/2-CAM.y));
+  const faltam=[...blocos.values()].filter(b=>!b.pronto&&!b.pedido&&!b.falhou&&b.uso>=usoTick-1).sort((a,b)=>Math.hypot((a.bx+.5)*BLOCO-CAM.x,(a.by+.5)*BLOCO-CAM.y)-Math.hypot((b.bx+.5)*BLOCO-CAM.x,(b.by+.5)*BLOCO-CAM.y));
+  if(PINTOR){
+    for(const b of faltam){if(emVoo>=3)break;b.pedido=true;emVoo++;PINTOR.postMessage({tipo:'bloco',chave:b.k,bx:b.bx,by:b.by,S:BLOCO,rs:RS})}
+    for(const s of salasVis){if(fundoEmVoo>=1)break;const f=fundoDe(s);if(f.pronto||f.pedido||f.falhou)continue;f.pedido=true;fundoEmVoo++;
+      (PINTOR_F||PINTOR).postMessage({tipo:'fundo',sala:s.id,rs:RS,longe:medidasFundo(s,PAR_LONGE),perto:medidasFundo(s,PAR_PERTO)})}
+    /* blocks just outside the view, painted ahead */
+    if(emVoo<2){const mx=VW*.6,my=VH*.6;for(let by=Math.floor((y0-my)/BLOCO);by<=Math.floor((y1+my)/BLOCO)&&emVoo<2;by++)for(let bx=Math.floor((x0-mx)/BLOCO);bx<=Math.floor((x1+mx)/BLOCO)&&emVoo<2;bx++){const b=blocoEm(bx,by);if(b.pronto||b.pedido||b.falhou)continue;b.pedido=true;emVoo++;PINTOR.postMessage({tipo:'bloco',chave:b.k,bx,by,S:BLOCO,rs:RS})}}
+    return}
+  for(const s of salasVis){const f=fundoDe(s);if(!f.pronto){pintarFundoAqui(s,f);return}}
+  if(faltam[0])detalharAqui(faltam[0])}
+function desenharFundoSala(s,camada,par,W,H,Z){const f=fundos.get(s.id),L=f&&f.pronto?f[camada]:null;if(!L)return false;
+  const cx=W/2+(s.x+s.w/2-CAM.x)*Z*par,cy=H/2+(s.y+s.h/2-CAM.y)*Z*par;mc.drawImage(L.bmp,cx-L.bw*Z/2,cy-L.bh*Z/2,L.bw*Z,L.bh*Z);return true}
 function desenharMundo(trabalhar){const W=mcv.width,H=mcv.height,Z=ZOOM*FD;usoTick++;
   mc.setTransform(1,0,0,1,0,0);mc.globalAlpha=1;mc.globalCompositeOperation='source-over';mc.fillStyle='#030407';mc.fillRect(0,0,W,H);
   const x0=CAM.x-VW/2,y0=CAM.y-VH/2,x1=x0+VW,y1=y0+VH;
-  for(const s of WORLD.salas){if(s.x>x1+40||s.x+s.w<x0-40||s.y>y1+40||s.y+s.h<y0-40)continue;
-    const f=fundoDe(s,false),sx=Math.round((s.x-CAM.x)*Z+W/2),sy=Math.round((s.y-CAM.y)*Z+H/2),sw=Math.round(s.w*Z),sh=Math.round(s.h*Z);
+  for(const s of WORLD.salas){if(s.x>x1+60||s.x+s.w<x0-60||s.y>y1+60||s.y+s.h<y0-60)continue;fundoDe(s);
+    const m=60,sx=Math.round((s.x-m-CAM.x)*Z+W/2),sy=Math.round(((s.ceu?s.y-2600:s.y)-m-CAM.y)*Z+H/2),sw=Math.round((s.w+2*m)*Z),sh=Math.round(((s.ceu?s.h+2600:s.h)+2*m)*Z);
     mc.save();mc.beginPath();mc.rect(sx,sy,sw,sh);mc.clip();
-    if(f){f.uso=usoTick;const cx=W/2+(s.x+s.w/2-CAM.x)*Z*PAR,cy=H/2+(s.y+s.h/2-CAM.y)*Z*PAR;mc.drawImage(f.cv,cx-f.bw*Z/2,cy-f.bh*Z/2,f.bw*Z,f.bh*Z)}
-    else{const P=REG[TEMA[s.regiao]].p,g=mc.createLinearGradient(0,sy,0,sy+sh);g.addColorStop(0,P.top);g.addColorStop(1,P.bot||P.far);mc.fillStyle=g;mc.fillRect(sx,sy,sw,sh)}
+    if(!desenharFundoSala(s,'longe',PAR_LONGE,W,H,Z)){const P=REG[TEMA[s.regiao]].p,g=mc.createLinearGradient(0,sy,0,sy+sh);g.addColorStop(0,P.top);g.addColorStop(1,P.bot||P.far);mc.fillStyle=g;mc.fillRect(sx,sy,sw,sh)}
+    desenharFundoSala(s,'perto',PAR_PERTO,W,H,Z);
     mc.restore()}
   const bx0=Math.floor(x0/BLOCO),bx1=Math.floor(x1/BLOCO),by0=Math.floor(y0/BLOCO),by1=Math.floor(y1/BLOCO);
-  for(let by=by0;by<=by1;by++)for(let bx=bx0;bx<=bx1;bx++){const b=blocoEm(bx,by),px=Math.round((bx*BLOCO-CAM.x)*Z+W/2),py=Math.round((by*BLOCO-CAM.y)*Z+H/2),
-    pw=Math.round(((bx+1)*BLOCO-CAM.x)*Z+W/2)-px,ph=Math.round(((by+1)*BLOCO-CAM.y)*Z+H/2)-py;mc.drawImage(b.cv,px,py,pw+1,ph+1)}
-  if(trabalhar)trabalhoPendente(x0,y0,x1,y1)}
-/* blurred dark silhouettes in front of the characters (drawn on the .fx canvas, after them) */
-function desenharFrente(){const x0=CAM.x-VW*.7,x1=CAM.x+VW*.7,y0=CAM.y-VH*.75,y1=CAM.y+VH*.75,Z=ZOOM*PFRENTE;
-  fc.save();fc.setTransform(FD,0,0,FD,0,0);fc.globalAlpha=.92;fc.globalCompositeOperation='source-over';
+  for(let by=by0;by<=by1;by++)for(let bx=bx0;bx<=bx1;bx++){const b=blocoEm(bx,by),img=b.pronto?b.img:provisorio(b);const px=Math.round((bx*BLOCO-CAM.x)*Z+W/2),py=Math.round((by*BLOCO-CAM.y)*Z+H/2),
+    pw=Math.round(((bx+1)*BLOCO-CAM.x)*Z+W/2)-px,ph=Math.round(((by+1)*BLOCO-CAM.y)*Z+H/2)-py;mc.drawImage(img,px,py,pw+1,ph+1)}
+  if(trabalhar)pedirPintura(x0,y0,x1,y1)}
+/* blurred dark silhouettes in front of the characters, and grass in front of their feet (drawn on .fx, after them) */
+function desenharFrente(){const x0=CAM.x-VW*.75,x1=CAM.x+VW*.75,y0=CAM.y-VH*.8,y1=CAM.y+VH*.8;
+  fc.save();fc.setTransform(FD,0,0,FD,0,0);fc.globalCompositeOperation='source-over';
   for(const s of WORLD.salas){if(s.x>x1||s.x+s.w<x0||s.y>y1||s.y+s.h<y0)continue;const tm=temaDe(s.tema);
-    for(const f of s.frente){if(f.x<x0-300||f.x>x1+300||f.y<y0-300||f.y>y1+300)continue;const sp=spriteFrente(tm,f),k=Z*f.s,sx=FW/2+(f.x-CAM.x)*Z,sy=FH/2+(f.y-CAM.y)*Z;
-      fc.drawImage(sp.cv,sx-sp.ax*k,sy-sp.ay*k,sp.W*k,sp.H*k)}}
+    for(const f of s.frente){if(f.x<x0-400||f.x>x1+400||f.y<y0-400||f.y>y1+400)continue;const sp=spriteFrente(tm,f),grama=f.tipo==='grama',par=grama?1:PFRENTE,Z=ZOOM*par,k=Z*f.s*(grama?.62:.5),sx=FW/2+(f.x-CAM.x)*Z,sy=FH/2+(f.y-CAM.y)*Z;
+      fc.globalAlpha=grama?.95:.82;fc.drawImage(sp.cv,sx-sp.ax*k,sy-sp.ay*k,sp.W*k,sp.H*k)}}
   fc.restore()}
 /* first paint of what the camera sees (used at boot, before the opening ends) */
 function prepararVista(){const x0=CAM.x-VW/2,y0=CAM.y-VH/2,x1=x0+VW,y1=y0+VH;usoTick++;
-  for(let by=Math.floor(y0/BLOCO);by<=Math.floor(y1/BLOCO);by++)for(let bx=Math.floor(x0/BLOCO);bx<=Math.floor(x1/BLOCO);bx++){const b=blocoEm(bx,by);if(!b.pronto)detalhar(b)}
-  for(const s of WORLD.salas)if(!(s.x>x1||s.x+s.w<x0||s.y>y1||s.y+s.h<y0))fundoDe(s,true)}
+  for(let by=Math.floor(y0/BLOCO);by<=Math.floor(y1/BLOCO);by++)for(let bx=Math.floor(x0/BLOCO);bx<=Math.floor(x1/BLOCO);bx++){const b=blocoEm(bx,by);if(!PINTOR&&!b.pronto)detalharAqui(b)}
+  if(PINTOR){pedirPintura(x0,y0,x1,y1);pedirPintura(x0,y0,x1,y1)}
+  else for(const s of WORLD.salas)if(!(s.x>x1||s.x+s.w<x0||s.y>y1||s.y+s.h<y0)){const f=fundoDe(s);if(!f.pronto)pintarFundoAqui(s,f)}}
+PINTOR=criarPintor();if(PINTOR)PINTOR_F=criarPintor();
 
 /* ---------- HUD, side map and minimap ---------- */
 function romanNum(n){let s='';for(const[v,r]of[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']])while(n>=v){s+=r;n-=v}return s}
 const roman=REGS.map((g,i)=>romanNum(i+1));
-const pips=document.getElementById('pips'),map=document.getElementById('map');
-REGS.forEach(()=>pips.appendChild(document.createElement('span')));
-const pipEls=[...pips.children],mapEls=[...map.querySelectorAll('a')];
-const hudRegion=document.getElementById('hudRegion'),hudDepth=document.getElementById('hudDepth'),vfillEl=document.getElementById('vfill');
+const map=document.getElementById('map'),mapEls=[...map.querySelectorAll('a')];
+const hudRegion=document.getElementById('hudRegion'),vfillEl=document.getElementById('vfill');
 let lastIdx=-1,maxIdx=0;
-const visitadas=new Set();
+const visitadas=new Set(),caminhoMini=new Map();
 const mini=document.getElementById('minimapa'),mic=mini?mini.getContext('2d'):null;
 function desenharMinimapa(px,py,reg){if(!mic||!mini.clientWidth)return;const D=Math.min(devicePixelRatio||1,2),W=mini.clientWidth,H=mini.clientHeight;if(mini.width!==Math.round(W*D)){mini.width=Math.round(W*D);mini.height=Math.round(H*D)}
   const L=WORLD.limites,esc=Math.min((W-16)/(L.x1-L.x0),(H-16)/(L.y1-L.y0)),ox=(W-(L.x1-L.x0)*esc)/2-L.x0*esc,oy=(H-(L.y1-L.y0)*esc)/2-L.y0*esc;
-  mic.setTransform(D,0,0,D,0,0);mic.clearRect(0,0,W,H);
-  for(const s of WORLD.salas){const vis=visitadas.has(s.id),cur=s.regiao===reg;mic.fillStyle=cur?'rgba(232,224,207,.32)':vis?'rgba(232,224,207,.16)':'rgba(232,224,207,.05)';mic.strokeStyle=cur?'rgba(242,212,155,.9)':vis?'rgba(232,224,207,.55)':'rgba(232,224,207,.2)';mic.lineWidth=1;
-    mic.beginPath();mic.rect(ox+s.x*esc,oy+(s.ceu?s.y+s.h*.55:s.y)*esc,s.w*esc,(s.ceu?s.h*.45:s.h)*esc);mic.fill();mic.stroke()}
+  mic.setTransform(D,0,0,D,0,0);mic.clearRect(0,0,W,H);mic.setTransform(D*esc,0,0,D*esc,D*ox,D*oy);mic.lineJoin='round';
+  /* the rooms with their drawn outline (simplified), like a map sketched in ink */
+  for(const s of WORLD.salas){const vis=visitadas.has(s.id),cur=s.regiao===reg;let P=caminhoMini.get(s.id);
+    if(!P){P=new Path2D();const pts=contornoSala(s).pts.filter((p,k)=>k%5===0).map(([x,y])=>[x,s.ceu?Math.max(y,s.y+s.h*.55):y]);P.moveTo(pts[0][0],pts[0][1]);for(const[x,y]of pts)P.lineTo(x,y);P.closePath();caminhoMini.set(s.id,P)}
+    mic.fillStyle=cur?'rgba(232,224,207,.3)':vis?'rgba(232,224,207,.14)':'rgba(232,224,207,.04)';mic.strokeStyle=cur?'rgba(242,212,155,.95)':vis?'rgba(232,224,207,.6)':'rgba(232,224,207,.22)';mic.lineWidth=1.2/esc;mic.fill(P);mic.stroke(P)}
+  mic.setTransform(D,0,0,D,0,0);mic.lineWidth=1;
   mic.fillStyle='#fff6dc';mic.beginPath();mic.arc(ox+px*esc,oy+py*esc,2.6,0,TAU);mic.fill();mic.strokeStyle='rgba(255,246,220,.5)';mic.beginPath();mic.arc(ox+px*esc,oy+py*esc,5.5,0,TAU);mic.stroke()}
 
 /* ---------- particles ---------- */
