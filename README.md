@@ -32,6 +32,7 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `js/01-base.js` | utilitários e kit de pintura (formas, folhagem, cristais, luz) |
 | `js/02-regioes.js` | os oito temas: fundos distantes pintados e partículas |
 | `js/02b-salas.js` | pintura das salas no estilo desenhado: rocha, aros, estalactites, enfeites por tema, plataformas, frente desfocada |
+| `js/02d-enfeites.js` | objetos de cada matéria (colunas, bustos, poliedros, quadro-negro, estantes, livros, árvores, frascos, servidores, robôs…), desenhados no estilo do cenário |
 | `js/02c-pintor.js` | pintor em segundo plano (Web Worker): pinta os blocos do mapa e os fundos sem travar o jogo |
 | `js/03-cenario.js` | câmera, blocos pintados do mundo, fundos com parallax, tinta e papel, minimapa, HUD, partículas, criaturas desenhadas |
 | `js/04-jogo.js` | colisão com o mapa, modo Passeio (rolagem → caminho), modo Jogo, inimigos (percepção, alerta, preparo, ataque), combate |
@@ -48,6 +49,6 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `.github/workflows/indice.yml` | automação do GitHub que mantém o índice em dia |
 | `docs/PROMPT-PORTFOLIO.md` | o plano de reconstrução do site |
 
-Os scripts são clássicos (não módulos) e compartilham o escopo global, na ordem numérica: um nome declarado duas vezes quebra o site. `js/00a-mundo.js`, `js/00b-conteudo.js` e `js/00c-abertura.js` ficam dentro de funções e só expõem `MUNDO`, `CONTEUDO` e `ABERTURA`. O conteúdo aparece mesmo se o motor do jogo falhar. A pintura pesada do cenário roda em `js/02c-pintor.js` (Web Worker, que carrega `01-base.js`, `02-regioes.js`, `00a-mundo.js` e `02b-salas.js`); aberto direto do disco (`file://`) ou num navegador sem `OffscreenCanvas`, a pintura volta para a página, um pedaço por quadro.
+Os scripts são clássicos (não módulos) e compartilham o escopo global, na ordem numérica: um nome declarado duas vezes quebra o site. `js/00a-mundo.js`, `js/00b-conteudo.js` e `js/00c-abertura.js` ficam dentro de funções e só expõem `MUNDO`, `CONTEUDO` e `ABERTURA`. O conteúdo aparece mesmo se o motor do jogo falhar. A pintura pesada do cenário roda em `js/02c-pintor.js` (Web Worker, que carrega `01-base.js`, `02-regioes.js`, `00a-mundo.js`, `02b-salas.js` e `02d-enfeites.js`); aberto direto do disco (`file://`) ou num navegador sem `OffscreenCanvas`, a pintura volta para a página, um pedaço por quadro.
 
 A Oficina é uma ferramenta temporária de produção e sai do site quando ele ficar pronto.
