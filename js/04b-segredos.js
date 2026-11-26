@@ -60,6 +60,8 @@ function montarCoisas(){COISAS.length=0;const areas=(window.CONTEUDO&&CONTEUDO.a
       if(!c){const x=chaoLivre(H,px+dir*(k+1)*190);c={x,y:MUNDO.chaoEm(H,x)-70}}
       usados.push(c);const id=a.id+'/'+atv.id;
       COISAS.push({tipo:'pagina',reg:i,area:j,areaId:a.id,atv:atv.id,titulo:atv.titulo||'Atividade',n:k,x:c.x,y:c.y,raio:62,achada:ACH.paginas.includes(id),voo:-1})})});
+  /* a trajetória (se existir) também tem a sua placa */
+  const iT=WORLD.regioes.findIndex(g=>g.id==='trajetoria');if(iT>0&&CONTEUDO.painelTrajetoria){const g=WORLD.regioes[iT],H=WORLD.salas[g.principal],dir=g.dir||1,px=chaoLivre(H,H.x+H.w/2-dir*H.w*.3);COISAS.push({tipo:'placa',reg:iT,trajetoria:true,x:px,y:MUNDO.chaoEm(H,px),raio:130,tema:H.tema})}
   for(const g of SEGREDOS){const S=WORLD.salas[g.sala],x=chaoLivre(S,S.x+S.w/2);COISAS.push({tipo:'reliquia',chave:g.chave,reg:S.regiao,x,y:MUNDO.chaoEm(S,x),raio:120,seg:g,tema:S.tema})}}
 montarCoisas();
 const totalPaginas=()=>COISAS.filter(o=>o.tipo==='pagina').length;
@@ -93,6 +95,7 @@ function desenharReliquia(c,o,perto){const T=ROCHA_TEMA[temaDe(o.tema)],x=o.x,y=
   else if(k==='matematica'){c.font=`700 52px ${FONTE_TITULO()}`;c.textAlign='center';c.textBaseline='middle';c.lineWidth=5;c.strokeText('π',x,oy);c.fillText('π',x,oy)}
   else if(k==='linguagens'){c.beginPath();c.moveTo(x-10,oy+18);c.quadraticCurveTo(x+18,oy-2,x+22,oy-30);c.quadraticCurveTo(x+4,oy-16,x-10,oy+18);c.fill();c.stroke();c.fillStyle='#1d1611';c.beginPath();c.ellipse(x-12,oy+22,12,6,0,0,TAU);c.fill()}
   else if(k==='natureza'){c.strokeStyle='#1d5a44';c.beginPath();c.moveTo(x,oy+22);c.quadraticCurveTo(x-4,oy,x,oy-10);c.stroke();for(let q=0;q<6;q++){const a=q/6*TAU+T_rel();c.fillStyle=q%2?'#ffd1e8':'#fff3d6';c.beginPath();c.ellipse(x+Math.cos(a)*10,oy-16+Math.sin(a)*10,7,4,a,0,TAU);c.fill()}}
+  else if(k==='trajetoria'){c.beginPath();c.rect(x-18,oy-22,36,44);c.fill();c.stroke();c.beginPath();c.moveTo(x-12,oy-22);c.lineTo(x-12,oy+22);c.stroke();c.strokeStyle='rgba(29,22,17,.5)';c.lineWidth=1.4;for(let q=0;q<4;q++){c.beginPath();c.moveTo(x-6,oy-12+q*8);c.lineTo(x+12,oy-12+q*8);c.stroke()}c.fillStyle=lc;c.fillRect(x+8,oy-26,5,14)}
   else if(k==='tecnico'){c.beginPath();c.rect(x-24,oy-20,48,36);c.fill();c.stroke();c.fillStyle='#0b1a10';c.fillRect(x-17,oy-13,34,22);c.fillStyle=(Math.floor(T_rel()*2)%2)?'#7dffa0':'#0b1a10';c.fillRect(x-12,oy+1,8,4);c.fillStyle='#ece6d8';c.beginPath();c.rect(x-8,oy+16,16,6);c.fill();c.stroke()}
   else{c.beginPath();for(let q=0;q<10;q++){const a=q/10*TAU-Math.PI/2,rr=q%2?9:22;q?c.lineTo(x+Math.cos(a)*rr,oy+Math.sin(a)*rr):c.moveTo(x+Math.cos(a)*rr,oy+Math.sin(a)*rr)}c.closePath();c.fill();c.stroke()}}
 const T_rel=()=>T;
@@ -130,7 +133,7 @@ function atualizarCoisas(dt){for(const g of SEGREDOS)g.tremor=Math.max(0,g.tremo
   upAntes=up}
 addEventListener('keydown',e=>{if(e.code!=='KeyE'||e.repeat||MODE!=='play'||paused||typing(e)||detalheAberto())return;
   if(pertoCoisa){interagir(pertoCoisa);e.preventDefault()}else if(ultimoAchado&&performance.now()<achadoAte){lerAchado();e.preventDefault()}});
-function interagir(o){if(o.tipo==='placa')abrirPainelArea(o.area);else if(o.tipo==='reliquia')abrirOvo(o)}
+function interagir(o){if(o.tipo==='placa')abrirPainelArea(o.trajetoria?'trajetoria':o.area);else if(o.tipo==='reliquia')abrirOvo(o)}
 function pegarPagina(o){o.achada=true;o.voo=0;const id=o.areaId+'/'+o.atv;if(!ACH.paginas.includes(id)){ACH.paginas.push(id);guardarAchados()}
   sfx('coleta');burst(o.x,o.y,'#fff3d6',16,220);mostrarAchado(o);hudGame()}
 function mostrarAchado(o){const el=document.getElementById('achado');if(!el)return;ultimoAchado=o;achadoAte=performance.now()+7000;
@@ -143,7 +146,7 @@ function lerAchado(){const o=ultimoAchado;if(!o)return;fecharAchado();ultimoAcha
 
 /* resumo da matéria dentro do jogo (o mesmo painel do Passeio) */
 function abrirPainelArea(j){const m=document.getElementById('painelJogo');if(!m||!CONTEUDO.painelArea)return;const corpo=m.querySelector('.pj-corpo');corpo.textContent='';
-  corpo.append(CONTEUDO.painelArea(j));m.hidden=false;paused=true;sfx('coleta',.6);m.querySelector('.x').focus()}
+  corpo.append(j==='trajetoria'?CONTEUDO.painelTrajetoria():CONTEUDO.painelArea(j));m.hidden=false;paused=true;sfx('coleta',.6);m.querySelector('.x').focus()}
 {const m=document.getElementById('painelJogo');if(m){m.querySelector('.x').onclick=()=>closePanels();m.addEventListener('click',e=>{if(e.target===m)closePanels()})}}
 /* o detalhe de uma atividade pausa o jogo enquanto está aberto */
 new MutationObserver(()=>{const ab=document.documentElement.classList.contains('detalhe-aberto');if(MODE!=='play')return;
@@ -158,6 +161,7 @@ const OVOS={
   matematica:{t:'A câmara do π',h:()=>'<p class="ovo-pi" aria-label="Os primeiros dígitos de pi">3,14159 26535 89793 23846 26433 83279 50288 41971 69399 37510 58209 74944 59230 78164…</p><p>Os dígitos continuam para sempre, sem se repetir. Alguém começou a gravá-los na pedra e desistiu na septuagésima casa.</p>'+curiosidade('matematica')},
   linguagens:{t:'O gabinete das vozes',h:()=>'<p class="ovo-ola">Olá · Hello · Hola · Bonjour · Ciao · Hallo · Salve · Привет · こんにちは · 你好 · مرحبا · Γειά σου · שלום</p><p>A mesma palavra em treze vozes, sussurrada pelas paredes.</p>'+curiosidade('linguagens')},
   natureza:{t:'A estufa esquecida',h:()=>{florescer();return'<p>Uma flor guardada num pote de vidro. Você chega perto e a sala inteira floresce.</p>'+curiosidade('natureza')}},
+  trajetoria:{t:'O diário de bordo',h:()=>'<p>Um caderno gasto, uma linha por dia. As primeiras falam de medo de errar; as do meio, de projetos que não davam certo até darem. A última diz só:</p><blockquote>Amanhã continua.</blockquote>'+curiosidade('trajetoria')},
   tecnico:{t:'O terminal esquecido',terminal:true,h:()=>'<p>Um terminal antigo, ainda ligado. O cursor pisca esperando alguém. (Digite <code>ajuda</code>.)</p>'+curiosidade('tecnico')}};
 function abrirOvo(o){const m=document.getElementById('ovoModal');if(!m)return;const d=OVOS[o.chave]||{t:'Uma relíquia',h:()=>'<p>Um objeto antigo, guardado com cuidado.</p>'+curiosidade(o.chave)};
   m.querySelector('.ovo-t').textContent=d.t;m.querySelector('.ovo-corpo').innerHTML=d.h();const term=m.querySelector('.ovo-term');term.hidden=!d.terminal;if(d.terminal)iniciarTerminal(term);

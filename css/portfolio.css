@@ -417,3 +417,30 @@ body::before{content:"";position:fixed;z-index:29;left:0;right:0;top:0;height:ca
 .seg button,.tbtn{box-shadow:none;border-radius:0;background:rgba(6,5,10,.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M2.5 3.5 C30 2 70 4.5 97.5 2.8 M97 2 C98.2 15 96.8 27 97.6 37.5 M98 37 C70 38.4 30 36.6 2.4 37.8 M3 38.4 C1.8 26 3.2 14 2 2.4' fill='none' stroke='%23e8e0cf' stroke-opacity='.42' stroke-width='1.3' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
 .seg button[aria-pressed="true"]{background:#ece6d8 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M2.5 3.5 C30 2 70 4.5 97.5 2.8 M97 2 C98.2 15 96.8 27 97.6 37.5 M98 37 C70 38.4 30 36.6 2.4 37.8 M3 38.4 C1.8 26 3.2 14 2 2.4' fill='none' stroke='%230b0a10' stroke-opacity='.7' stroke-width='1.4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
 .tbtn:hover,.seg button:hover{box-shadow:none;color:#fff8ea;background-color:rgba(30,26,34,.7)}
+
+/* ---------- trajetória: linha do tempo, conquistas e habilidades ---------- */
+.linha-tempo{list-style:none;margin:.3rem 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.8rem;position:relative}
+.linha-tempo::before{content:"";position:absolute;left:8%;right:8%;top:8px;height:6px;opacity:.6;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 6' preserveAspectRatio='none'%3E%3Cpath d='M1 3 C40 1 80 5 120 3 S200 1 240 4 S285 2 299 3' fill='none' stroke='%23e8e0cf' stroke-width='1.4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.linha-tempo li{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem}
+.lt-no{width:13px;height:13px;transform:rotate(45deg);background:var(--void);border:1.5px solid var(--accent);box-shadow:0 0 12px color-mix(in srgb,var(--accent) 55%,transparent)}
+.lt-ano{font-family:var(--label);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);text-shadow:0 2px 8px #000}
+.lt-tit{font-family:var(--display);font-size:1rem;letter-spacing:.02em;line-height:1.2;color:var(--bone);text-shadow:0 2px 10px #000}
+.revela .painel-area:not(.visto) .linha-tempo li{opacity:0;translate:0 10px}
+.revela .linha-tempo li{transition:opacity .6s ease calc(380ms + var(--i,0)*120ms),translate .6s cubic-bezier(.2,.7,.2,1) calc(380ms + var(--i,0)*120ms)}
+.lt-bloco .sub small{font-family:var(--label);letter-spacing:.12em;color:var(--ink-dim)}
+.lt-texto{margin:.3rem 0 0;font-size:1.05rem;line-height:1.5;color:var(--ink);text-shadow:0 2px 10px #000}
+.conquistas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.7rem}
+.conquistas li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.8rem;align-items:start}
+.cq-ic{line-height:0;padding-top:2px}
+.cq-ic svg{width:26px;height:26px;fill:none;stroke:var(--accent);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--accent) 50%,transparent))}
+.cq-txt{display:flex;flex-direction:column;gap:.15rem}
+.cq-t{font-family:var(--display);font-size:1.05rem;color:var(--bone)}
+.cq-d{font-family:var(--label);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.cq-desc{font-style:italic;color:var(--ink-dim);font-size:1rem}
+.cq-txt a{align-self:flex-start;font-family:var(--label);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--bone)}
+/* destaques do mapa no início */
+.destaques{width:min(34rem,100%);margin-top:1.3rem;text-align:left}
+.destaques>.eyebrow{text-align:center;margin-bottom:.5rem}
+/* no Passeio o texto é o principal: o minimapa só aparece no modo Jogo (o mapa lateral já mostra onde você está) */
+html:not(.playing) .minimapa{display:none}

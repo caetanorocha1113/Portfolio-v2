@@ -61,6 +61,32 @@
           "tags": ["exemplo"],
           "destaque": false,
           "exemplo": true
+        },
+        {
+          "id": "exemplo-3",
+          "titulo": "[Título da atividade]",
+          "tipo": "trabalho",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-4",
+          "titulo": "[Título da atividade]",
+          "tipo": "apresentação",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
         }
       ],
       "jogo": {
@@ -100,6 +126,32 @@
           "data": "",
           "resumo": "[Exemplo: uma frase que resume a atividade.]",
           "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-3",
+          "titulo": "[Título da atividade]",
+          "tipo": "prova",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-4",
+          "titulo": "[Título da atividade]",
+          "tipo": "trabalho",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
           "imagens": [],
           "links": [],
           "tags": ["exemplo"],
@@ -149,6 +201,32 @@
           "tags": ["exemplo"],
           "destaque": false,
           "exemplo": true
+        },
+        {
+          "id": "exemplo-3",
+          "titulo": "[Título da atividade]",
+          "tipo": "apresentação",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-4",
+          "titulo": "[Título da atividade]",
+          "tipo": "trabalho",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
         }
       ],
       "jogo": {
@@ -188,6 +266,32 @@
           "data": "",
           "resumo": "[Exemplo: uma frase que resume a atividade.]",
           "descricao": "[Exemplo de texto completo.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-3",
+          "titulo": "[Título da atividade]",
+          "tipo": "projeto",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-4",
+          "titulo": "[Título da atividade]",
+          "tipo": "prova",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
           "imagens": [],
           "links": [],
           "tags": ["exemplo"],
@@ -237,6 +341,32 @@
           "tags": ["exemplo"],
           "destaque": false,
           "exemplo": true
+        },
+        {
+          "id": "exemplo-3",
+          "titulo": "[Título da atividade]",
+          "tipo": "projeto",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
+        },
+        {
+          "id": "exemplo-4",
+          "titulo": "[Título da atividade]",
+          "tipo": "trabalho",
+          "data": "",
+          "resumo": "[Exemplo: uma frase que resume a atividade.]",
+          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "imagens": [],
+          "links": [],
+          "tags": ["exemplo"],
+          "destaque": false,
+          "exemplo": true
         }
       ],
       "jogo": {
@@ -248,6 +378,51 @@
       }
     }
   ],
+  "trajetoria": {
+    "titulo_area": "A Estrada dos Anos",
+    "tema": "brejo",
+    "descricao": "[Como foi a caminhada do 1º ao 3º ano, em 2 ou 3 frases: o que mudou, o que você descobriu, para onde quer ir.]",
+    "anos": [
+      {
+        "ano": "1º ano",
+        "periodo": "[ano]",
+        "titulo": "[O que marcou o 1º ano]",
+        "texto": "[Os primeiros passos no ensino médio e no técnico: matérias novas, colegas, o primeiro projeto.]"
+      },
+      {
+        "ano": "2º ano",
+        "periodo": "[ano]",
+        "titulo": "[O que marcou o 2º ano]",
+        "texto": "[O que ficou mais sério, os projetos maiores, o que você aprendeu a fazer sozinho.]"
+      },
+      {
+        "ano": "3º ano",
+        "periodo": "[ano]",
+        "titulo": "[O que marcou o 3º ano]",
+        "texto": "[O fim do caminho: o projeto final, o estágio ou o vestibular, os planos para depois.]"
+      }
+    ],
+    "conquistas": [
+      {
+        "titulo": "[Certificado, curso ou olimpíada]",
+        "tipo": "certificado",
+        "data": "",
+        "descricao": "[Onde foi e o que você fez.]",
+        "link": ""
+      },
+      {
+        "titulo": "[Prêmio, medalha ou apresentação]",
+        "tipo": "premio",
+        "data": "",
+        "descricao": "[Onde foi e o que você fez.]",
+        "link": ""
+      }
+    ],
+    "habilidades": {
+      "tecnicas": ["[Linguagem de programação]", "[Ferramenta]", "[Banco de dados]", "[Outra habilidade técnica]"],
+      "pessoais": ["[Trabalho em equipe]", "[Comunicação]", "[Organização]"]
+    }
+  },
   "sobre": "[Texto livre sobre você: interesses, objetivos, o que gosta de construir.]",
   "historia": {
     "prologo": "Antes de haver mapas, havia o Atlas: um livro que guardava tudo o que já se aprendeu. Numa noite sem lua, ele se partiu, e cada página caiu sobre o mundo como uma terra isolada, guardada por um Guardião que transformou o saber em enigma. De uma vila esquecida na superfície, um pequeno viajante de máscara pálida parte em silêncio para recuperar as páginas.",

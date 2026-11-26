@@ -121,9 +121,16 @@
       atividades.sort((x, y) => (y.destaque ? 1 : 0) - (x.destaque ? 1 : 0));
       return { ...a, id, tema, atividades, competencias: lista(a.competencias), jogo: a.jogo || {} };
     });
+    /* trajetória (opcional): linha do tempo dos anos, conquistas e habilidades, numa área própria do mapa */
+    if (d.trajetoria && typeof d.trajetoria === 'object') {
+      const t = d.trajetoria, h = t.habilidades || {};
+      const temaT = TEMAS.includes(t.tema) ? t.tema : (TEMAS.includes('brejo') ? 'brejo' : livres[0]);
+      d.trajetoria = { ...t, tema: temaT, titulo_area: t.titulo_area || 'A Estrada dos Anos', anos: lista(t.anos).filter(Boolean), conquistas: lista(t.conquistas).filter(c => c && c.titulo),
+        habilidades: { tecnicas: lista(h.tecnicas), pessoais: lista(h.pessoais) } };
+    } else d.trajetoria = null;
     /* variação de cor quando um tema se repete */
     const giros = [0, 34, -34, 68, -68, 102];
-    const todas = [temaInicio, ...d.areas.map(a => a.tema), temaFinal];
+    const todas = [temaInicio, ...d.areas.map(a => a.tema), ...(d.trajetoria ? [d.trajetoria.tema] : []), temaFinal];
     const variantes = todas.map(t => { const n = contagem[t] = (contagem[t] || 0) + 1; return giros[(n - 1) % giros.length]; });
     d._temas = { inicio: temaInicio, final: temaFinal, variantes };
     return d;
@@ -179,6 +186,18 @@
     return svg;
   }
 
+  /* destaques do mapa: as atividades marcadas com "destaque", de todas as matérias, numa lista curta no início */
+  function destaquesDoMapa(d) {
+    const L = d.areas.flatMap((a, i) => a.atividades.filter(t => t.destaque).map(t => ({ a, t, i }))).slice(0, 5);
+    if (!L.length) return null;
+    return el('div', { class: 'destaques' }, el('p', { class: 'eyebrow' }, 'Destaques do mapa'),
+      el('ol', { class: 'trilha' }, L.map(({ a, t, i }, k) => {
+        const li = itemTrilha(a, t, 0, 9);
+        li.style.setProperty('--accent', girarCor(ACENTO[a.tema] || '#e8d3a2', d._temas.variantes[i + 1]));
+        const meta = li.querySelector('.tr-meta'); if (meta) meta.firstChild.textContent = romano(i + 2) + ' · ' + texto(a.materia) + ' · ' + (TIPOS[t.tipo] || 'Outro');
+        return li;
+      })));
+  }
   function montarInicio(d, n) {
     const p = d.perfil, s = d.site, primeira = d.areas[0];
     const sec = secao('inicio', d._temas.inicio, 'Início', d._temas.variantes[0], 'hero', 0);
@@ -202,6 +221,7 @@
         primeira ? el('a', { class: 'botao', href: '#' + primeira.id }, 'Ver matérias') : null,
         el('button', { type: 'button', class: 'botao fantasma', id: 'btnJogar', onclick: () => { const b = document.getElementById('mPlay'); if (b) b.click(); } }, 'Jogar'),
         el('button', { type: 'button', class: 'botao-texto', id: 'btnAbertura', onclick: () => window.ABERTURA && window.ABERTURA.tocar(true) }, 'Rever abertura')),
+      destaquesDoMapa(d),
       desenho,
       mapa,
       el('div', { class: 'cue', 'aria-hidden': 'true' }, 'Role para começar a jornada', el('i')));
@@ -297,6 +317,51 @@
     else { aviso.textContent = textoCopiar; }
   }
 
+  /* Trajetória: resumo, linha do tempo dos anos e, ao abrir o registro, o texto de cada ano, conquistas e habilidades */
+  const ICONE_CONQUISTA = { certificado: 'M4 4h16v12H4zM8 20l4-3 4 3M8 8h8M8 11h5', premio: 'M8 3h8v5a4 4 0 0 1-8 0zM5 4h3M16 4h3M12 12v4M8 21h8M10 16h4', olimpiada: 'M12 9a6 6 0 1 0 0 12 6 6 0 1 0 0-12zM7 3l5 6 5-6', curso: 'M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5', outro: 'M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z' };
+  function montarTrajetoria(d, sufixo) {
+    sufixo = sufixo || '';
+    const t = d.trajetoria, idx = d.areas.length, n = idx + 2, lado = idx % 2 ? 'r' : 'l';
+    const sec = secao('trajetoria', t.tema, 'Trajetória', d._temas.variantes[idx + 1], 'area', (n - 1) * 380);
+    const hab = [...t.habilidades.tecnicas, ...t.habilidades.pessoais], idMais = 'reg-trajetoria' + sufixo;
+    const num = (q, um, varios) => el('li', null, el('b', null, String(q)), ' ' + (q === 1 ? um : varios));
+    const linha = t.anos.length ? el('ol', { class: 'linha-tempo', 'aria-label': 'Os anos' }, t.anos.map((a, k) => el('li', { style: '--i:' + k },
+      el('span', { class: 'lt-no', 'aria-hidden': 'true' }), el('span', { class: 'lt-ano' }, comMarcadores(a.ano || romano(k + 1))), el('span', { class: 'lt-tit' }, comMarcadores(a.titulo || ''))))) : null;
+    const mais = el('div', { class: 'area-mais', id: idMais }, el('div', { class: 'area-mais-in' },
+      t.descricao ? el('div', { class: 'area-desc' }, paragrafos(t.descricao, 'lede')) : null,
+      t.anos.map(a => el('div', { class: 'lt-bloco' }, el('h3', { class: 'sub' }, comMarcadores(a.ano || ''), a.periodo ? el('small', null, ' · ', comMarcadores(a.periodo)) : null), a.texto ? paragrafos(a.texto, 'lt-texto') : null)),
+      t.conquistas.length ? el('h3', { class: 'sub' }, 'Conquistas') : null,
+      t.conquistas.length ? el('ul', { class: 'conquistas' }, t.conquistas.map(c => el('li', null,
+        el('span', { class: 'cq-ic', 'aria-hidden': 'true', html: '<svg viewBox="0 0 24 24"><path d="' + (ICONE_CONQUISTA[c.tipo] || ICONE_CONQUISTA.outro) + '"/></svg>' }),
+        el('span', { class: 'cq-txt' }, el('span', { class: 'cq-t' }, comMarcadores(c.titulo)), c.data ? el('span', { class: 'cq-d' }, dataBonita(c.data)) : null, c.descricao ? el('span', { class: 'cq-desc' }, comMarcadores(c.descricao)) : null,
+          c.link ? el('a', { href: c.link, target: ehExterno(c.link) ? '_blank' : null, rel: ehExterno(c.link) ? 'noopener' : null }, 'Ver') : null)))) : null,
+      t.habilidades.tecnicas.length ? el('h3', { class: 'sub' }, 'Habilidades técnicas') : null,
+      t.habilidades.tecnicas.length ? el('ul', { class: 'comp' }, t.habilidades.tecnicas.map(h => el('li', null, comMarcadores(h)))) : null,
+      t.habilidades.pessoais.length ? el('h3', { class: 'sub' }, 'Habilidades pessoais') : null,
+      t.habilidades.pessoais.length ? el('ul', { class: 'comp' }, t.habilidades.pessoais.map(h => el('li', null, comMarcadores(h)))) : null));
+    const botao = el('button', { type: 'button', class: 'abrir-area', 'aria-expanded': 'false', 'aria-controls': idMais, onclick: () => alternar() },
+      el('span', { class: 'ab-txt' }, 'Abrir registro'), el('span', { class: 'ab-ic', html: CHEVRON }));
+    const resumo = primeiraFrase(t.descricao, 170);
+    const partes = [
+      el('p', { class: 'eyebrow' }, `Área ${romano(n)} · `, comMarcadores(t.titulo_area)),
+      el('h2', { id: 't-trajetoria' + sufixo }, 'Trajetória', t.periodo ? el('small', null, comMarcadores(t.periodo)) : null),
+      el('div', { class: 'orn', html: ORNAMENTO }),
+      resumo ? el('p', { class: 'area-resumo' }, comMarcadores(resumo)) : null,
+      el('ul', { class: 'area-num', 'aria-label': 'Resumo da trajetória' }, num(t.anos.length, 'ano', 'anos'), t.conquistas.length ? num(t.conquistas.length, 'conquista', 'conquistas') : null, hab.length ? num(hab.length, 'habilidade', 'habilidades') : null),
+      linha, mais, botao].filter(Boolean);
+    partes.forEach((p, k) => p.style.setProperty('--i', k));
+    const copy = el('div', { class: 'copy painel-area painel-trajetoria ' + lado }, partes);
+    mais.inert = true;
+    function alternar() {
+      const aberto = !copy.classList.contains('aberto');
+      copy.classList.toggle('aberto', aberto); botao.setAttribute('aria-expanded', String(aberto));
+      botao.querySelector('.ab-txt').textContent = aberto ? 'Fechar registro' : 'Abrir registro'; mais.inert = !aberto;
+      if (!aberto) requestAnimationFrame(() => botao.scrollIntoView({ block: 'nearest', behavior: reduzido() ? 'auto' : 'smooth' }));
+    }
+    sec.append(copy);
+    return sec;
+  }
+
   /* Sobre: o primeiro parágrafo aparece; o resto abre com "Ler tudo" */
   function sobreResumido(txt) {
     const ps = paragrafos(txt, 'lede');
@@ -354,12 +419,14 @@
     try {
       const regioes = [{ id: 'inicio', nome: 'Início', tema: d._temas.inicio, variante: d._temas.variantes[0] },
         ...d.areas.map((a, i) => ({ id: a.id, nome: texto(a.materia), tema: a.tema, variante: d._temas.variantes[i + 1] })),
+        ...(d.trajetoria ? [{ id: 'trajetoria', nome: 'Trajetória', tema: d.trajetoria.tema, variante: d._temas.variantes[d.areas.length + 1] }] : []),
         { id: 'sobre', nome: 'Sobre e contato', tema: d._temas.final, variante: d._temas.variantes[d._temas.variantes.length - 1] }];
       C.mundo = window.MUNDO ? MUNDO.gerar(regioes, 7) : null;
     } catch (e) { console.warn('Portfólio: mapa', e); C.mundo = null; }
     const secs = [montarInicio(d)];
     d.areas.forEach((a, i) => secs.push(montarArea(d, a, i)));
-    secs.push(montarFinal(d, d.areas.length + 2));
+    if (d.trajetoria) secs.push(montarTrajetoria(d));
+    secs.push(montarFinal(d, d.areas.length + 2 + (d.trajetoria ? 1 : 0)));
     secs.forEach(s => main.append(s));
     revelar(secs);
     C.secoes = secs;
@@ -524,6 +591,7 @@
     }
     C.dados = dados;
     /* o resumo de uma matéria montado de novo (o modo Jogo mostra numa janela, js/04b-segredos.js) */
+    C.painelTrajetoria = () => { const sec = montarTrajetoria(dados, '-jogo'), copy = sec.querySelector('.copy'); copy.style.setProperty('--accent', sec.style.getPropertyValue('--accent')); copy.classList.remove('l', 'r'); copy.classList.add('visto', 'no-jogo'); return copy; };
     C.painelArea = j => { const sec = montarArea(dados, dados.areas[j], j, '-jogo'), copy = sec.querySelector('.copy'); copy.style.setProperty('--accent', sec.style.getPropertyValue('--accent')); copy.classList.remove('l', 'r'); copy.classList.add('visto', 'no-jogo'); return copy; };
     montar(dados);
     pronto(dados);

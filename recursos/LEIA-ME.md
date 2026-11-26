@@ -182,7 +182,7 @@ Há dois jeitos, e eles podem ser usados juntos.
 
 **Onde aparece (`regioes`):** aceita três jeitos, que podem ser misturados:
 
-- o **id da área** em `conteudo/portfolio.json`: `inicio`, `humanas`, `matematica`, `linguagens`, `natureza`, `tecnico`, `sobre`;
+- o **id da área** em `conteudo/portfolio.json`: `inicio`, `humanas`, `matematica`, `linguagens`, `natureza`, `tecnico`, `trajetoria`, `sobre`;
 - o **nome do tema**: `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso` (vale para todas as áreas com esse tema);
 - o **número da seção** no mapa (1 = início).
 

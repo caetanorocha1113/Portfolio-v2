@@ -40,6 +40,24 @@ Cada área aparece **resumida**: o nome, a primeira frase de `descricao`, a cont
 
 Temas disponíveis: `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso`. Duas matérias podem usar o mesmo tema: a cor muda sozinha.
 
+## Trajetória (opcional)
+
+O bloco `trajetoria` cria uma área a mais no mapa, depois das matérias: a estrada dos anos. Tem uma linha do tempo (`anos`), `conquistas` (certificados, prêmios, olimpíadas, cursos) e `habilidades` (técnicas e pessoais). Ela aparece resumida, como as matérias, e o registro completo abre com um clique. Sem o bloco, a área não aparece.
+
+```json
+"trajetoria": {
+  "titulo_area": "A Estrada dos Anos",
+  "tema": "brejo",
+  "descricao": "Como foi a caminhada do 1º ao 3º ano.",
+  "anos": [{ "ano": "1º ano", "periodo": "2024", "titulo": "O que marcou", "texto": "…" }],
+  "conquistas": [{ "titulo": "Olimpíada de Matemática", "tipo": "olimpiada", "data": "2025-08", "descricao": "…", "link": "" }],
+  "habilidades": { "tecnicas": ["Python", "Git"], "pessoais": ["Trabalho em equipe"] }
+}
+```
+
+- `tipo` da conquista: `certificado`, `premio`, `olimpiada`, `curso` ou `outro` (muda o desenho).
+- As atividades com `"destaque": true` também aparecem em **Destaques do mapa**, no início.
+
 ## Segredos (opcional)
 
 No modo Jogo, cada matéria esconde uma sala secreta atrás de uma parede falsa, com uma relíquia. Para deixar um recado seu em alguma delas, acrescente um bloco `segredos` com a chave da área (`vila` para o porão do início, ou o `id` da matéria):
