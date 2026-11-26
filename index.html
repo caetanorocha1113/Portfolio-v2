@@ -24,9 +24,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English+SC&display=swap">
 <link rel="stylesheet" href="css/estilo.css">
 <link rel="stylesheet" href="css/portfolio.css">
-<!-- 00: conteúdo e abertura. Os scripts do motor (01 a 09) são carregados por js/00-conteudo.js depois que as seções existem. -->
-<script defer src="js/00-conteudo.js"></script>
-<script defer src="js/00b-abertura.js"></script>
+<!-- 00a: mapa do mundo · 00b: conteúdo · 00c: abertura. O motor (01 a 09) é carregado por js/00b-conteudo.js depois que as seções e o mapa existem. -->
+<script defer src="js/00a-mundo.js"></script>
+<script defer src="js/00b-conteudo.js"></script>
+<script defer src="js/00c-abertura.js"></script>
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -181,7 +182,9 @@
   </div>
 </div>
 
+<canvas class="mundo" id="mundo" aria-hidden="true"></canvas>
 <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+<canvas class="minimapa" id="minimapa" aria-hidden="true"></canvas>
 
 <div class="hud" aria-hidden="true">
   <svg class="vessel" viewBox="0 0 64 64">

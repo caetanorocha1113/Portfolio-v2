@@ -5,7 +5,7 @@
    Os textos vêm de conteudo/portfolio.json ("abertura"). Dá para pular com o botão, Esc, Enter,
    Espaço, clique ou rolagem. "mostrar": "sempre" | "uma_vez_por_sessao" | "nunca".
    Ela começa depois da primeira pintura do motor (no máximo 2,5 s de escuro, como o começo de um filme),
-   e o laço do jogo fica parado enquanto ela cobre a tela (classe abertura-cobrindo).
+   e o laço do jogo fica parado enquanto ela cobre a tela (classe abertura-cobrindo). Vem depois de js/00b-conteudo.js.
    Global exposto: ABERTURA.tocar() (botão "Rever abertura"). */
 (function () {
   'use strict';

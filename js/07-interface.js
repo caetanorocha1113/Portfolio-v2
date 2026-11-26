@@ -74,7 +74,7 @@ async function applyFont(role,blob,gname){const prop=role==='display'?'--display
   const fam='OficinaUser'+role+(++fontN),ff=new FontFace(fam,await blob.arrayBuffer());await ff.load();document.fonts.add(ff);document.documentElement.style.setProperty(prop,`'${fam}',${def}`)}
 async function decodeAudio(blob){const C=audioInit();if(!C)throw new Error('sem áudio');const ab=await blob.arrayBuffer();return await new Promise((res,rej)=>{const p=C.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)})}
 function addUserTrack(blob,title,region,id,tema){const el=new Audio(URL.createObjectURL(blob));el.preload='metadata';const tr={id,title,region:region==null?-1:+region,tema:tema==null?null:+tema,builtin:false,el};MUS.list.push(tr);uiPlayer();renderMusicMgr();return tr}
-function rerenderSection(i){if(drawn[i])renderSection(i)}
+function rerenderSection(i){rerenderRegion(i)}
 
 /* workshop */
 const ANIMS=[['parado','Parado',0,1,6],['correr','Correr',1,6,12],['pular','Pular',2,2,8],['cair','Cair',3,2,8],['golpe','Golpe',4,4,16],['avanco','Avanço',5,2,12],['dano','Dano',6,1,6]];
@@ -136,10 +136,10 @@ const GUIDE={
 comeco:['Começo',`<h4>O que é este site</h4>
 <p>Um portfólio escolar em forma de mapa. Cada área do mapa é uma matéria, com as atividades, os projetos e os trabalhos dela. Quem visita lê tudo rolando a página; o jogo é uma camada extra.</p>
 <ul><li><b>Conteúdo</b>: vem de <code>conteudo/portfolio.json</code>. Mudar o arquivo muda o site (veja a aba "Conteúdo").</li>
-<li><b>Cenários</b>: oito temas pintados em código. Cada área escolhe um tema.</li>
+<li><b>Cenários</b>: um mapa 2D de salas, corredores e poços, como num metroidvania. Cada área é uma região do mapa e escolhe um dos oito temas pintados em código. O minimapa do canto mostra onde o personagem está.</li>
 <li><b>Personagem, inimigos, fontes, sons e músicas</b>: vêm da pasta <code>recursos/</code> (veja a aba "Pasta recursos").</li></ul>
 <h4>Dois modos</h4>
-<ul><li><b>Passeio</b>: o site rola normalmente e o personagem joga sozinho ao fundo, atrás do texto. A música toca como uma playlist.</li>
+<ul><li><b>Passeio</b>: o site rola normalmente e o personagem atravessa o mapa sozinho ao fundo, atrás do texto (para os lados e para baixo). A música toca como uma playlist.</li>
 <li><b>Jogo</b>: você controla o personagem pelo mapa (teclado ou toque). O texto some para a fase aparecer; volte ao Passeio para ler.</li></ul>
 <h4>Oficina</h4>
 <p>Ferramenta temporária de produção: mostra o que carregou da pasta <code>recursos/</code> e deixa testar arquivos só neste navegador. Vai sair do site quando ele ficar pronto.</p>
@@ -217,8 +217,8 @@ inimigos:['Inimigos',`<h4>Os inimigos do dono</h4>
 <tr><td>Criatura do teto</td><td>ninho</td><td>sobe e desce por um fio</td></tr>
 <tr><td>Água-viva de luz</td><td>fosso</td><td>flutua, não causa dano</td></tr></table></div>`],
 fundos:['Fundos',`<h4>Como os fundos se encaixam</h4>
-<p>Cada área tem uma faixa de cenário na parte de baixo, com três camadas: <b>fundo</b> (mais distante), <b>meio</b> (o chão onde o personagem pisa) e <b>frente</b>. A imagem vai para a camada de <b>fundo</b>; o chão, as fendas e as plataformas continuam no lugar.</p>
-<ul><li>Tamanho sugerido: perto de <b>2400 × 2200 px</b>. O chão fica a cerca de <b>80%</b> da altura.</li>
+<p>O mundo é um mapa de salas ligadas (salões, corredores, poços), desenhado em três planos: o <b>fundo</b> de cada sala (mais distante, anda devagar), a <b>rocha</b> com o chão, as plataformas e os enfeites, e a <b>frente</b> desfocada. A imagem vai para o <b>fundo</b> de todas as salas da área; a rocha e o chão continuam no lugar.</p>
+<ul><li>Tamanho sugerido: perto de <b>2400 × 1400 px</b> (paisagem). Ela aparece pelas aberturas das salas, por trás da rocha.</li>
 <li><b>Cobrir</b> preenche tudo e corta as sobras. <b>Conter</b> mostra a imagem inteira.</li>
 <li><b>Substituir</b> troca o fundo pintado. <b>Sobrepor</b> mistura por cima, com a opacidade escolhida.</li></ul>`],
 sons:['Sons',`<h4>Os onze eventos</h4>

@@ -130,22 +130,57 @@
   }
 
   /* ---------- montagem das seções ---------- */
-  function diorama() {
-    return el('div', { class: 'diorama', 'aria-hidden': 'true' },
-      el('canvas', { class: 'lyr back' }), el('canvas', { class: 'lyr mid' }), el('canvas', { class: 'lyr front' }));
-  }
+  /* uma seção por região do mapa; o cenário é desenhado pelo motor atrás de todas (canvas #mundo) */
   function secao(id, tema, nome, variante, classe, profundidade) {
     const acento = girarCor(ACENTO[tema] || '#e8d3a2', variante);
     return el('section', {
       class: 'realm ' + classe, id, 'data-tema': tema, 'data-variante': variante || null, 'data-name': nome,
       'data-depth': profundidade, style: '--accent:' + acento, 'aria-labelledby': 't-' + id
-    }, diorama());
+    });
+  }
+
+  /* o mapa do mundo desenhado no início: salas com traço de tinta, o caminho e cada região clicável */
+  const SVG = 'http://www.w3.org/2000/svg';
+  function sv(tag, attrs, ...filhos) {
+    const e = document.createElementNS(SVG, tag);
+    for (const [k, v] of Object.entries(attrs || {})) if (v != null) e.setAttribute(k, v);
+    for (const f of filhos.flat()) if (f != null) e.append(f instanceof Node ? f : document.createTextNode(String(f)));
+    return e;
+  }
+  function caminhoSala(s) {
+    const pts = [], P = MUNDO.PASSO, passo = 6;
+    const topo = k => s.ceu ? s.y + s.h * .45 : s.teto[k], chao = k => { const f = s.chao[k]; return f === f ? f : s.y + s.h; };
+    for (let k = 0; k < s.n; k += passo) pts.push([s.x + Math.min(k * P, s.w), topo(k)]);
+    pts.push([s.x + s.w, topo(s.n - 1)], [s.x + s.w, chao(s.n - 1)]);
+    for (let k = s.n - 1; k >= 0; k -= passo) pts.push([s.x + Math.min(k * P, s.w), chao(k)]);
+    pts.push([s.x, chao(0)]);
+    return 'M' + pts.map(([x, y]) => Math.round(x) + ' ' + Math.round(y)).join('L') + 'Z';
+  }
+  function mapaDoMundo(m, d) {
+    const L = m.limites, pad = 700, vb = [L.x0 - pad, L.y0 + 600 - pad, L.x1 - L.x0 + 2 * pad, L.y1 - L.y0 - 600 + 2 * pad];
+    const svg = sv('svg', { viewBox: vb.join(' '), class: 'mapa-svg', role: 'group', 'aria-label': 'Mapa do portfólio: cada região é uma matéria' },
+      sv('defs', null, sv('filter', { id: 'tinta-mapa', x: '-5%', y: '-5%', width: '110%', height: '110%' },
+        sv('feTurbulence', { type: 'fractalNoise', baseFrequency: '.006', numOctaves: '2', seed: '4' }),
+        sv('feDisplacementMap', { in: 'SourceGraphic', scale: '38' }))));
+    const rota = 'M' + m.rota.map(n => n.x + ' ' + (n.y - 60)).join('L');
+    svg.append(sv('path', { d: rota, class: 'mapa-rota' }));
+    m.regioes.forEach((g, i) => {
+      const acento = girarCor(ACENTO[g.tema] || '#e8d3a2', g.variante), p = m.salas[g.principal];
+      const ty = p.ceu ? p.y + p.h * .75 : p.y + p.h * .62;
+      const grupo = sv('a', { href: '#' + g.id, class: 'mapa-reg', style: '--accent:' + acento, 'aria-label': romano(i + 1) + ' · ' + g.nome },
+        sv('g', { filter: 'url(#tinta-mapa)' }, g.salas.map(k => sv('path', { d: caminhoSala(m.salas[k]), class: 'mapa-sala' }))),
+        sv('text', { x: p.x + p.w / 2, y: ty, class: 'mapa-n' }, romano(i + 1)),
+        sv('text', { x: p.x + p.w / 2, y: ty + 330, class: 'mapa-nome' }, g.nome));
+      svg.append(grupo);
+    });
+    return svg;
   }
 
   function montarInicio(d, n) {
     const p = d.perfil, s = d.site, primeira = d.areas[0];
     const sec = secao('inicio', d._temas.inicio, 'Início', d._temas.variantes[0], 'hero', 0);
     const foto = p.foto ? el('img', { class: 'hero-foto', src: p.foto, alt: 'Foto de ' + texto(p.nome), width: 160, height: 160, decoding: 'async' }) : null;
+    const desenho = C.mundo ? el('figure', { class: 'mapa-mundo' }, mapaDoMundo(C.mundo, d), el('figcaption', null, 'O mapa. Clique numa região para ir até ela.')) : null;
     const mapa = el('nav', { class: 'atlas-mapa', 'aria-label': 'Mapa das matérias' },
       el('ol', null, d.areas.map((a, i) => el('li', null,
         el('a', { href: '#' + a.id, style: '--accent:' + girarCor(ACENTO[a.tema], d._temas.variantes[i + 1]) },
@@ -164,6 +199,7 @@
         primeira ? el('a', { class: 'botao', href: '#' + primeira.id }, 'Ver matérias') : null,
         el('button', { type: 'button', class: 'botao fantasma', id: 'btnJogar', onclick: () => { const b = document.getElementById('mPlay'); if (b) b.click(); } }, 'Jogar'),
         el('button', { type: 'button', class: 'botao-texto', id: 'btnAbertura', onclick: () => window.ABERTURA && window.ABERTURA.tocar(true) }, 'Rever abertura')),
+      desenho,
       mapa,
       el('div', { class: 'cue', 'aria-hidden': 'true' }, 'Role para começar a jornada', el('i')));
     sec.append(copy);
@@ -255,6 +291,13 @@
   function montar(d) {
     const main = document.getElementById('conteudo');
     main.textContent = '';
+    /* o mapa 2D (js/00a-mundo.js): uma região por seção, na mesma ordem */
+    try {
+      const regioes = [{ id: 'inicio', nome: 'Início', tema: d._temas.inicio, variante: d._temas.variantes[0] },
+        ...d.areas.map((a, i) => ({ id: a.id, nome: texto(a.materia), tema: a.tema, variante: d._temas.variantes[i + 1] })),
+        { id: 'sobre', nome: 'Sobre e contato', tema: d._temas.final, variante: d._temas.variantes[d._temas.variantes.length - 1] }];
+      C.mundo = window.MUNDO ? MUNDO.gerar(regioes, 7) : null;
+    } catch (e) { console.warn('Portfólio: mapa', e); C.mundo = null; }
     const secs = [montarInicio(d)];
     d.areas.forEach((a, i) => secs.push(montarArea(d, a, i)));
     secs.push(montarFinal(d, d.areas.length + 2));
@@ -364,7 +407,7 @@
   }
 
   /* ---------- motor (cenários e jogo) ---------- */
-  const MOTOR = ['js/01-base.js', 'js/02-regioes.js', 'js/03-cenario.js', 'js/04-jogo.js', 'js/05-audio.js', 'js/06-loop.js', 'js/07-interface.js', 'js/08-pasta-recursos.js', 'js/08b-poderes.js', 'js/09-inicio.js'];
+  const MOTOR = ['js/01-base.js', 'js/02-regioes.js', 'js/02b-salas.js', 'js/03-cenario.js', 'js/04-jogo.js', 'js/05-audio.js', 'js/06-loop.js', 'js/07-interface.js', 'js/08-pasta-recursos.js', 'js/08b-poderes.js', 'js/09-inicio.js'];
   function carregarMotor() {
     for (const src of MOTOR) {
       const s = document.createElement('script');
@@ -425,7 +468,7 @@
     rota(true);
     vigiarAltura();
     /* o motor carrega já, por trás do escuro inicial; a abertura começa quando ele termina a primeira pintura */
-    carregarMotor();
+    if (C.mundo) carregarMotor();
   }
   iniciar();
 })();

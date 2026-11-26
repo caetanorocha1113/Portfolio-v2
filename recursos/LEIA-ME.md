@@ -244,9 +244,8 @@ O site procura primeiro pelo **id da área** e depois pelo **nome do tema** dela
 | `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso` | todas as áreas com aquele tema |
 
 - Formatos: `.jpg` `.png` `.webp`.
-- Tamanho sugerido: **2400 × 2200 px** (a camada é um pouco mais alta que larga).
-- Vai para a camada de **fundo** (a mais distante) da faixa de cenário na parte de baixo da área. O chão, as fendas e as plataformas continuam no lugar.
-- O chão da área fica a cerca de **80% da altura** da imagem. Se a sua imagem tiver chão desenhado, ponha nessa altura.
+- Tamanho sugerido: **2400 × 1400 px** (paisagem).
+- Vai para o **fundo** (o plano mais distante) de todas as salas da área, visto pelas aberturas da rocha. A rocha, o chão e as plataformas continuam no lugar.
 
 **Opcional:** `ajustes.json`:
 

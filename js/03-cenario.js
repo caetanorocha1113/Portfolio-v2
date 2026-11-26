@@ -2,42 +2,106 @@
 const GRAIN=(()=>{const g=document.createElement('canvas');g.width=g.height=256;const x=g.getContext('2d'),r=rng(99);
   for(let i=0;i<9000;i++){const v=r();x.fillStyle=v<.55?`rgba(0,0,0,${r()*.35})`:`rgba(255,238,215,${r()*.08})`;x.fillRect(r()*256,r()*256,r()*1.8+.4,r()*1.8+.4)}
   for(let i=0;i<46;i++){x.strokeStyle=`rgba(0,0,0,${.05+r()*.14})`;x.lineWidth=.6;x.beginPath();const a=r()*256,b=r()*256;x.moveTo(a,b);x.quadraticCurveTo(a+(r()-.5)*40,b+(r()-.5)*40,a+(r()-.5)*70,b+(r()-.5)*70);x.stroke()}return g})();
-const TMP=document.createElement('canvas');
-function postFX(cv,c,w,h,d,l,i){const W=cv.width,H=cv.height;if(W<4)return;TMP.width=W;TMP.height=H;const t=TMP.getContext('2d');t.drawImage(cv,0,0);
-  c.save();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,W,H);c.filter=(l==='back'?'saturate(.62) contrast(1.08) brightness(.9)':'saturate(.72) contrast(1.06) brightness(.94)')+(VARIANTE[i]?` hue-rotate(${VARIANTE[i]}deg)`:'');c.drawImage(TMP,0,0);c.filter='none';
-  const r=rng(313*(i+1)+l.length*7);
+/* scratch canvas for pixel readback (CPU-backed); the painted blocks stay GPU-friendly */
+const TMP=document.createElement('canvas'),TMPc=TMP.getContext('2d',{willReadFrequently:true});
+/* paper and ink: desaturates, adds grain and smudges, and (for 'meio') draws a wobbly ink outline around everything opaque */
+function postFX(cv,c,d,l,seed,hue){const W=cv.width,H=cv.height;if(W<4)return;TMP.width=W;TMP.height=H;const t=TMPc;t.drawImage(cv,0,0);
+  c.save();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,W,H);c.filter=(l==='back'?'saturate(.62) contrast(1.08) brightness(.9)':'saturate(.74) contrast(1.06) brightness(.95)')+(hue?` hue-rotate(${hue}deg)`:'');c.drawImage(TMP,0,0);c.filter='none';
+  const r=rng(313*(seed+1)+l.length*7);
   c.globalCompositeOperation='source-atop';c.fillStyle=c.createPattern(GRAIN,'repeat');c.globalAlpha=l==='back'?.75:.9;c.fillRect(0,0,W,H);c.globalAlpha=1;
-  for(let k=0;k<28;k++){const x=r()*W,y=r()*H,rad=(80+r()*280)*d,g=c.createRadialGradient(x,y,0,x,y,rad);g.addColorStop(0,`rgba(6,4,8,${.1+r()*.16})`);g.addColorStop(1,'rgba(6,4,8,0)');c.fillStyle=g;c.fillRect(x-rad,y-rad,rad*2,rad*2)}
-  if(l!=='back'){c.strokeStyle='rgba(6,5,9,.38)';c.lineWidth=1*d;for(let k=0;k<90;k++){const x=r()*W,y=r()*H,n=4+(r()*6|0),L=(6+r()*14)*d,a=-1+r()*.35;for(let m=0;m<n;m++){const ox=x+m*3*d;c.beginPath();c.moveTo(ox,y);c.lineTo(ox+Math.cos(a)*L,y+Math.sin(a)*L);c.stroke()}}}
-  c.strokeStyle='rgba(230,220,200,.05)';c.lineWidth=.8*d;for(let k=0;k<16;k++){c.beginPath();const x=r()*W;c.moveTo(x,0);c.lineTo(x+(r()-.5)*90*d,H);c.stroke()}
-  if(l!=='back'){const im=c.getImageData(0,0,W,H),px=new Uint32Array(im.data.buffer),ink=(255<<24)|(9<<16)|(5<<8)|6;for(let k=0;k<px.length;k++)px[k]=(px[k]>>>24)>190?ink:0;t.putImageData(im,0,0);
-    c.globalCompositeOperation='destination-over';const o=(l==='front'?2.6:1.9)*d;for(let k=0;k<10;k++){const a=k/10*TAU,oo=o*(.8+r()*.5);c.drawImage(TMP,Math.cos(a)*oo,Math.sin(a)*oo)}}
+  for(let k=0;k<22;k++){const x=r()*W,y=r()*H,rad=(80+r()*280)*d,g=c.createRadialGradient(x,y,0,x,y,rad);g.addColorStop(0,`rgba(6,4,8,${.1+r()*.16})`);g.addColorStop(1,'rgba(6,4,8,0)');c.fillStyle=g;c.fillRect(x-rad,y-rad,rad*2,rad*2)}
+  if(l!=='back'){c.strokeStyle='rgba(6,5,9,.38)';c.lineWidth=1.2*d;for(let k=0;k<110;k++){const x=r()*W,y=r()*H,n=4+(r()*6|0),L=(7+r()*16)*d,a=-1+r()*.35;for(let m=0;m<n;m++){const ox=x+m*3.4*d;c.beginPath();c.moveTo(ox,y);c.lineTo(ox+Math.cos(a)*L,y+Math.sin(a)*L);c.stroke()}}}
+  c.strokeStyle='rgba(230,220,200,.05)';c.lineWidth=.8*d;for(let k=0;k<12;k++){c.beginPath();const x=r()*W;c.moveTo(x,0);c.lineTo(x+(r()-.5)*90*d,H);c.stroke()}
+  if(l!=='back'){t.setTransform(1,0,0,1,0,0);t.clearRect(0,0,W,H);t.drawImage(cv,0,0);const im=t.getImageData(0,0,W,H),px=new Uint32Array(im.data.buffer),ink=(255<<24)|(9<<16)|(5<<8)|6;for(let k=0;k<px.length;k++)px[k]=(px[k]>>>24)>190?ink:0;t.putImageData(im,0,0);
+    c.globalCompositeOperation='destination-over';const o=3.1*d;for(let k=0;k<12;k++){const a=k/12*TAU,oo=o*(.75+r()*.55);c.drawImage(TMP,Math.cos(a)*oo,Math.sin(a)*oo)}}
   c.restore()}
 
-/* ---------- section rendering ---------- */
+/* ---------- the world: one map (js/00a-mundo.js), seen through a camera ----------
+   The page still scrolls (the portfolio is read normally); the world is a fixed backdrop behind the text.
+   Layers: far background of each room (parallax), painted blocks of rock and decoration (cached, 1024 units each),
+   then particles, characters and blurred foreground silhouettes on the .fx canvas. */
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const secs=[...document.querySelectorAll('.realm')];
-/* each section (built from conteudo/portfolio.json) uses one painted theme; the painted band is the .diorama inside it */
-const DIO=secs.map(s=>s.querySelector('.diorama')||s);
-const TEMA=secs.map(s=>Math.max(0,TEMA_IDS.indexOf(s.dataset.tema)));
-const VARIANTE=secs.map(s=>+s.dataset.variante||0);
-const SREG=secs.map((s,i)=>Object.create(REG[TEMA[i]]));/* per section: own ground (G) and ceiling (C), shared drawing code */
-const layers=secs.map(s=>({back:s.querySelector('.lyr.back'),mid:s.querySelector('.lyr.mid'),front:s.querySelector('.lyr.front')}));
-const drawn=secs.map(()=>false);
-function renderSection(i){const s=DIO[i],R=SREG[i],w=s.clientWidth,h=s.clientHeight*1.2,u=clamp(w/1280,.5,1.25);
-  ['back','mid','front'].forEach((l,k)=>{const cv=layers[i][l],d=l==='back'?1:Math.min(window.devicePixelRatio||1,1.5);cv.width=Math.round(w*d);cv.height=Math.round(h*d);const c=cv.getContext('2d',{willReadFrequently:l!=='back'});c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,h);const bo=l==='back'&&ASSETS.bg[i]&&ASSETS.bg[i].img?ASSETS.bg[i]:null;try{if(!(bo&&bo.cfg.modo!=='sobrepor')){R[l](c,w,h,rng(7919*(i+1)+k*131),u,R.p);if(l==='back')DETAIL[TEMA[i]](c,w,h,rng(5557*(i+1)),u,R.p)}if(bo)drawBg(c,bo,w,h);if(l==='mid'){drawHole(c,i,w,h,u);drawPlatforms(c,i,w,h,u)}}catch(e){console.error('region',i,l,e)}try{if(!(bo&&bo.cfg.sujeira===false))postFX(cv,c,w,h,d,l,i)}catch(e){console.error('postfx',e)}});
-  drawn[i]=true}
-function release(i){Object.values(layers[i]).forEach(cv=>{cv.width=1;cv.height=1});drawn[i]=false}
+const secs=[...document.querySelectorAll('.realm')];/* one section per region, same order */
+const WORLD=CONTEUDO.mundo,REGS=WORLD.regioes;
+const TEMA=REGS.map(g=>Math.max(0,TEMA_IDS.indexOf(g.tema)));
+const VARIANTE=REGS.map(g=>+g.variante||0);
+WORLD.salas.forEach(s=>{s.tema=REGS[s.regiao].tema});
+const mcv=document.getElementById('mundo'),mc=mcv.getContext('2d');
+const CAM={x:0,y:0,ok:false};let ZOOM=1,VW=1440,VH=900,RS=1;
+const PAR=.55,PFRENTE=1.22;
+function viewSetup(){const old=RS;VH=innerWidth>=innerHeight?900:1120;ZOOM=innerHeight/VH;VW=innerWidth/ZOOM;RS=clamp(ZOOM*FD,.55,1.2);
+  mcv.width=Math.round(innerWidth*FD);mcv.height=Math.round(innerHeight*FD);
+  if(Math.abs(old-RS)>.04){blocos.clear();fundos.clear()}}
 
-/* ---------- HUD + map ---------- */
+/* painted blocks of the middle layer */
+const BLOCO=1024,blocos=new Map();let usoTick=0;
+const salasPerto=(X,Y,S,m)=>WORLD.salas.filter(s=>s.x-m<X+S&&s.x+s.w+m>X&&s.y-m<Y+S&&s.y+s.h+m>Y);
+function blocoEm(bx,by){const k=bx+','+by;let b=blocos.get(k);
+  if(!b){const cv=document.createElement('canvas');cv.width=cv.height=Math.ceil(BLOCO*RS);b={bx,by,cv,c:cv.getContext('2d'),pronto:false,uso:0};
+    try{pintarBloco(b.c,bx*BLOCO,by*BLOCO,BLOCO,RS,salasPerto(bx*BLOCO,by*BLOCO,BLOCO,360),true)}catch(e){console.warn('bloco',e)}blocos.set(k,b);
+    if(blocos.size>30){const v=[...blocos.values()].sort((a,c)=>a.uso-c.uso);for(let q=0;q<blocos.size-30;q++)blocos.delete(v[q].bx+','+v[q].by)}}
+  b.uso=usoTick;return b}
+function detalhar(b){const X=b.bx*BLOCO,Y=b.by*BLOCO,ss=salasPerto(X,Y,BLOCO,360);
+  try{b.c.setTransform(1,0,0,1,0,0);b.c.clearRect(0,0,b.cv.width,b.cv.height);pintarBloco(b.c,X,Y,BLOCO,RS,ss,false);postFX(b.cv,b.c,RS,'meio',b.bx*73+b.by*131+999,ss[0]?VARIANTE[ss[0].regiao]:0)}catch(e){console.warn('bloco',e)}
+  b.pronto=true}
+/* far background of a room, larger than the room so the parallax never shows its edge */
+const fundos=new Map();
+function fundoDe(s,criar){let f=fundos.get(s.id);if(f||!criar)return f||null;
+  const PX=Math.max(80,(1-PAR)*(VW-s.w)/2+90),PY=Math.max(80,(1-PAR)*(VH-s.h)/2+90),bw=s.w+2*PX,bh=s.h+2*PY,rb=RS*.42,cv=document.createElement('canvas');
+  cv.width=Math.ceil(bw*rb);cv.height=Math.ceil(bh*rb);const c=cv.getContext('2d');
+  try{pintarFundo(c,s,bw,bh,rb,ASSETS.bg[s.regiao]);postFX(cv,c,rb,'back',s.id*7+3,VARIANTE[s.regiao])}catch(e){console.warn('fundo',e)}
+  f={cv,bw,bh,uso:0};fundos.set(s.id,f);
+  if(fundos.size>12){const v=[...fundos.entries()].sort((a,b)=>a[1].uso-b[1].uso);for(let q=0;q<fundos.size-12;q++)fundos.delete(v[q][0])}
+  return f}
+function rerenderRegion(i){for(const s of WORLD.salas)if(s.regiao===i)fundos.delete(s.id)}
+/* one heavy job per frame at most (a background or a detailed block); the rest waits */
+function trabalhoPendente(x0,y0,x1,y1){
+  for(const s of WORLD.salas){if(s.x>x1+40||s.x+s.w<x0-40||s.y>y1+40||s.y+s.h<y0-40)continue;if(!fundos.get(s.id)){fundoDe(s,true);return true}}
+  /* nothing visible is missing: paint ahead the background of a room that is about to appear */
+  const mx=VW*.6,my=VH*.6;for(const s of WORLD.salas){if(s.x>x1+mx||s.x+s.w<x0-mx||s.y>y1+my||s.y+s.h<y0-my)continue;if(!fundos.get(s.id)){fundoDe(s,true);return true}}
+  let best=null,bd=1e18;for(const b of blocos.values()){if(b.pronto||b.uso!==usoTick)continue;const d=Math.hypot((b.bx+.5)*BLOCO-CAM.x,(b.by+.5)*BLOCO-CAM.y);if(d<bd){bd=d;best=b}}
+  if(best){detalhar(best);return true}return false}
+function desenharMundo(trabalhar){const W=mcv.width,H=mcv.height,Z=ZOOM*FD;usoTick++;
+  mc.setTransform(1,0,0,1,0,0);mc.globalAlpha=1;mc.globalCompositeOperation='source-over';mc.fillStyle='#030407';mc.fillRect(0,0,W,H);
+  const x0=CAM.x-VW/2,y0=CAM.y-VH/2,x1=x0+VW,y1=y0+VH;
+  for(const s of WORLD.salas){if(s.x>x1+40||s.x+s.w<x0-40||s.y>y1+40||s.y+s.h<y0-40)continue;
+    const f=fundoDe(s,false),sx=Math.round((s.x-CAM.x)*Z+W/2),sy=Math.round((s.y-CAM.y)*Z+H/2),sw=Math.round(s.w*Z),sh=Math.round(s.h*Z);
+    mc.save();mc.beginPath();mc.rect(sx,sy,sw,sh);mc.clip();
+    if(f){f.uso=usoTick;const cx=W/2+(s.x+s.w/2-CAM.x)*Z*PAR,cy=H/2+(s.y+s.h/2-CAM.y)*Z*PAR;mc.drawImage(f.cv,cx-f.bw*Z/2,cy-f.bh*Z/2,f.bw*Z,f.bh*Z)}
+    else{const P=REG[TEMA[s.regiao]].p,g=mc.createLinearGradient(0,sy,0,sy+sh);g.addColorStop(0,P.top);g.addColorStop(1,P.bot||P.far);mc.fillStyle=g;mc.fillRect(sx,sy,sw,sh)}
+    mc.restore()}
+  const bx0=Math.floor(x0/BLOCO),bx1=Math.floor(x1/BLOCO),by0=Math.floor(y0/BLOCO),by1=Math.floor(y1/BLOCO);
+  for(let by=by0;by<=by1;by++)for(let bx=bx0;bx<=bx1;bx++){const b=blocoEm(bx,by),px=Math.round((bx*BLOCO-CAM.x)*Z+W/2),py=Math.round((by*BLOCO-CAM.y)*Z+H/2),
+    pw=Math.round(((bx+1)*BLOCO-CAM.x)*Z+W/2)-px,ph=Math.round(((by+1)*BLOCO-CAM.y)*Z+H/2)-py;mc.drawImage(b.cv,px,py,pw+1,ph+1)}
+  if(trabalhar)trabalhoPendente(x0,y0,x1,y1)}
+/* blurred dark silhouettes in front of the characters (drawn on the .fx canvas, after them) */
+function desenharFrente(){const x0=CAM.x-VW*.7,x1=CAM.x+VW*.7,y0=CAM.y-VH*.75,y1=CAM.y+VH*.75,Z=ZOOM*PFRENTE;
+  fc.save();fc.setTransform(FD,0,0,FD,0,0);fc.globalAlpha=.92;fc.globalCompositeOperation='source-over';
+  for(const s of WORLD.salas){if(s.x>x1||s.x+s.w<x0||s.y>y1||s.y+s.h<y0)continue;const tm=temaDe(s.tema);
+    for(const f of s.frente){if(f.x<x0-300||f.x>x1+300||f.y<y0-300||f.y>y1+300)continue;const sp=spriteFrente(tm,f),k=Z*f.s,sx=FW/2+(f.x-CAM.x)*Z,sy=FH/2+(f.y-CAM.y)*Z;
+      fc.drawImage(sp.cv,sx-sp.ax*k,sy-sp.ay*k,sp.W*k,sp.H*k)}}
+  fc.restore()}
+/* first paint of what the camera sees (used at boot, before the opening ends) */
+function prepararVista(){const x0=CAM.x-VW/2,y0=CAM.y-VH/2,x1=x0+VW,y1=y0+VH;usoTick++;
+  for(let by=Math.floor(y0/BLOCO);by<=Math.floor(y1/BLOCO);by++)for(let bx=Math.floor(x0/BLOCO);bx<=Math.floor(x1/BLOCO);bx++){const b=blocoEm(bx,by);if(!b.pronto)detalhar(b)}
+  for(const s of WORLD.salas)if(!(s.x>x1||s.x+s.w<x0||s.y>y1||s.y+s.h<y0))fundoDe(s,true)}
+
+/* ---------- HUD, side map and minimap ---------- */
 function romanNum(n){let s='';for(const[v,r]of[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']])while(n>=v){s+=r;n-=v}return s}
-const roman=secs.map((s,i)=>romanNum(i+1));
+const roman=REGS.map((g,i)=>romanNum(i+1));
 const pips=document.getElementById('pips'),map=document.getElementById('map');
-secs.forEach(()=>pips.appendChild(document.createElement('span')));
+REGS.forEach(()=>pips.appendChild(document.createElement('span')));
 const pipEls=[...pips.children],mapEls=[...map.querySelectorAll('a')];
 const hudRegion=document.getElementById('hudRegion'),hudDepth=document.getElementById('hudDepth'),vfillEl=document.getElementById('vfill');
-const depths=secs.map(s=>+s.dataset.depth);
 let lastIdx=-1,maxIdx=0;
+const visitadas=new Set();
+const mini=document.getElementById('minimapa'),mic=mini?mini.getContext('2d'):null;
+function desenharMinimapa(px,py,reg){if(!mic||!mini.clientWidth)return;const D=Math.min(devicePixelRatio||1,2),W=mini.clientWidth,H=mini.clientHeight;if(mini.width!==Math.round(W*D)){mini.width=Math.round(W*D);mini.height=Math.round(H*D)}
+  const L=WORLD.limites,esc=Math.min((W-16)/(L.x1-L.x0),(H-16)/(L.y1-L.y0)),ox=(W-(L.x1-L.x0)*esc)/2-L.x0*esc,oy=(H-(L.y1-L.y0)*esc)/2-L.y0*esc;
+  mic.setTransform(D,0,0,D,0,0);mic.clearRect(0,0,W,H);
+  for(const s of WORLD.salas){const vis=visitadas.has(s.id),cur=s.regiao===reg;mic.fillStyle=cur?'rgba(232,224,207,.32)':vis?'rgba(232,224,207,.16)':'rgba(232,224,207,.05)';mic.strokeStyle=cur?'rgba(242,212,155,.9)':vis?'rgba(232,224,207,.55)':'rgba(232,224,207,.2)';mic.lineWidth=1;
+    mic.beginPath();mic.rect(ox+s.x*esc,oy+(s.ceu?s.y+s.h*.55:s.y)*esc,s.w*esc,(s.ceu?s.h*.45:s.h)*esc);mic.fill();mic.stroke()}
+  mic.fillStyle='#fff6dc';mic.beginPath();mic.arc(ox+px*esc,oy+py*esc,2.6,0,TAU);mic.fill();mic.strokeStyle='rgba(255,246,220,.5)';mic.beginPath();mic.arc(ox+px*esc,oy+py*esc,5.5,0,TAU);mic.stroke()}
 
 /* ---------- particles ---------- */
 const fx=document.getElementById('fx'),fc=fx.getContext('2d');let FW=0,FH=0,FD=1;
@@ -58,18 +122,14 @@ const FX={
 };
 function dot(c,col,x,y,rad,a){if(a<=.01)return;c.globalAlpha=Math.min(1,a);c.drawImage(sprite(col),x-rad,y-rad,rad*2,rad*2)}
 let pools=[];
-function initFx(){FD=Math.min(window.devicePixelRatio||1,1.5);FW=innerWidth;FH=innerHeight;fx.width=Math.round(FW*FD);fx.height=Math.round(FH*FD);fc.setTransform(FD,0,0,FD,0,0);
+function initFx(){FD=Math.min(window.devicePixelRatio||1,1.5);FW=innerWidth;FH=innerHeight;fx.width=Math.round(FW*FD);fx.height=Math.round(FH*FD);fc.setTransform(FD,0,0,FD,0,0);viewSetup();
   const k=clamp(FW*FH/(1440*900),.35,1.2);
-  pools=SREG.map(Rg=>Rg.fx.map(([type,n,col])=>{const arr=[];const m=Math.round(n*k*(reduce?.4:1));for(let j=0;j<m;j++){const p={x:R()*FW,y:R()*FH,col};FX[type].init(p);arr.push(p)}return{type,arr}}))}
+  pools=TEMA.map(t=>REG[t].fx.map(([type,n,col])=>{const arr=[];const m=Math.round(n*k*(reduce?.4:1));for(let j=0;j<m;j++){const p={x:R()*FW,y:R()*FH,col};FX[type].init(p);arr.push(p)}return{type,arr}}))}
 
-/* ---------- actors: the character walks the ground and jumps a trail of platforms between areas ---------- */
+/* ---------- actors ---------- */
 const LC=['#ffd896','#ffc77a','#d6ffe4','#ffdca8','#dbe9ff','#ffd8f0','#ffe2b0','#f3eeff'];/* by theme */
-const lcOf=i=>LC[TEMA[Math.max(0,i)]]||LC[0];
+const lcOf=i=>LC[TEMA[clamp(i|0,0,TEMA.length-1)]]||LC[0];
 const tri=p=>1-Math.abs((((p%2)+2)%2)-1);
-const rects=[],midOff=new Array(secs.length).fill(0);
-function canvasTop(i){const b=rects[i];return b.top-.1*b.height+midOff[i]}
-function groundAt(i,x){const Rg=SREG[i];if(!drawn[i]||!Rg.G||!rects[i])return null;const g=Rg.G(x);return g==null?null:canvasTop(i)+g}
-function ceilAt(i,x){const Rg=SREG[i];if(!rects[i])return null;return canvasTop(i)+(Rg.C?Rg.C(x):rects[i].height*.25)}
 const WH=(c0,f)=>f>0?mix(c0,'#ffffff',Math.min(1,f)):c0;
 function dotAt(col,x,y,rad,a){const o=fc.globalCompositeOperation;fc.globalCompositeOperation='lighter';dot(fc,col,x,y,rad,a);fc.globalAlpha=1;fc.globalCompositeOperation=o}
 
@@ -161,7 +221,6 @@ function eJelly(c,x,y,s,P,fl,t,ph){const pu=1+Math.sin(t*1.6+ph)*.12;dotAt(P.glo
   c.fillStyle=rgba(WH(P.body,fl),.55);c.beginPath();c.moveTo(-15*pu,0);c.bezierCurveTo(-15*pu,-22/pu,15*pu,-22/pu,15*pu,0);c.quadraticCurveTo(0,-5,-15*pu,0);c.fill();
   c.strokeStyle=rgba(P.glow,.45);c.lineWidth=1;for(let k=-2;k<=2;k++){c.beginPath();c.moveTo(k*5,0);c.bezierCurveTo(k*5+Math.sin(t*2+k)*7,14,k*5-Math.sin(t*2+k)*7,26,k*5+Math.sin(t*1.3+k)*4,40+Math.abs(k)*-4);c.stroke()}
   c.fillStyle=rgba('#ffffff',.7);c.beginPath();c.arc(-4,-8,1.6,0,TAU);c.arc(4,-8,1.6,0,TAU);c.fill();c.restore()}
-function dotAt(col,x,y,rad,a){const o=fc.globalCompositeOperation;fc.globalCompositeOperation='lighter';dot(fc,col,x,y,rad,a);fc.globalAlpha=1;fc.globalCompositeOperation=o}
 
 const ENEMY_DEF=[
  [{k:'crawler',x0:.66,rg:.36,sp:.05,P:{shell:'#2a3245',head:'#1a2030',leg:'#0d1119',eye:'#f4c97a'}},{k:'flyer',x0:.3,rg:.4,sp:.04,hv:190,P:{body:'#1a2132',wing:'#c9d6ee',eye:'#f4c97a'}}],

@@ -1,7 +1,7 @@
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0}
 img{max-width:100%}
-/* Layout: one continuous vertical descent; each realm is a parallax diorama (back / mid / copy / front) that dissolves into the next. */
+/* Layout: the portfolio sections scroll over a fixed 2D world map painted in canvas (js/02b, 03). */
 :root{
   color-scheme:dark;
   --void:#030407;
@@ -18,23 +18,13 @@ html{scroll-behavior:smooth;background:var(--void)}
 body{background:var(--void);color:var(--ink);font-family:var(--body);font-size:20px;line-height:1.55;overflow-x:hidden}
 main{position:relative}
 
-/* Each section: content on top, and a painted diorama band (back / mid / front canvases) anchored to the bottom of the section,
-   where the character walks. The band has a fixed height, so long content never stretches the scenery or moves the ground.
-   The section background fades to the void at the top, so a section dissolves into the next one. */
-:root{--band:max(800px,132vh)}
-.realm{
-  position:relative;min-height:var(--band);margin-top:-16vh;overflow:hidden;
-  display:flex;align-items:flex-start;
+/* The world (a 2D map painted in canvas #mundo) is a fixed backdrop; the sections are transparent blocks of content
+   scrolling over it. The empty space around each section is where the journey is seen. */
+.realm{position:relative;display:flex;align-items:flex-start;overflow-x:clip;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-block:30vh 12vh;
-  background:linear-gradient(to bottom,transparent 0,var(--void) 16vh);
-}
-.realm.hero{margin-top:0;background:var(--void);padding-block:17vh 12vh;justify-content:center}
-.diorama{position:absolute;left:0;right:0;bottom:0;height:var(--band);z-index:0;pointer-events:none;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 16vh);mask-image:linear-gradient(to bottom,transparent 0,#000 16vh)}
-.realm.hero .diorama{top:0;height:auto;-webkit-mask-image:none;mask-image:none}/* the opening section is painted from top to bottom */
-.lyr{position:absolute;left:0;top:-10%;width:100%;height:120%;display:block;pointer-events:none;will-change:transform}
-.lyr.back{z-index:0}.lyr.mid{z-index:1}.lyr.front{z-index:3}
+  padding-block:42vh 52vh}
+.realm.hero{padding-block:17vh 36vh;justify-content:center}
+.mundo{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
 
 /* above the game layer (.fx, z-index 20): the game never covers text or buttons */
 .copy{position:relative;z-index:25;max-width:31rem;width:100%;display:flex;flex-direction:column;gap:.9rem}
@@ -123,7 +113,7 @@ h2 small{display:block;font-family:var(--body);font-style:italic;font-weight:400
 .tbtn{background:var(--panel);border:1px solid var(--line)}
 .tbtn:hover,.seg button:hover{color:var(--bone)}.seg button[aria-pressed="true"]:hover{color:var(--void)}
 .topbar button:focus-visible,.pbar button:focus-visible,.panel button:focus-visible,.panel input:focus-visible,.panel select:focus-visible,.pad button:focus-visible{outline:2px solid var(--bone);outline-offset:2px}
-.map{top:calc(50% - 30px)}
+.map{top:calc(50% + 40px)}
 
 .ghud{display:none;align-items:center;gap:10px;margin-top:5px}
 .playing .ghud{display:flex}
