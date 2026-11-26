@@ -404,8 +404,8 @@ body::before{content:"";position:fixed;z-index:29;left:0;right:0;top:0;height:ca
 /* easter egg ↑↑↓↓←→←→BA: tinta escura sobre papel */
 .modo-papel #mundo,.modo-papel #fx{filter:invert(1) hue-rotate(180deg) sepia(.35) saturate(.8)}
 /* dentro das janelas (.panel), os botões do resumo continuam com cara de tinta, não de botão cheio */
-.panel button.abrir-area,.panel .tr-mais button{background:none;border:0;color:var(--bone);padding:.5rem .1rem;letter-spacing:.2em;font-size:.8rem}
-.panel .tr-mais button{width:100%;text-align:left;color:var(--ink-dim);font-size:.74rem;letter-spacing:.18em;padding:.55rem .2rem}
+.panel button.abrir-area:not(.x):not(.lnk),.panel .tr-mais button:not(.x):not(.lnk){background:none;border:0;color:var(--bone);padding:.5rem .1rem;letter-spacing:.2em;font-size:.8rem}
+.panel .tr-mais button:not(.x):not(.lnk){width:100%;text-align:left;color:var(--ink-dim);font-size:.74rem;letter-spacing:.18em;padding:.55rem .2rem}
 .panel button.abrir-area:hover,.panel button.abrir-area:focus-visible{color:var(--accent)}
 
 /* HUD e minimapa desenhados a tinta (js/03b-hud.js, desenharMinimapa em js/03-cenario.js) */
