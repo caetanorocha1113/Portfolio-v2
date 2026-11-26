@@ -41,12 +41,31 @@ function usarPoder(id){const p=poderDe(id);if(!p)return;if(p.estado!=='liberado'
   if(p.custo&&PL.luz<p.custo){toast('Energia insuficiente. Acerte criaturas para encher o frasco.');sfx('trava');return}
   if(p.custo)PL.luz-=p.custo;acao(p)}
 
-/* painel de poderes */
+/* painel de poderes: grade de medalhões por grupo (resumo) e, ao lado, o detalhe do poder escolhido */
+let powSel=null;
+function powDetalhe(p){const d=$('powDet');if(!d||!p)return;const ok=p.estado==='liberado';d.classList.toggle('on',ok);
+  d.innerHTML=`<div class="pwd-cab"><svg class="pwd-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="${p.icone}"/></svg><div><p class="pwd-g"></p><h4></h4><p class="pwd-st">${ok?'Liberado':'Bloqueado · em construção'}</p></div></div>
+    <p class="pwd-d"></p><dl class="pwd-dl"><div><dt>Controle</dt><dd class="k"></dd></div>${p.custo?`<div><dt>Custo</dt><dd>${p.custo} de energia <span class="pwd-nota">(enche ao acertar criaturas)</span></dd></div>`:''}</dl>
+    <details class="pwd-tec"><summary>Para quem monta o jogo</summary><p>Pastas de animação em <code>recursos/personagem/</code>: <span class="an"></span>.</p></details>`;
+  d.querySelector('.pwd-g').textContent=p.grupo;d.querySelector('h4').textContent=p.nome;d.querySelector('.pwd-d').textContent=p.desc;
+  d.querySelector('.k').append(...String(p.tecla).split(/(\b[A-Z]\b|Shift|Espaço)/).filter(Boolean).map(t=>{if(/^([A-Z]|Shift|Espaço)$/.test(t)){const k=document.createElement('kbd');k.textContent=t;return k}return t}));
+  d.querySelector('.an').textContent=p.anims.length?p.anims.join(', '):'nenhuma'}
 function renderPoderes(){const g=$('powGrid');if(!g)return;g.innerHTML='';
-  for(const p of PODERES){const ok=p.estado==='liberado',card=document.createElement('article');card.className='pow'+(ok?' on':'');
-    card.innerHTML=`<svg class="powic" viewBox="0 0 24 24" aria-hidden="true"><path d="${p.icone}"/></svg><div class="powtx"><p class="powg"></p><h4></h4><p class="powd"></p><dl><div><dt>Controle</dt><dd class="k"></dd></div>${p.custo?`<div><dt>Custo</dt><dd>${p.custo} de energia</dd></div>`:''}<div><dt>Pastas</dt><dd class="an"></dd></div></dl></div><span class="powst">${ok?'Liberado':'Bloqueado · em construção'}</span>`;
-    card.querySelector('.powg').textContent=p.grupo;card.querySelector('h4').textContent=p.nome;card.querySelector('.powd').textContent=p.desc;card.querySelector('.k').textContent=p.tecla;card.querySelector('.an').textContent=p.anims.length?p.anims.join(', '):'nenhuma';g.appendChild(card)}
-  const n=PODERES.filter(p=>p.estado==='liberado').length;$('powInfo').textContent=`${n} de ${PODERES.length} poderes liberados. Os bloqueados serão liberados aos poucos, conforme forem construídos. A energia (o frasco do canto) enche quando o personagem acerta criaturas e é gasta pelas magias.`}
+  const grupos=[...new Set(PODERES.map(p=>p.grupo))],wrap=document.createElement('div');wrap.className='pw-grupos';const slots=[];
+  for(const gr of grupos){const sec=document.createElement('section');sec.className='pw-grupo';const h=document.createElement('h4');h.textContent=gr;const row=document.createElement('div');row.className='pw-slots';row.setAttribute('role','listbox');row.setAttribute('aria-label',gr);
+    for(const p of PODERES.filter(q=>q.grupo===gr)){const ok=p.estado==='liberado',b=document.createElement('button');b.type='button';b.className='pw-slot'+(ok?' on':'');b.setAttribute('role','option');b.dataset.id=p.id;b.setAttribute('aria-label',p.nome+(ok?'':' (bloqueado)'));b.tabIndex=-1;
+      b.innerHTML=`<svg viewBox="0 0 64 64" aria-hidden="true"><circle class="pw-aro" cx="32" cy="32" r="27"/><circle class="pw-aro2" cx="32" cy="32" r="22.5"/><g transform="translate(20 20)"><path class="pw-ic" d="${p.icone}"/></g>${ok?'':'<path class="pw-trava" d="M47 45h9v8h-9zM48.6 45v-2.4a2.9 2.9 0 0 1 5.8 0V45"/>'}</svg><span class="pw-nome"></span>`;
+      b.querySelector('.pw-nome').textContent=p.nome;
+      b.onmouseenter=b.onfocus=()=>powDetalhe(p);b.onmouseleave=()=>powDetalhe(poderDe(powSel)||p);
+      b.onclick=()=>{powSel=p.id;slots.forEach(x=>x.setAttribute('aria-selected',String(x===b)));powDetalhe(p)};
+      row.appendChild(b);slots.push(b)}
+    sec.append(h,row);wrap.appendChild(sec)}
+  const det=document.createElement('article');det.className='pw-det';det.id='powDet';det.setAttribute('aria-live','polite');
+  g.append(wrap,det);
+  /* setas do teclado andam entre os medalhões */
+  wrap.onkeydown=e=>{const k=slots.indexOf(document.activeElement);if(k<0)return;const d=e.key==='ArrowRight'||e.key==='ArrowDown'?1:e.key==='ArrowLeft'||e.key==='ArrowUp'?-1:0;if(!d)return;e.preventDefault();const n=slots[(k+d+slots.length)%slots.length];slots.forEach(x=>x.tabIndex=-1);n.tabIndex=0;n.focus()};
+  const ini=poderDe(powSel)||PODERES.find(p=>p.estado==='liberado')||PODERES[0];powSel=ini.id;const b0=slots.find(x=>x.dataset.id===ini.id);b0.tabIndex=0;b0.setAttribute('aria-selected','true');powDetalhe(ini);
+  const n=PODERES.filter(p=>p.estado==='liberado').length;$('powInfo').innerHTML=`<span class="pw-cont">${PODERES.map(p=>`<i class="${p.estado==='liberado'?'on':''}"></i>`).join('')}</span> ${n} de ${PODERES.length} liberados. Os outros chegam aos poucos.`}
 function openPoderes(){renderPoderes();$('powModal').hidden=false;paused=true;$('powModal').querySelector('.x').focus()}
 $('openPow').onclick=()=>$('powModal').hidden?openPoderes():closePanels();
 $('powModal').addEventListener('click',e=>{if(e.target===$('powModal'))closePanels()});

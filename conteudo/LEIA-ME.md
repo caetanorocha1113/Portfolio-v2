@@ -1,6 +1,6 @@
 # Pasta `conteudo/`
 
-Aqui fica o portfólio em si. O site lê [`portfolio.json`](portfolio.json) e monta tudo a partir dele: a abertura, o início, uma área por matéria, os cartões das atividades, o detalhe de cada atividade, Sobre e Contato.
+Aqui fica o portfólio em si. O site lê [`portfolio.json`](portfolio.json) e monta tudo a partir dele: a abertura, o início, uma área por matéria (resumida, com o registro completo ao abrir), a lista das atividades, o detalhe de cada atividade, Sobre e Contato.
 
 > Os arquivos do jogo (personagem, inimigos, fontes, sons) ficam em `recursos/`. Os do portfólio (fotos, imagens e arquivos das atividades) ficam aqui.
 
@@ -16,7 +16,7 @@ Tudo o que está entre colchetes, como `[e-mail]` ou `[ano / semestre]`, aparece
   "titulo": "Nome da atividade",
   "tipo": "projeto",
   "data": "2025-03",
-  "resumo": "Uma frase que aparece no cartão.",
+  "resumo": "Uma frase: aparece na lista da área ao passar o mouse e inteira com o registro aberto.",
   "descricao": "Texto completo.\n\nUma linha em branco separa parágrafos.",
   "imagens": ["conteudo/atividades/projeto-1/capa.jpg"],
   "links": [{ "rotulo": "Ver arquivo", "url": "conteudo/atividades/projeto-1/arquivo.pdf" }],
@@ -27,20 +27,22 @@ Tudo o que está entre colchetes, como `[e-mail]` ou `[ano / semestre]`, aparece
 
 - `tipo`: `projeto`, `trabalho`, `prova`, `apresentação` ou `outro`.
 - `destaque`: aparece primeiro na área, com selo.
-- A primeira imagem vira a capa do cartão. Sem imagem, o cartão ganha uma capa desenhada.
+- A primeira imagem vira a miniatura da atividade na lista da área (e aparece no detalhe). Sem imagem, a miniatura ganha o desenho do tipo.
 - Imagens também podem ter legenda: `{ "src": "conteudo/…/foto.jpg", "legenda": "…" }`.
 - Cada atividade tem endereço próprio, por exemplo `#humanas/projeto-1`. Dá para mandar o link direto.
 - Sugestão de pastas: `conteudo/imagens/` (foto) e `conteudo/atividades/<id>/` (imagens e arquivos de cada atividade).
 
 ## Áreas (matérias)
 
-Cada área tem `id`, `materia`, `titulo_area` (o nome no mapa), `periodo`, `descricao`, `competencias`, `tema` e `atividades`. A ordem do arquivo é a ordem do mapa. O bloco `jogo` guarda o que o modo Jogo usa (texto de abertura da área, chefe, poder, músicas).
+Cada área tem `id`, `materia`, `titulo_area` (o nome no mapa), `periodo`, `descricao`, `competencias`, `tema` e `atividades`. A ordem do arquivo é a ordem do mapa.
+
+Cada área aparece **resumida**: o nome, a primeira frase de `descricao`, a contagem de atividades, competências e destaques, e a lista curta das atividades (até `site.atividades_visiveis`; as outras aparecem como "+ N atividades"). O botão **Abrir registro** mostra a descrição inteira, as competências e o resumo e a miniatura de cada atividade. Clicar numa atividade abre o detalhe completo. Em Sobre, o primeiro parágrafo aparece e o resto abre com **Ler tudo**. O bloco `jogo` guarda o que o modo Jogo usa (texto de abertura da área, chefe, poder, músicas).
 
 Temas disponíveis: `cinzaraiz`, `galerias`, `sendas`, `brejo`, `cidadela`, `minas`, `ninho`, `fosso`. Duas matérias podem usar o mesmo tema: a cor muda sozinha.
 
 ## Abertura
 
-`abertura.falas` são os textos da abertura de cinema. `abertura.mostrar` pode ser `sempre`, `uma_vez_por_sessao` ou `nunca`.
+`abertura.falas` são os três textos da abertura de cinema (desenhada a tinta: a gota, o livro, as páginas que viram o mapa e o título). `abertura.mostrar` pode ser `sempre`, `uma_vez_por_sessao` ou `nunca`.
 
 ## Compartilhamento
 

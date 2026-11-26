@@ -154,7 +154,10 @@
     pts.push([s.x + s.w, topo(s.n - 1)], [s.x + s.w, chao(s.n - 1)]);
     for (let k = s.n - 1; k >= 0; k -= passo) pts.push([s.x + Math.min(k * P, s.w), chao(k)]);
     pts.push([s.x, chao(0)]);
-    return 'M' + pts.map(([x, y]) => Math.round(x) + ' ' + Math.round(y)).join('L') + 'Z';
+    /* cantos arredondados (duas passadas de Chaikin): o mapa fica com cara de desenhado, igual ao da abertura */
+    let q = pts;
+    for (let r = 0; r < 2; r++) q = q.flatMap((a, i) => { const c = q[(i + 1) % q.length]; return [[a[0] * .75 + c[0] * .25, a[1] * .75 + c[1] * .25], [a[0] * .25 + c[0] * .75, a[1] * .25 + c[1] * .75]]; });
+    return 'M' + q.map(([x, y]) => Math.round(x) + ' ' + Math.round(y)).join('L') + 'Z';
   }
   function mapaDoMundo(m, d) {
     const L = m.limites, pad = 700, vb = [L.x0 - pad, L.y0 + 600 - pad, L.x1 - L.x0 + 2 * pad, L.y1 - L.y0 - 600 + 2 * pad];
@@ -214,44 +217,75 @@
       el('span', { class: 'capa-n', 'aria-hidden': 'true' }, num),
       el('span', { class: 'capa-ic-w', 'aria-hidden': 'true', html: '<svg class="capa-ic" viewBox="0 0 24 24"><path d="' + ic + '"/></svg>' }));
   }
-  function cartao(area, atv, k, visiveis) {
-    const meta = [TIPOS[atv.tipo] || 'Outro'];
+  /* primeira frase de um texto (o resumo que aparece antes de abrir o registro) */
+  function primeiraFrase(s, max) {
+    const t = texto(s).replace(/\s+/g, ' ').trim();
+    if (!t || soMarcador(t)) return t;
+    const m = t.match(/^.{24,}?[.!?…](?=\s|$)/);
+    let f = m ? m[0] : t;
+    if (f.length > (max || 170)) f = f.slice(0, max || 170).replace(/[\s,;:]+\S*$/, '') + '…';
+    return f;
+  }
+  /* uma atividade na trilha da área: linha curta; mostra o resumo ao passar o mouse e tudo quando o registro abre */
+  function itemTrilha(area, atv, k, visiveis) {
+    const meta = [romano(k + 1), TIPOS[atv.tipo] || 'Outro'];
     if (atv.data) meta.push(dataBonita(atv.data));
-    return el('article', { class: 'card' + (k >= visiveis ? ' oculto' : '') + (atv.destaque ? ' destaque' : ''), role: 'listitem' },
-      el('a', { class: 'card-a', href: '#' + area.id + '/' + atv.id, 'data-area': area.id, 'data-atv': atv.id },
-        capa(area, atv, romano(k + 1)),
-        el('div', { class: 'card-txt' },
-          el('p', { class: 'card-meta' }, meta.join(' · '),
+    const img = atv.imagens[0], ic = ICONE_TIPO[atv.tipo] || ICONE_TIPO.outro;
+    const mini = img ? el('span', { class: 'tr-mini' }, el('img', { src: img.src, alt: '', loading: 'lazy', decoding: 'async' }))
+      : el('span', { class: 'tr-mini tr-mini-arte', html: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + ic + '"/></svg>' });
+    return el('li', { class: 'tr-item' + (k >= visiveis ? ' alem' : '') + (atv.destaque ? ' destaque' : ''), style: '--i:' + k },
+      el('a', { class: 'tr-a', href: '#' + area.id + '/' + atv.id, 'data-area': area.id, 'data-atv': atv.id },
+        mini,
+        el('span', { class: 'tr-txt' },
+          el('span', { class: 'tr-tit' }, comMarcadores(atv.titulo || 'Sem título')),
+          el('span', { class: 'tr-meta' }, meta.join(' · '),
             atv.destaque ? el('span', { class: 'selo selo-destaque' }, 'destaque') : null,
             atv.exemplo ? el('span', { class: 'selo' }, 'exemplo') : null),
-          el('h3', null, comMarcadores(atv.titulo || 'Sem título')),
-          atv.resumo ? el('p', { class: 'card-resumo' }, comMarcadores(atv.resumo)) : null)));
+          atv.resumo ? el('span', { class: 'tr-resumo' }, comMarcadores(atv.resumo)) : null),
+        el('span', { class: 'tr-seta', 'aria-hidden': 'true', html: '<svg viewBox="0 0 24 12"><path d="M1 6h20M16 1.5 21.5 6 16 10.5"/></svg>' })));
   }
+  const ORNAMENTO = '<svg class="orn-tinta" viewBox="0 0 320 22" aria-hidden="true"><path d="M3 13 C48 6 92 17 138 11 C146 10 150 9 152 8 M168 8 C172 9 178 10 186 11 C232 17 276 6 317 12"/><path class="orn-losango" d="M160 3 L166.5 9.5 L160 16 L153.5 9.5 Z"/></svg>';
+  const CHEVRON = '<svg viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 2 8 8.5 14.5 2"/></svg>';
 
   function montarArea(d, a, i) {
     const n = i + 2, lado = i % 2 ? 'r' : 'l';
     const sec = secao(a.id, a.tema, texto(a.materia), d._temas.variantes[i + 1], 'area', Math.round(n === 1 ? 0 : (n - 1) * 380));
     const visiveis = Math.max(1, +d.site.atividades_visiveis || 4);
-    const cards = el('div', { class: 'cards', role: 'list', 'aria-label': 'Atividades de ' + texto(a.materia) },
-      a.atividades.map((t, k) => cartao(a, t, k, visiveis)));
-    const extra = a.atividades.length - visiveis;
-    const mais = extra > 0 ? el('button', {
-      type: 'button', class: 'botao fantasma mais', 'aria-expanded': 'false',
-      onclick: e => {
-        const aberto = e.currentTarget.getAttribute('aria-expanded') === 'true';
-        cards.querySelectorAll('.card').forEach((c, k) => c.classList.toggle('oculto', aberto && k >= visiveis));
-        e.currentTarget.setAttribute('aria-expanded', String(!aberto));
-        e.currentTarget.textContent = aberto ? `Ver todas as ${a.atividades.length} atividades` : 'Mostrar menos';
-      }
-    }, `Ver todas as ${a.atividades.length} atividades`) : null;
-    const vazio = a.atividades.length ? null : el('p', { class: 'vazio' }, comMarcadores('[As atividades desta matéria aparecem aqui.]'));
-    const copy = el('div', { class: 'copy painel-area ' + lado },
-      el('header', { class: 'area-cab' },
-        el('p', { class: 'eyebrow' }, `Área ${romano(n)}`, a.titulo_area ? ' · ' : '', a.titulo_area ? comMarcadores(a.titulo_area) : null),
-        el('h2', { id: 't-' + a.id }, texto(a.materia), a.periodo ? el('small', null, comMarcadores(a.periodo)) : null),
-        a.descricao ? el('p', { class: 'lede' }, comMarcadores(a.descricao)) : null,
-        a.competencias.length ? el('ul', { class: 'comp', 'aria-label': 'Competências' }, a.competencias.map(c => el('li', null, comMarcadores(c)))) : null),
-      cards, vazio, mais);
+    const total = a.atividades.length, extra = total - visiveis, destaques = a.atividades.filter(t => t.destaque).length;
+    const resumo = primeiraFrase(a.descricao, 170);
+    const idMais = 'reg-' + a.id;
+    const num = (q, um, varios) => el('li', null, el('b', null, String(q)), ' ' + (q === 1 ? um : varios));
+    const trilha = total ? el('ol', { class: 'trilha', 'aria-label': 'Atividades de ' + texto(a.materia) },
+      a.atividades.map((t, k) => itemTrilha(a, t, k, visiveis)),
+      extra > 0 ? el('li', { class: 'tr-mais' }, el('button', { type: 'button', onclick: () => alternar(true) }, `+ ${extra} ${extra === 1 ? 'atividade' : 'atividades'}`)) : null)
+      : el('p', { class: 'vazio' }, comMarcadores('[As atividades desta matéria aparecem aqui.]'));
+    const mais = el('div', { class: 'area-mais', id: idMais },
+      el('div', { class: 'area-mais-in' },
+        a.descricao ? el('div', { class: 'area-desc' }, paragrafos(a.descricao, 'lede')) : null,
+        a.competencias.length ? el('h3', { class: 'sub' }, 'Competências') : null,
+        a.competencias.length ? el('ul', { class: 'comp', 'aria-label': 'Competências' }, a.competencias.map(c => el('li', null, comMarcadores(c)))) : null));
+    const botao = el('button', { type: 'button', class: 'abrir-area', 'aria-expanded': 'false', 'aria-controls': idMais, onclick: () => alternar() },
+      el('span', { class: 'ab-txt' }, 'Abrir registro'), el('span', { class: 'ab-ic', html: CHEVRON }));
+    const partes = [
+      el('p', { class: 'eyebrow' }, `Área ${romano(n)}`, a.titulo_area ? ' · ' : '', a.titulo_area ? comMarcadores(a.titulo_area) : null),
+      el('h2', { id: 't-' + a.id }, texto(a.materia), a.periodo ? el('small', null, comMarcadores(a.periodo)) : null),
+      el('div', { class: 'orn', html: ORNAMENTO }),
+      resumo ? el('p', { class: 'area-resumo' }, comMarcadores(resumo)) : null,
+      el('ul', { class: 'area-num', 'aria-label': 'Resumo da área' }, num(total, 'atividade', 'atividades'),
+        a.competencias.length ? num(a.competencias.length, 'competência', 'competências') : null,
+        destaques ? num(destaques, 'destaque', 'destaques') : null),
+      mais, trilha, botao].filter(Boolean);
+    partes.forEach((p, k) => p.style.setProperty('--i', k));
+    const copy = el('div', { class: 'copy painel-area ' + lado }, partes);
+    mais.inert = true;
+    function alternar(forcar) {
+      const aberto = forcar != null ? forcar : !copy.classList.contains('aberto');
+      copy.classList.toggle('aberto', aberto);
+      botao.setAttribute('aria-expanded', String(aberto));
+      botao.querySelector('.ab-txt').textContent = aberto ? 'Fechar registro' : 'Abrir registro';
+      mais.inert = !aberto;
+      if (!aberto) requestAnimationFrame(() => botao.scrollIntoView({ block: 'nearest', behavior: reduzido() ? 'auto' : 'smooth' }));
+    }
     sec.append(copy);
     return sec;
   }
@@ -260,6 +294,22 @@
     const ok = () => { aviso.textContent = 'Copiado.'; setTimeout(() => { aviso.textContent = ''; }, 2400); };
     if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(textoCopiar).then(ok, () => { aviso.textContent = textoCopiar; });
     else { aviso.textContent = textoCopiar; }
+  }
+
+  /* Sobre: o primeiro parágrafo aparece; o resto abre com "Ler tudo" */
+  function sobreResumido(txt) {
+    const ps = paragrafos(txt, 'lede');
+    if (ps.length < 2) return el('div', { class: 'sobre-txt' }, ps);
+    const resto = el('div', { class: 'area-mais sobre-mais', id: 'sobre-mais' }, el('div', { class: 'area-mais-in' }, ps.slice(1)));
+    resto.inert = true;
+    const caixa = el('div', { class: 'sobre-txt' }, ps[0], resto);
+    const botao = el('button', { type: 'button', class: 'abrir-area', 'aria-expanded': 'false', 'aria-controls': 'sobre-mais', onclick: () => {
+      const aberto = !caixa.classList.contains('aberto');
+      caixa.classList.toggle('aberto', aberto); resto.inert = !aberto;
+      botao.setAttribute('aria-expanded', String(aberto)); botao.querySelector('.ab-txt').textContent = aberto ? 'Mostrar menos' : 'Ler tudo';
+    } }, el('span', { class: 'ab-txt' }, 'Ler tudo'), el('span', { class: 'ab-ic', html: CHEVRON }));
+    caixa.append(botao);
+    return caixa;
   }
 
   function montarFinal(d, total) {
@@ -272,7 +322,7 @@
     const copy = el('div', { class: 'copy painel-final r' },
       el('p', { class: 'eyebrow' }, 'Fim do mapa'),
       el('h2', { id: 't-sobre' }, 'Sobre', el('small', null, 'Quem atravessou o mapa')),
-      el('div', { class: 'sobre-txt' }, paragrafos(d.sobre || '[Texto sobre você.]', 'lede')),
+      sobreResumido(d.sobre || '[Texto sobre você.]'),
       el('h3', { class: 'sub' }, 'Contato'),
       el('dl', { class: 'contato' },
         el('div', null, el('dt', null, 'E-mail'), el('dd', null,
@@ -288,6 +338,14 @@
   }
   const reduzido = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* os painéis aparecem aos poucos quando chegam à tela (sem animação para quem pediu menos movimento) */
+  function revelar(secs) {
+    if (!('IntersectionObserver' in window) || reduzido()) return;
+    document.documentElement.classList.add('revela');
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visto'); io.unobserve(e.target); } }), { threshold: .15 });
+    secs.forEach(s => { const c = s.querySelector('.painel-area, .painel-final'); if (c) io.observe(c); });
+  }
+
   function montar(d) {
     const main = document.getElementById('conteudo');
     main.textContent = '';
@@ -302,6 +360,7 @@
     d.areas.forEach((a, i) => secs.push(montarArea(d, a, i)));
     secs.push(montarFinal(d, d.areas.length + 2));
     secs.forEach(s => main.append(s));
+    revelar(secs);
     C.secoes = secs;
     C.areas = d.areas;
     /* mapa fixo à direita: uma entrada por seção, na mesma ordem (o motor usa essa ordem) */

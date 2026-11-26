@@ -7,7 +7,7 @@ Portfólio escolar apresentado como uma jornada por um mapa. Cada área do mapa 
 - **Jogo**: plataforma com teclado ou toque, explorando livremente o mesmo mapa. A história, os Guardiões de cada área e a trilha da jornada estão em construção.
 - **Conteúdo**: tudo o que se lê vem de [`conteudo/portfolio.json`](conteudo/portfolio.json). Mudar o arquivo muda o site. Veja [`conteudo/LEIA-ME.md`](conteudo/LEIA-ME.md).
 - **Pasta `recursos/`**: personagem, inimigos, fontes, fundos, sons e músicas do jogo. Coloque arquivos com os nomes certos e eles carregam sozinhos. Lista completa em [`recursos/LEIA-ME.md`](recursos/LEIA-ME.md).
-- **Abertura**: uma abertura de cinema antes do site, com os textos em `conteudo/portfolio.json` (`abertura`). Dá para pular; o botão "Rever abertura" toca de novo.
+- **Abertura**: uma abertura de cinema desenhada a tinta antes do site (uma gota vira um livro, as páginas voam e viram o mapa do mundo, o título pousa no lugar), com os textos em `conteudo/portfolio.json` (`abertura`). Dá para pular; o botão "Rever abertura" toca de novo.
 
 ## Rodar
 
@@ -23,12 +23,12 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 |---|---|
 | `index.html` | esqueleto da página (barra, player, painéis, abertura, detalhe) |
 | `css/estilo.css` | estilos do cenário, do jogo e dos painéis |
-| `css/portfolio.css` | estilos do portfólio (abertura, início, áreas, cartões, detalhe, sobre) |
+| `css/portfolio.css` | estilos do portfólio (abertura, início, áreas resumidas e registro, detalhe, sobre, HUD, poderes) |
 | `conteudo/portfolio.json` | o conteúdo do portfólio |
 | `conteudo/` | imagens e arquivos das atividades |
 | `js/00a-mundo.js` | gera o mapa 2D (salas, portas, poços, chão e teto, plataformas, caminho do Passeio) |
-| `js/00b-conteudo.js` | lê o conteúdo, monta as seções, cartões, detalhe e rotas (`#area/atividade`), o mapa do início, e carrega o motor |
-| `js/00c-abertura.js` | abertura de cinema |
+| `js/00b-conteudo.js` | lê o conteúdo, monta as seções (área resumida + registro que abre), a lista de atividades, o detalhe e as rotas (`#area/atividade`), o mapa do início, e carrega o motor |
+| `js/00c-abertura.js` | abertura de cinema desenhada a tinta (gota, gavinhas, livro, páginas, mapa do mundo, título) |
 | `js/01-base.js` | utilitários e kit de pintura (formas, folhagem, cristais, luz) |
 | `js/02-regioes.js` | os oito temas: fundos distantes pintados e partículas |
 | `js/02b-salas.js` | pintura das salas no estilo desenhado: rocha, aros, estalactites, enfeites por tema, plataformas, frente desfocada |

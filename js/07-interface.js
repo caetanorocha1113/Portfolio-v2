@@ -176,7 +176,7 @@ conteudo:['Conteúdo',`<h4>O arquivo <code>conteudo/portfolio.json</code></h4>
   "tags": ["…"], "destaque": true }</pre>
 <ul><li><code>tipo</code>: projeto, trabalho, prova, apresentação ou outro.</li>
 <li><code>destaque</code>: aparece primeiro, com selo.</li>
-<li>A 1ª imagem vira a capa do cartão. Sem imagem, o cartão ganha uma capa desenhada.</li>
+<li>A 1ª imagem vira a miniatura da atividade na lista da área. Sem imagem, a miniatura ganha o desenho do tipo.</li><li>Cada área aparece resumida (primeira frase da descrição, contagens e lista curta); <b>Abrir registro</b> mostra tudo. <code>site.atividades_visiveis</code> diz quantas atividades aparecem antes do "+ N".</li>
 <li>Na <code>descricao</code>, uma linha em branco (<code>\\n\\n</code>) separa parágrafos.</li>
 <li>Cada atividade tem endereço próprio: <code>#humanas/projeto-1</code>. Dá para mandar o link direto.</li>
 <li>Texto entre colchetes, como <code>[e-mail]</code>, aparece destacado: é o que ainda falta preencher.</li></ul>

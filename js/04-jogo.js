@@ -102,7 +102,9 @@ function colocar(e,v){e.sala=v.sala;e.cx=v.x;e.cy=v.y;e.x=v.x;e.vx=e.vy=0;e.kbv=
   else if(e.beh==='flutuar')e.y=e.sala.y+e.sala.h*(e.yf||.5);
   else e.y=e.air?v.y-(e.hv||170):v.y}
 function redistribuirInimigos(){for(let i=0;i<ENEMIES.length;i++){const list=ENEMIES[i];if(!list.length)continue;
-    const vagas=REGS[i].salas.map(k=>WORLD.salas[k]).filter(s=>s.tipo!=='poco').flatMap(s=>(s.vagasInimigo||[]).map(v=>({...v,sala:s})));if(!vagas.length)continue;
+    /* nada nasce em cima de quem chega: as vagas perto do ponto de chegada da região ficam de fora (se sobrar alguma) */
+    const sp=spawnPoint(i),todas=REGS[i].salas.map(k=>WORLD.salas[k]).filter(s=>s.tipo!=='poco').flatMap(s=>(s.vagasInimigo||[]).map(v=>({...v,sala:s}))),
+      longe=todas.filter(v=>Math.hypot(v.x-sp.x,v.y-sp.y)>560),vagas=longe.length?longe:todas;if(!vagas.length)continue;
     const ordem=list.map((e,k)=>[e,(k*.618034)%1]).sort((a,b)=>a[1]-b[1]).map(a=>a[0]);
     ordem.forEach((e,k)=>{e.home=vagas[Math.min(vagas.length-1,Math.floor((k+.5)/ordem.length*vagas.length))];colocar(e,e.home)})}}
 redistribuirInimigos();
