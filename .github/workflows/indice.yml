@@ -1,9 +1,9 @@
-# Gera recursos/indice.json sozinho sempre que algo muda em recursos/.
+# Gera recursos/indice.json sozinho sempre que algo muda em recursos/ (na main e nos branches claude/…).
 name: Índice de recursos
 
 on:
   push:
-    branches: [main]
+    branches: [main, "claude/**"]
     paths:
       - "recursos/**"
       - "ferramentas/gerar-indice.py"
@@ -36,5 +36,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add recursos/indice.json
           git commit -m "Atualiza recursos/indice.json"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
