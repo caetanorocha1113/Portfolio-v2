@@ -37,14 +37,14 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `js/02c-pintor.js` | pintor em segundo plano (Web Worker): pinta os blocos do mapa e os fundos sem travar o jogo |
 | `js/03-cenario.js` | câmera, blocos pintados do mundo, fundos com parallax, tinta e papel, minimapa, HUD, partículas, criaturas desenhadas |
 | `js/03c-vivos.js` | cenário vivo: plantas que se dobram, lanternas e cipós que balançam, vasos, caixas, livros e cristais que quebram e soltam fragmentos de luz, borboletas que fogem |
-| `js/03b-hud.js` | HUD desenhado a tinta: medalhão com a luz líquida, nome da área com floreio, páginas de vida, fragmentos e páginas do Atlas |
+| `js/03b-hud.js` | HUD desenhado a tinta: tinteiro com a luz líquida e a pena, gotas de vida num traço de pena, fragmentos de luz, páginas do Atlas e o nome da área |
 | `js/04-jogo.js` | colisão com o mapa, modo Passeio (rolagem → caminho), modo Jogo, inimigos (percepção, alerta, preparo, ataque), combate |
 | `js/04c-inimigos.js` | o comportamento de cada criatura (patrulha, emboscada, escudo, mergulho, raio, concha, esporos…), projéteis, raios, nuvens e o dano |
 | `js/04b-segredos.js` | o portfólio dentro do jogo: placa de cada matéria, páginas das atividades, paredes falsas, salas secretas e easter eggs |
 | `js/05-audio.js` | trilha gerada, efeitos sonoros, motor do player |
 | `js/05b-sons.js` | música que acompanha a área (com a versão de combate e a das salas secretas), passos e outros sons em laço, vozes sintetizadas das criaturas e sons do cenário |
 | `js/06-loop.js` | laço de animação e parallax |
-| `js/07-interface.js` | player, modos, controles, Oficina, Guia |
+| `js/07-interface.js` | player de música no canto, modos, controles e Guia (com a lista do que a pasta `recursos/` carregou) |
 | `js/08-pasta-recursos.js` | carregamento automático da pasta `recursos/` |
 | `js/08b-poderes.js` | lista de poderes, estado (liberado/bloqueado) e painel |
 | `js/09-inicio.js` | inicialização do motor |
@@ -56,4 +56,3 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 
 Os scripts são clássicos (não módulos) e compartilham o escopo global, na ordem numérica: um nome declarado duas vezes quebra o site. `js/00-tinta.js`, `js/00a-mundo.js`, `js/00b-conteudo.js` e `js/00c-abertura.js` ficam dentro de funções e só expõem `TINTA`, `MUNDO`, `CONTEUDO` e `ABERTURA`. O conteúdo aparece mesmo se o motor do jogo falhar. A pintura pesada do cenário roda em `js/02c-pintor.js` (Web Worker, que carrega `01-base.js`, `02-regioes.js`, `00a-mundo.js`, `02b-salas.js` e `02d-enfeites.js`); aberto direto do disco (`file://`) ou num navegador sem `OffscreenCanvas`, a pintura volta para a página, um pedaço por quadro.
 
-A Oficina é uma ferramenta temporária de produção e sai do site quando ele ficar pronto.

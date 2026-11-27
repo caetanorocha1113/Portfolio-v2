@@ -150,7 +150,7 @@ function abrirPainelArea(j){const m=document.getElementById('painelJogo');if(!m|
 {const m=document.getElementById('painelJogo');if(m){m.querySelector('.x').onclick=()=>closePanels();m.addEventListener('click',e=>{if(e.target===m)closePanels()})}}
 /* o detalhe de uma atividade pausa o jogo enquanto está aberto */
 new MutationObserver(()=>{const ab=document.documentElement.classList.contains('detalhe-aberto');if(MODE!=='play')return;
-  if(ab)paused=true;else if([document.getElementById('painelJogo'),document.getElementById('ovoModal'),document.getElementById('powModal'),document.getElementById('guide'),document.getElementById('shop')].every(m=>!m||m.hidden))paused=false}).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+  if(ab)paused=true;else if([document.getElementById('painelJogo'),document.getElementById('ovoModal'),document.getElementById('powModal'),document.getElementById('guide'),document.getElementById('mPainel')].every(m=>!m||m.hidden))paused=false}).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
 
 /* ---------- easter eggs ---------- */
 function ganharOvo(id,frags,x,y){if(ACH.ovos.includes(id))return false;ACH.ovos.push(id);guardarAchados();if(frags&&x!=null)dropFrags(x,y,frags);return true}

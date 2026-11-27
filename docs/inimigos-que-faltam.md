@@ -2,7 +2,7 @@
 
 Lista do que o mapa ainda precisa, área por área. Cada linha diz o **papel** do inimigo no jogo, o **comportamento** (o valor de `comportamento` em `recursos/inimigos/inimigos.json`) e as **animações** (as subpastas de quadros). Pode usar os sprites que quiser: o site acerta a escala sozinho pelos quadros do personagem.
 
-Depois de pôr a pasta em `recursos/inimigos/`, acrescente uma entrada no `inimigos.json` (o formato e a lista de comportamentos estão em `recursos/LEIA-ME.md`). A Oficina → Pasta recursos/ mostra se deu certo.
+Depois de pôr a pasta em `recursos/inimigos/`, acrescente uma entrada no `inimigos.json` (o formato e a lista de comportamentos estão em `recursos/LEIA-ME.md`). O Guia → Pasta recursos mostra se deu certo.
 
 ## O que já existe
 

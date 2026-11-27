@@ -24,9 +24,9 @@ function pontoNaRegiao(reg,f){const ss=REGS[reg].salas.map(i=>WORLD.salas[i]).fi
   return{sala,x}}
 function spawnPoint(i){const st=REGS[i].rota;for(let k=st;k<ROUTE.length;k++){const n=ROUTE[k];if(WORLD.salas[n.sala].tipo!=='poco'||WORLD.chaoPerto(n.x,n.y,3)!=null)return n}return ROUTE[st]}
 
-/* ---------- custom assets (filled by the recursos/ folder and by the workshop) ---------- */
+/* ---------- custom assets (filled by the recursos/ folder) ---------- */
 const ASSETS={player:null,enemy:{},bg:{},sfx:{}};
-/* sprite sets: one structure for grid sheets (workshop, enemies) and one-folder-per-animation frames (character) */
+/* sprite sets: one structure for grid sheets (simple enemy sheets) and one-folder-per-animation frames (character) */
 const ANIM_KEYS=['parado','correr','pular','cair','golpe','golpe_cima','golpe_baixo','avanco','dano','morte','salto_duplo','pouso','olhar_cima','olhar_baixo',
   'parede','salto_parede','lancar','acender','carregar','disparo','mergulho','clarao','passo_nevoa'];
 const FX_KEYS=['efeito_golpe','efeito_golpe_cima','efeito_golpe_baixo','efeito_salto_duplo','efeito_avanco',

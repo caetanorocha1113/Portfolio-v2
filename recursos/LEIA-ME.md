@@ -5,7 +5,7 @@ Coloque aqui os seus arquivos com **exatamente** os nomes abaixo. O site carrega
 > Não apague este `LEIA-ME.md`: o site procura por ele para saber que a pasta existe.
 > Nomes sempre em minúsculas, sem acento e sem espaço.
 
-Para conferir o que foi encontrado, abra o site, clique em **Oficina** e veja a seção **Pasta recursos/**:
+Para conferir o que foi encontrado, abra o site, clique em **Guia** e veja a aba **Pasta recursos** (a lista fica no fim):
 ✓ carregou · ainda não colocado · ✕ arquivo com problema.
 
 ---
@@ -102,7 +102,7 @@ Os efeitos são desenhados **centralizados** no ponto da ação.
 - `fps`: velocidade de cada animação, pelo nome da pasta.
 - `loop`: força uma animação a tocar uma vez (`false`) ou em loop (`true`).
 - `pixel`: `true` para pixel art. `outline`: `true` desenha a linha de tinta do site em volta. `glow`: `true` acende um brilho de lanterna perto do personagem.
-- O arquivo precisa conter só o JSON. Se estiver quebrado, a Oficina mostra a linha do erro.
+- O arquivo precisa conter só o JSON. Se estiver quebrado, o Guia → Pasta recursos mostra a linha do erro.
 
 Os arquivos antigos `personagem.png` e `personagem.json` **não são mais lidos**.
 
@@ -160,7 +160,7 @@ Há dois jeitos, e eles podem ser usados juntos.
 
 | Campo | O que é | Padrão |
 |---|---|---|
-| `nome` | nome que aparece na Oficina | a pasta |
+| `nome` | nome que aparece no Guia → Pasta recursos | a pasta |
 | `pasta` | pasta dentro de `recursos/inimigos/` | obrigatório |
 | `comportamento` | um da tabela abaixo | `andar` |
 | `regioes` | área (ou tema) → quantidade (até 12 por área) | obrigatório |
@@ -265,7 +265,7 @@ Um papel pode juntar duas pastas em sequência: `"atacar": ["Attack (Part 1)", "
 
 - O tamanho na tela usa a **mesma escala de pixels do seu personagem**: se os quadros vieram do mesmo jogo, as proporções entre personagem e inimigos ficam certas. Use `tamanho` só para ajustar.
 - Os quadros são alinhados pelos pés (voadores: pelo centro).
-- A Oficina → Pasta recursos/ mostra cada inimigo com ✓ (onde foi colocado e quantos quadros cada animação tem) ou ✕ (pasta, subpasta, área ou comportamento errados).
+- O Guia → Pasta recursos mostra cada inimigo com ✓ (onde foi colocado e quantos quadros cada animação tem) ou ✕ (pasta, subpasta, área ou comportamento errados).
 
 ### B) Trocar o desenho das criaturas originais do site
 
@@ -349,7 +349,7 @@ O site procura primeiro pelo **id da área** e depois pelo **nome do tema** dela
 | `hero_run_footsteps_stone` / `_grass` / `_metal` | passos correndo, em laço (grama em Natureza e Trajetória, metal no Técnico) |
 | `hero_wall_slide`, `hero_falling` | deslizar na parede, queda longa (em laço) |
 
-Para usar outro arquivo num evento, crie `sons/sons.json`: `{ "pulo": "personagem/hero_jump.wav", "loop_passos": "personagem/hero_walk_footsteps_stone.wav" }`. Os nomes dos eventos estão na Oficina → Pasta recursos/.
+Para usar outro arquivo num evento, crie `sons/sons.json`: `{ "pulo": "personagem/hero_jump.wav", "loop_passos": "personagem/hero_walk_footsteps_stone.wav" }`. Os nomes dos eventos estão na tabela acima e no Guia → Pasta recursos.
 
 **Vozes das criaturas:** são sintetizadas (susto, ataque, tiro, raio, dano, morte, explosão…), com a voz escolhida pelo nome do inimigo ou pelo campo `voz`. Para trocar por arquivos: `sons/inimigos/<pasta do inimigo>/<evento>.wav`, com o evento entre `alerta`, `ataque`, `tiro`, `laser`, `dano`, `bloqueio`, `morte`, `explosao`, `surgir`, `sumir`, `pulo`, `pouso`, `passo`, `asa`, `nuvem`, `esporo`, `pancada`.
 
@@ -390,6 +390,14 @@ No modo Jogo, a música sempre acompanha a área e troca devagar. Se existir a m
   "segredo": "44 Dream (Cello)"
 }
 ```
+
+**Capas:** as imagens de `musicas/` (`.jpg`, `.png` ou `.webp`) viram as capas do player. Uma imagem com o mesmo nome da faixa (`09 Greenpath.jpg`) vai para ela. O arquivo opcional `capas.json` escolhe à mão: a chave é o começo do nome da faixa (vale para todas que começam assim) e `padrao` lista as imagens que se revezam nas outras faixas (sem ele, todas as imagens se revezam):
+
+```json
+{ "padrao": ["1.jpg", "2.jpg", "3.jpg", "4.jpg"], "Greenpath": "5.jpg" }
+```
+
+Tamanho bom para capa: quadrada, entre 300 e 800 px (imagens maiores também funcionam, só demoram mais para carregar).
 
 **Opcional:** `titulos.json` para os nomes que aparecem no player:
 

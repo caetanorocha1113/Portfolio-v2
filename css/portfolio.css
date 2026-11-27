@@ -172,11 +172,10 @@ body::before{content:"";position:fixed;z-index:29;left:0;right:0;top:0;height:ca
 
 @media (max-width:620px){.mapa-mundo{display:none}.atlas-mapa{display:block}}
 @media (max-width:760px){
-  /* barra de botões cabe na largura do celular; a Oficina (ferramenta de produção) fica só no computador */
+  /* a barra de botões cabe na largura do celular */
   .topbar{left:max(8px,env(safe-area-inset-left,0px));right:max(8px,env(safe-area-inset-right,0px));justify-content:center;gap:5px}
   .topbar .seg{padding:0 4px}
   .seg button,.tbtn{padding:.5rem .5rem;font-size:.62rem;letter-spacing:.12em}
-  #openShop{display:none}
   .det-x{top:4px;right:6px}
   .realm.area,.realm.final{padding-block:36vh 48vh}
   .cards{grid-template-columns:1fr}
@@ -444,3 +443,60 @@ body::before{content:"";position:fixed;z-index:29;left:0;right:0;top:0;height:ca
 .destaques>.eyebrow{text-align:center;margin-bottom:.5rem}
 /* no Passeio o texto é o principal: o minimapa só aparece no modo Jogo (o mapa lateral já mostra onde você está) */
 html:not(.playing) .minimapa{display:none}
+
+/* ---------- player de música: um disco no canto, com a capa e o anel do progresso, que abre o player (js/07-interface.js) ---------- */
+.musica{position:fixed;z-index:38;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+.m-disco{position:relative;display:block;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:#0b0a10;cursor:pointer;box-shadow:0 0 0 1.5px rgba(8,7,12,.95),0 6px 16px rgba(0,0,0,.6)}
+.m-mini{position:absolute;inset:6px;width:46px;height:46px;border-radius:50%;object-fit:cover;display:block;transition:filter .2s}
+.tocando .m-mini{animation:mGira 16s linear infinite}
+@keyframes mGira{to{rotate:360deg}}
+.m-disco:hover .m-mini{filter:brightness(1.15)}
+.m-disco:focus-visible{outline:2px solid var(--bone);outline-offset:4px}
+.m-anel{position:absolute;inset:0;width:100%;height:100%;rotate:-90deg;overflow:visible;pointer-events:none}
+.m-anel circle{fill:none;stroke-linecap:round}
+.m-trilho{stroke:rgba(236,230,216,.22);stroke-width:2.5}
+.m-feito{stroke:var(--bone);stroke-width:3;transition:stroke-dashoffset .25s linear}
+.m-som{position:absolute;right:-5px;bottom:-3px;display:flex;gap:2px;align-items:flex-end;height:15px;box-sizing:border-box;padding:3px 4px;background:#0b0a10;border-radius:8px;box-shadow:0 0 0 1.5px rgba(236,230,216,.4);opacity:0;transition:opacity .3s;pointer-events:none}
+.tocando .m-som{opacity:1}
+.m-som i{display:block;width:2.5px;height:3px;background:var(--bone);border-radius:2px;animation:mOnda .9s ease-in-out infinite}
+.m-som i:nth-child(2){animation-delay:-.3s}.m-som i:nth-child(3){animation-delay:-.6s}
+@keyframes mOnda{50%{height:9px}}
+@media (prefers-reduced-motion:reduce){.tocando .m-mini,.m-som i{animation:none}}
+.m-painel{position:absolute;left:0;bottom:calc(100% + 12px);width:min(330px,calc(100vw - 32px));max-height:min(74vh,620px);overflow:auto;padding:14px;box-sizing:border-box;background:rgba(10,8,14,.97);color:var(--ink);border-radius:4px;
+  box-shadow:0 0 0 1.5px rgba(236,230,216,.3),0 0 0 5px rgba(8,7,12,.6),0 18px 40px rgba(0,0,0,.6);transform-origin:0 100%;animation:mAbre .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes mAbre{from{opacity:0;transform:translateY(8px) scale(.96)}}
+.m-topo{display:grid;grid-template-columns:84px minmax(0,1fr) auto;gap:12px;align-items:center}
+.m-capa{width:84px;height:84px;object-fit:cover;border-radius:3px;box-shadow:0 0 0 1.5px rgba(236,230,216,.3),0 6px 16px rgba(0,0,0,.5)}
+.m-meta{display:flex;flex-direction:column;gap:4px;min-width:0}
+.m-meta b{font-family:var(--display);font-weight:600;font-size:1rem;letter-spacing:.04em;color:var(--bone);line-height:1.2;overflow-wrap:anywhere}
+.m-meta span{font-family:var(--label);font-size:.7rem;letter-spacing:.12em;color:#a8a194;text-transform:uppercase}
+.m-x{align-self:start;background:none;border:0;color:#a8a194;font-size:1.5rem;line-height:1;cursor:pointer;padding:0 2px}
+.m-x:hover{color:var(--bone)}
+.m-prog{display:flex;align-items:center;gap:8px;margin-top:12px;font-family:var(--label);font-size:.72rem;color:#a8a194;font-variant-numeric:tabular-nums}
+.m-prog input{flex:1;min-width:0}
+.musica input[type=range],.panel input[type=range]{accent-color:#e8e0cf;height:4px}
+.m-ctrl{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.m-ctrl button{display:grid;place-items:center;width:38px;height:38px;padding:0;background:none;border:0;border-radius:50%;color:#bdb5a6;cursor:pointer}
+.m-ctrl button:hover{color:#fff}
+.m-ctrl svg{width:20px;height:20px;fill:currentColor}
+.m-ctrl .pp{width:48px;height:48px;background:var(--bone);color:#0b0a10}
+.m-ctrl .pp:hover{background:#fff;color:#0b0a10}
+#pfollow[aria-pressed="true"]{color:#f2d49b}#pfollow[aria-pressed="false"]{opacity:.55}
+.m-ctrl button:focus-visible,.m-x:focus-visible,#ptracks button:focus-visible,.m-lista summary:focus-visible{outline:2px solid var(--bone);outline-offset:2px}
+.m-vol{display:flex;align-items:center;gap:10px;margin-top:10px;font-family:var(--label);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#a8a194}
+.m-vol input{flex:1;min-width:0}
+.m-lista{margin-top:12px;border-top:1px solid rgba(236,230,216,.14);padding-top:8px}
+.m-lista summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-family:var(--label);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#f2d49b;padding:4px 0}
+.m-lista summary::-webkit-details-marker{display:none}
+.m-lista summary::after{content:"+";font-size:1rem}.m-lista[open] summary::after{content:"−"}
+#ptracks{list-style:none;margin:6px 0 0;padding:0;max-height:min(40vh,330px);overflow:auto}
+#ptracks button{display:grid;grid-template-columns:1.7rem minmax(0,1fr) auto;gap:8px;width:100%;text-align:left;padding:.42rem .45rem;background:none;border:0;border-radius:3px;font-family:var(--body);font-size:1.02rem;color:#ddd5c4;cursor:pointer}
+#ptracks button:hover{background:rgba(236,230,216,.08);color:#fff}
+#ptracks button.on{color:#fff;background:rgba(236,230,216,.1);box-shadow:inset 3px 0 0 #f2d49b}
+#ptracks .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ptracks .n,#ptracks .d{align-self:center;font-family:var(--label);font-size:.74rem;color:#9d968a;font-variant-numeric:tabular-nums}
+#ptracks .on .n{color:#f2d49b}
+/* celular: no Passeio, acima dos botões de baixo; no Jogo, no alto à direita (os botões de toque ficam embaixo) */
+@media (max-width:760px){.musica{bottom:calc(env(safe-area-inset-bottom,0px) + 68px)}.m-disco{width:50px;height:50px}.m-mini{inset:5px;width:40px;height:40px}}
+@media (pointer:coarse){.playing .musica{bottom:auto;left:auto;right:max(10px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 10px)}
+  .playing .m-painel{left:auto;right:0;bottom:auto;top:calc(100% + 12px);transform-origin:100% 0}}

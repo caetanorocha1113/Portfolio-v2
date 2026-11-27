@@ -114,13 +114,13 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
     try{ASSETS.sfx[k]=await decodeAudio(f.blob);note('Sons',f.file,true)}catch(e){note('Sons',f.file,false,'não consegui ler o áudio')}})());
   jobs.push(carregarMusicas(note));
   await Promise.all(jobs);
-  carregarSonsPasta(note).then(()=>{renderFolderStatus();sfxStatus()});
+  carregarSonsPasta(note).then(()=>renderFolderStatus());
   redistribuirInimigos();
   const grp=p=>p.startsWith('personagem/')?'Personagem':p.startsWith('inimigos/')?'Inimigos':p.startsWith('fundos/')?'Fundos':p.startsWith('musicas/')?'Músicas':p.startsWith('sons/')?'Sons':'Personagem';
   for(const q of JSON_ISSUES)note(grp(q.path),q.path,q.ok?null:false,q.msg);
-  renderFolderStatus();sfxStatus();fillEnemyForm($('eKind').value);
+  renderFolderStatus();
   const ok=FOLDER.filter(x=>x.ok).length,bad=FOLDER.filter(x=>x.ok===false).length;console.info('Portfólio · pasta recursos/',FOLDER);
-  if(bad)toast(`Pasta recursos: ${bad} arquivo(s) com problema (veja a Oficina).`)}
+  if(bad)toast(`Pasta recursos: ${bad} arquivo(s) com problema (veja o Guia → Pasta recursos).`)}
 /* ---------- músicas da pasta ----------
    Com o índice, toda faixa de recursos/musicas/ entra na lista do player (cada uma só baixa quando toca).
    Cada área ganha uma faixa: o arquivo com o id da área (humanas.mp3…), o que estiver em musicas.json,
@@ -145,14 +145,26 @@ async function carregarMusicas(note){const tit=await probeJSON('musicas/titulos.
     if(!tr){tr=acha(areas[id]||MUSICA_PADRAO[id]);if(tr&&!/\((action|bass|alt|sub)\)/i.test(tr.nome)||tr&&areas[id]){(tr.areas=tr.areas||[]).push(i)}else tr=null}
     if(tr){const tc=acha(comb[id]||tr.nome+' (action)',true);if(tc&&tc!==tr)(tc.combateDe=tc.combateDe||[]).push(i)}});
   const sg=acha(cfg.segredo||MUSICA_SEGREDO,true);if(sg)sg.segredo=true;
+  await capasDasMusicas(pasta,note);
   /* as faixas geradas saem da lista quando a pasta tem as suas */
   const tocava=MUS.playing;if(tocava)musicPause();MUS.list=MUS.list.filter(t=>!t.builtin);MUS.idx=0;MUS.pos=0;
-  const k=musicaSegue()?faixaDaArea(Math.max(0,lastIdx)):0;if(k>=0)MUS.idx=k;if(tocava)musicPlay();uiPlayer();renderMusicMgr();
+  const k=musicaSegue()?faixaDaArea(Math.max(0,lastIdx)):0;if(k>=0)MUS.idx=k;if(tocava)musicPlay();uiPlayer();
   const porArea=ids.map((id,i)=>{const t=pasta.find(t=>t.region===i||(t.areas&&t.areas.includes(i)));return t?`${secs[i].dataset.name}: ${t.title}`:null}).filter(Boolean);
   note('Músicas','musicas/',true,`${pasta.length} faixa(s) na lista`);
   if(porArea.length)note('Músicas','áreas',true,porArea.join(' · '));
   const cb=pasta.filter(t=>t.combateDe);if(cb.length)note('Músicas','combate',true,cb.map(t=>t.title).join(' · '));
   if(sg)note('Músicas','salas secretas',true,sg.title)}
+
+/* capas: imagens em musicas/ (jpg, png, webp). Uma imagem com o mesmo nome da faixa vai para ela;
+   capas.json escolhe à mão ({ "Greenpath": "5.jpg" } vale para todas as faixas que começam com "Greenpath")
+   e "padrao" diz quais imagens se revezam nas outras faixas (sem ele, todas as imagens se revezam). */
+async function capasDasMusicas(pasta,note){if(!INDEX)return;const imgs=INDEX.arquivos.filter(f=>/^musicas\/[^/]+\.(jpe?g|png|webp)$/i.test(f));if(!imgs.length)return;
+  const cfg=await probeJSON('musicas/capas.json')||{},nome=f=>f.slice(8).replace(/\.[^.]+$/,'').toLowerCase(),arq=v=>{const f='musicas/'+String(v).replace(/^\/+|^musicas\//g,'');return INDEX_SET.has(f)?f:null};
+  const regras=Object.entries(cfg).filter(([k])=>k!=='padrao').map(([k,v])=>[k.toLowerCase(),arq(v)]).filter(([k,f])=>{if(!f)note('Músicas','capas.json',false,`"${k}": imagem não encontrada`);return!!f}).sort((a,b)=>b[0].length-a[0].length);
+  const rodizio=(Array.isArray(cfg.padrao)?cfg.padrao.map(arq).filter(Boolean):imgs).filter(Boolean);let k=0,n=0;
+  for(const tr of pasta){const propria=imgs.find(f=>nome(f)===tr.base||nome(f)===tr.nome),regra=regras.find(([q])=>tr.nome.startsWith(q)||tr.base===q);
+    const f=propria||(regra&&regra[1])||(rodizio.length?rodizio[k++%rodizio.length]:null);if(f){tr.capa=urlRecurso(f);n++}}
+  note('Músicas','capas',true,`${imgs.length} imagem(ns) em ${n} faixa(s)`)}
 
 /* ---------- sons da pasta ----------
    Os nomes curtos (sons/pulo.ogg…) continuam valendo. Sem eles, o site reconhece os nomes do pacote do personagem

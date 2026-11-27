@@ -52,7 +52,6 @@
     <button type="button" id="mPlay" aria-pressed="false" title="Você controla o personagem com teclado ou toque">Jogar</button>
   </div>
   <button type="button" class="tbtn" id="openPow" aria-haspopup="dialog">Poderes</button>
-  <button type="button" class="tbtn" id="openShop" aria-haspopup="dialog">Oficina</button>
   <button type="button" class="tbtn" id="openGuide" aria-haspopup="dialog">Guia</button>
 </div>
 
@@ -81,91 +80,31 @@
   </div>
 </div>
 
-<div class="pbar" id="pbar">
-  <canvas class="pcover" id="pcover" width="96" height="96" aria-hidden="true"></canvas>
-  <div class="pmeta"><b id="ptitle">Trilha</b><span id="partist">Trilha do Atlas</span></div>
-  <div class="pmain">
-    <div class="pbtns">
+<div class="musica" id="musica">
+  <div class="m-painel" id="mPainel" role="dialog" aria-label="Música" hidden>
+    <div class="m-topo">
+      <img class="m-capa" id="mCapa" alt="" width="96" height="96">
+      <div class="m-meta"><b id="ptitle">Trilha</b><span id="partist"></span></div>
+      <button type="button" class="m-x" id="mFechar" aria-label="Fechar o player">×</button>
+    </div>
+    <div class="m-prog"><span id="pcur">0:00</span><input type="range" id="pseek" min="0" max="1000" value="0" aria-label="Posição na faixa"><span id="pdur">0:00</span></div>
+    <div class="m-ctrl">
+      <button type="button" id="pfollow" aria-pressed="false" title="Trocar a música ao mudar de área (no modo Jogo, sempre troca)" aria-label="Acompanhar a área"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></button>
       <button type="button" id="pprev" aria-label="Faixa anterior"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
       <button type="button" id="pplay" class="pp" aria-label="Tocar"></button>
       <button type="button" id="pnext" aria-label="Próxima faixa"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      <button type="button" id="pmute" aria-label="Silenciar música"></button>
     </div>
-    <div class="pprog"><span id="pcur">0:00</span><input type="range" id="pseek" min="0" max="1000" value="0" aria-label="Posição na faixa"><span id="pdur">0:00</span></div>
+    <label class="m-vol"><span>Volume</span><input type="range" id="pvol" min="0" max="100" value="55" aria-label="Volume da música"></label>
+    <details class="m-lista" id="mLista"><summary>Faixas <span id="mQtd"></span></summary><ol id="ptracks"></ol></details>
   </div>
-  <div class="pside">
-    <button type="button" id="pfollow" aria-pressed="false" title="Trocar a música ao mudar de área" aria-label="Acompanhar área"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></button>
-    <button type="button" id="pmute" aria-label="Silenciar música"></button>
-    <input type="range" id="pvol" min="0" max="100" value="55" aria-label="Volume da música">
-    <button type="button" id="plist" aria-label="Lista de faixas" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M3 6h13v2H3zm0 5h13v2H3zm0 5h9v2H3zm15-6v8.2a3 3 0 1 0 2 2.8V8h3V6h-5z"/></svg></button>
-  </div>
-  <div class="plistbox panel" id="plistbox" hidden>
-    <p class="plt">Faixas</p>
-    <ol id="ptracks"></ol>
-    <label class="filebtn">Adicionar músicas<input type="file" id="paddmusic" accept="audio/*" multiple></label>
-  </div>
+  <button type="button" class="m-disco" id="mDisco" aria-expanded="false" aria-controls="mPainel" aria-label="Abrir o player de música">
+    <img class="m-mini" id="mCapaMini" alt="" width="56" height="56">
+    <svg class="m-anel" viewBox="0 0 64 64" aria-hidden="true"><circle class="m-trilho" cx="32" cy="32" r="29.5"/><circle class="m-feito" id="mFeito" cx="32" cy="32" r="29.5"/></svg>
+    <span class="m-som" aria-hidden="true"><i></i><i></i><i></i></span>
+  </button>
 </div>
 
-<aside class="panel shop" id="shop" role="dialog" aria-modal="false" aria-labelledby="shopT" hidden>
-  <header><h3 id="shopT">Oficina</h3><button type="button" class="x" data-close="shop" aria-label="Fechar oficina">×</button></header>
-  <p class="note">Ferramenta temporária de produção: mostra o que carregou da pasta <code>recursos/</code> e deixa testar arquivos neste navegador. O <button type="button" class="lnk" data-guide="comeco">Guia</button> explica cada formato.</p>
-
-  <details open><summary>Pasta recursos/</summary>
-    <p class="note">Arquivos colocados em <code>recursos/</code> carregam sozinhos ao abrir o site. ✓ encontrado · ainda não colocado · ✕ com problema. A lista está no <button type="button" class="lnk" data-guide="pasta">Guia</button>.</p>
-    <ul class="flist" id="folderList"><li class="off">Procurando arquivos…</li></ul>
-  </details>
-
-  <details><summary>Fontes</summary>
-    <div class="row"><label for="fDisp">Títulos</label><input type="file" id="fDisp" accept=".ttf,.otf,.woff,.woff2"></div>
-    <div class="row"><label for="gDisp">ou Google Fonts</label><input type="text" id="gDisp" placeholder="ex.: Cinzel Decorative"><button type="button" data-gf="display">Aplicar</button></div>
-    <div class="row"><label for="fBody">Texto</label><input type="file" id="fBody" accept=".ttf,.otf,.woff,.woff2"></div>
-    <div class="row"><label for="gBody">ou Google Fonts</label><input type="text" id="gBody" placeholder="ex.: IM Fell English"><button type="button" data-gf="body">Aplicar</button></div>
-    <button type="button" class="ghost" data-reset="fonts">Voltar às fontes padrão</button>
-  </details>
-
-  <details><summary>Personagem</summary>
-    <p class="note">Para testar rápido neste navegador: folha em grade (PNG transparente), uma animação por linha. No projeto, o personagem vem das pastas em <code>recursos/personagem/</code>.</p>
-    <div class="row"><label for="pImg">Folha</label><input type="file" id="pImg" accept="image/*"></div>
-    <div class="grid3"><label>Largura do quadro<input type="number" id="pFw" value="64" min="1"></label><label>Altura do quadro<input type="number" id="pFh" value="64" min="1"></label><label>Tamanho<input type="number" id="pSc" value="1" step="0.1" min="0.1"></label></div>
-    <table class="anims"><thead><tr><th>Animação</th><th>Linha</th><th>Quadros</th><th>FPS</th></tr></thead><tbody id="pAnims"></tbody></table>
-    <div class="checks"><label><input type="checkbox" id="pFlip"> A folha olha para a esquerda</label><label><input type="checkbox" id="pPix"> Pixel art</label><label><input type="checkbox" id="pInk" checked> Contorno de tinta</label><label><input type="checkbox" id="pGlow" checked> Brilho de lanterna</label></div>
-    <canvas class="prev" id="pPrev" width="360" height="150" aria-label="Prévia da animação do personagem"></canvas>
-    <div class="btns"><button type="button" id="pApply">Aplicar personagem</button><button type="button" class="ghost" data-reset="player">Remover folha de teste</button></div>
-  </details>
-
-  <details><summary>Inimigos</summary>
-    <div class="row"><label for="eKind">Criatura</label><select id="eKind"></select></div>
-    <div class="row"><label for="eImg">Folha</label><input type="file" id="eImg" accept="image/*"></div>
-    <div class="grid3"><label>Largura do quadro<input type="number" id="eFw" value="48" min="1"></label><label>Altura do quadro<input type="number" id="eFh" value="32" min="1"></label><label>Tamanho<input type="number" id="eSc" value="1" step="0.1" min="0.1"></label><label>Quadros<input type="number" id="eFr" value="4" min="1"></label><label>FPS<input type="number" id="eFps" value="8" min="1"></label></div>
-    <div class="checks"><label><input type="checkbox" id="eFlip"> Olha para a esquerda</label><label><input type="checkbox" id="ePix"> Pixel art</label><label><input type="checkbox" id="eInk" checked> Contorno de tinta</label></div>
-    <canvas class="prev" id="ePrev" width="360" height="110" aria-label="Prévia da criatura"></canvas>
-    <div class="btns"><button type="button" id="eApply">Aplicar criatura</button><button type="button" class="ghost" id="eReset">Voltar ao desenho original</button></div>
-  </details>
-
-  <details><summary>Fundos das áreas</summary>
-    <div class="row"><label for="bReg">Área</label><select id="bReg"></select></div>
-    <div class="row"><label for="bImg">Imagem</label><input type="file" id="bImg" accept="image/*"></div>
-    <div class="grid3"><label>Encaixe<select id="bFit"><option value="cobrir">Cobrir</option><option value="conter">Conter</option></select></label><label>Modo<select id="bMode"><option value="substituir">Substituir</option><option value="sobrepor">Sobrepor</option></select></label><label>Opacidade<input type="range" id="bOp" min="0" max="100" value="100"></label></div>
-    <div class="checks"><label><input type="checkbox" id="bDirt" checked> Manter grão e sujeira por cima</label></div>
-    <div class="btns"><button type="button" id="bApply">Aplicar fundo</button><button type="button" class="ghost" id="bReset">Voltar ao fundo pintado</button></div>
-  </details>
-
-  <details><summary>Efeitos sonoros</summary>
-    <div class="row"><label for="sfxVol">Volume dos efeitos</label><input type="range" id="sfxVol" min="0" max="100" value="60"></div>
-    <ul class="sfxlist" id="sfxList"></ul>
-  </details>
-
-  <details><summary>Música</summary>
-    <div class="checks"><label><input type="checkbox" id="setAuto"> Começar a tocar no primeiro clique ou tecla</label><label><input type="checkbox" id="setFollow"> Trocar a faixa ao mudar de área</label></div>
-    <label class="filebtn">Adicionar músicas<input type="file" id="mAdd" accept="audio/*" multiple></label>
-    <ul class="mlist" id="mList"></ul>
-  </details>
-
-  <details><summary>Apagar tudo</summary>
-    <p class="note">Remove todas as fontes, imagens, sons e músicas que você carregou neste navegador.</p>
-    <button type="button" class="danger" id="resetAll">Apagar meus recursos</button>
-    <div class="confirm" id="resetConfirm" hidden><span>Tem certeza? Isso não pode ser desfeito.</span><button type="button" class="danger" id="resetYes">Apagar</button><button type="button" class="ghost" id="resetNo">Cancelar</button></div>
-  </details>
-</aside>
 
 <div class="modal" id="powModal" hidden>
   <div class="panel powp" role="dialog" aria-modal="true" aria-labelledby="powT">
