@@ -534,7 +534,7 @@
   }
 
   /* ---------- motor (cenários e jogo) ---------- */
-  const MOTOR = ['js/01-base.js', 'js/02-regioes.js', 'js/02b-salas.js', 'js/02d-enfeites.js', 'js/03-cenario.js', 'js/03b-hud.js', 'js/04-jogo.js', 'js/04b-segredos.js', 'js/05-audio.js', 'js/06-loop.js', 'js/07-interface.js', 'js/08-pasta-recursos.js', 'js/08b-poderes.js', 'js/09-inicio.js'];
+  const MOTOR = ['js/01-base.js', 'js/02-regioes.js', 'js/02b-salas.js', 'js/02d-enfeites.js', 'js/03-cenario.js', 'js/03b-hud.js', 'js/03c-vivos.js', 'js/04-jogo.js', 'js/04c-inimigos.js', 'js/04b-segredos.js', 'js/05-audio.js', 'js/05b-sons.js', 'js/06-loop.js', 'js/07-interface.js', 'js/08-pasta-recursos.js', 'js/08b-poderes.js', 'js/09-inicio.js'];
   function carregarMotor() {
     for (const src of MOTOR) {
       const s = document.createElement('script');

@@ -33,13 +33,16 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `js/01-base.js` | utilitários e kit de pintura (formas, folhagem, cristais, luz) |
 | `js/02-regioes.js` | os oito temas: fundos distantes pintados e partículas |
 | `js/02b-salas.js` | pintura das salas no estilo desenhado: rocha, aros, estalactites, enfeites por tema, plataformas, frente desfocada |
-| `js/02d-enfeites.js` | objetos de cada matéria (colunas, bustos, poliedros, quadro-negro, estantes, livros, árvores, frascos, servidores, robôs…), desenhados no estilo do cenário |
+| `js/02d-enfeites.js` | objetos de cada matéria (colunas, bustos, poliedros, quadro-negro, estantes, livros, árvores, frascos, servidores, robôs…) e de todas as áreas (postes, lanternas, casas, torres, cogumelos, cristais), com contorno de tinta e textura (hachura, veios, pontilhado) |
 | `js/02c-pintor.js` | pintor em segundo plano (Web Worker): pinta os blocos do mapa e os fundos sem travar o jogo |
 | `js/03-cenario.js` | câmera, blocos pintados do mundo, fundos com parallax, tinta e papel, minimapa, HUD, partículas, criaturas desenhadas |
+| `js/03c-vivos.js` | cenário vivo: plantas que se dobram, lanternas e cipós que balançam, vasos, caixas, livros e cristais que quebram e soltam fragmentos de luz, borboletas que fogem |
 | `js/03b-hud.js` | HUD desenhado a tinta: medalhão com a luz líquida, nome da área com floreio, páginas de vida, fragmentos e páginas do Atlas |
 | `js/04-jogo.js` | colisão com o mapa, modo Passeio (rolagem → caminho), modo Jogo, inimigos (percepção, alerta, preparo, ataque), combate |
+| `js/04c-inimigos.js` | o comportamento de cada criatura (patrulha, emboscada, escudo, mergulho, raio, concha, esporos…), projéteis, raios, nuvens e o dano |
 | `js/04b-segredos.js` | o portfólio dentro do jogo: placa de cada matéria, páginas das atividades, paredes falsas, salas secretas e easter eggs |
 | `js/05-audio.js` | trilha gerada, efeitos sonoros, motor do player |
+| `js/05b-sons.js` | música que acompanha a área (com a versão de combate e a das salas secretas), passos e outros sons em laço, vozes sintetizadas das criaturas e sons do cenário |
 | `js/06-loop.js` | laço de animação e parallax |
 | `js/07-interface.js` | player, modos, controles, Oficina, Guia |
 | `js/08-pasta-recursos.js` | carregamento automático da pasta `recursos/` |

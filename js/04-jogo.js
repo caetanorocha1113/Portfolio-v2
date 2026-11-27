@@ -100,7 +100,8 @@ function colocar(e,v){e.sala=v.sala;e.cx=v.x;e.cy=v.y;e.x=v.x;e.vx=e.vy=0;e.kbv=
   e.rg=Math.max(110,Math.min(e.sala.w/2-150,240+(e.vel||1)*90));
   if(e.beh==='teto'){const t=MUNDO.tetoEm(e.sala,e.x);e.top=(t===t&&t>=e.sala.y?t:e.sala.y)+50;e.y=e.top}
   else if(e.beh==='flutuar')e.y=e.sala.y+e.sala.h*(e.yf||.5);
-  else e.y=e.air?v.y-(e.hv||170):v.y}
+  else e.y=e.air?v.y-(e.hv||170):v.y;
+  if(typeof colocarExtra==='function')colocarExtra(e)}
 function redistribuirInimigos(){for(let i=0;i<ENEMIES.length;i++){const list=ENEMIES[i];if(!list.length)continue;
     /* nada nasce em cima de quem chega: as vagas perto do ponto de chegada da região ficam de fora (se sobrar alguma) */
     const sp=spawnPoint(i),todas=REGS[i].salas.map(k=>WORLD.salas[k]).filter(s=>s.tipo!=='poco').flatMap(s=>(s.vagasInimigo||[]).map(v=>({...v,sala:s}))),
@@ -118,85 +119,10 @@ function podeAndar(e,nx){const d=Math.sign(nx-e.x)||e.face,pe=nx+d*22,g=chaoInim
 function livreAr(x,y){return WORLD.dentro(x,y)&&WORLD.dentro(x,y-26)&&WORLD.dentro(x,y+22)&&WORLD.dentro(x-24,y)&&WORLD.dentro(x+24,y)}
 function moverAr(e,dt){const nx=e.x+e.vx*dt,ny=e.y+e.vy*dt,s=e.sala;if(livreAr(nx,e.y)&&nx>s.x+40&&nx<s.x+s.w-40)e.x=nx;else e.vx*=-.4;if(livreAr(e.x,ny)&&ny>s.y+30&&ny<s.y+s.h-20)e.y=ny;else e.vy*=-.4}
 function guiar(e,tx,ty,dt,vmax,acc){const dx=tx-e.x,dy=ty-e.y,d=Math.hypot(dx,dy)||1,f=Math.min(1,d/120),dvx=dx/d*vmax*f-e.vx,dvy=dy/d*vmax*f-e.vy,dv=Math.hypot(dvx,dvy)||1,k=Math.min(1,acc*dt/dv);e.vx+=dvx*k;e.vy+=dvy*k}
-function patrulhar(e,dt,vel){if(e.estado==='virar'){if(e.tE>=duracao(e,'virar',.22)){e.face*=-1;mudar(e,'patrulha')}return}
-  if(e.estado!=='patrulha')mudar(e,'patrulha');const nx=e.x+e.face*vel*dt;
-  if(!podeAndar(e,nx)||(Math.abs(nx-e.cx)>e.rg&&Math.sign(nx-e.cx)===e.face)){mudar(e,'virar');return}
-  e.x=nx;e.y=chaoInimigo(e,nx)??e.y;e.andando=true}
-function flutuarEmCasa(e,dt,v){const ty=e.cy-(e.hv||170)+Math.sin(T*1.4+e.bob)*18,tx=e.cx+Math.sin(T*.35+e.bob)*90*v;guiar(e,tx,ty,dt,90*v,260);moverAr(e,dt);if(Math.abs(e.vx)>10)e.face=e.vx>0?1:-1}
-function voarPatrulha(e,dt,v){if(Math.abs(e.vx)<20){e.vx=e.face*110*v;e.vy=(e.vy>=0?1:-1)*55*v}moverAr(e,dt);const top=e.cy-(e.hv||170)-150,bot=e.cy-70;
-  if((e.y<top&&e.vy<0)||(e.y>bot&&e.vy>0))e.vy=-e.vy;if(Math.abs(e.x-e.cx)>e.rg+100&&Math.sign(e.x-e.cx)===Math.sign(e.vx))e.vx=-e.vx;e.face=e.vx>0?1:-1}
-function pairar(e,dt,a){let tx=e.cx+Math.sin(T*.3+e.bob)*90,ty=e.cy-(e.hv||200)+Math.sin(T*1.6+e.bob)*16;
-  if(a){tx=a.x+(e.x<a.x?-1:1)*300;ty=Math.min(ty,a.y-150)}guiar(e,tx,ty,dt,150,320);moverAr(e,dt);if(!a&&Math.abs(e.vx)>10)e.face=e.vx>0?1:-1}
-function pular(e,dt,a,v){
-  if(e.noChao){e.vx=0;if(e.estado==='virar'){if(e.tE>=duracao(e,'virar',.2)){e.face*=-1;mudar(e,'patrulha')}return}
-    if(e.tE>(e.pausa??.6)){if(a)e.face=a.x>e.x?1:-1;const alvoX=e.x+e.face*150,ahead=chaoInimigo(e,alvoX);
-      if(ahead==null||Math.abs(ahead-e.y)>60||(!a&&Math.abs(alvoX-e.cx)>e.rg+120)){mudar(e,'virar');return}
-      e.vy=-(a?580:480);e.vx=e.face*(a?240:160)*v;e.noChao=false;mudar(e,'patrulha')}return}
-  e.vy+=1700*dt;const nx=e.x+e.vx*dt;if(WORLD.dentro(nx+e.face*20,e.y-30)&&nx>e.sala.x+40&&nx<e.sala.x+e.sala.w-40)e.x=nx;else e.vx=0;
-  const ny=e.y+e.vy*dt;if(e.vy>0){const g=chaoInimigo(e,e.x);if(g!=null&&ny>=g&&e.y<=g+6){e.y=g;e.noChao=true;e.tE=0;e.pausa=.25+Math.random()*.6;return}}
-  if(e.vy<0&&!WORLD.dentro(e.x,ny-alturaInimigo(e)))e.vy=0;e.y=ny;if(e.y>e.sala.y+e.sala.h+200)colocar(e,e.home)}
-function noTeto(e,dt,a){if(e.estado==='atacar'){e.vy=Math.min(e.vy+1500*dt,900);e.y+=e.vy*dt;const g=chaoInimigo(e,e.x);if(g!=null&&e.y>=g-24){e.y=g-24;mudar(e,'recuperar')}}
-  else if(e.estado==='recuperar'){if(e.tE>.8){e.y-=170*dt;if(e.y<=e.top){e.y=e.top;mudar(e,'patrulha');e.cd=1.4}}}
-  else if(e.estado==='preparar'){if(e.tE>=duracao(e,'preparar',.3)){e.vy=0;mudar(e,'atacar')}}
-  else{e.y=e.top+Math.sin(T*1.1+e.bob)*10;if(a)e.face=a.x>e.x?1:-1;if(a&&e.cd<=0&&Math.abs(a.x-e.x)<150&&a.y>e.y){e.vy=0;mudar(e,temAnim(e,'preparar')?'preparar':'atacar')}}}
-function disparar(e,a){if(!a)return;const sy=e.air?e.y:e.y-alturaInimigo(e)*.55,sx=e.x+e.face*22,dx=a.x-sx,dy=(a.y-40)-sy,d=Math.hypot(dx,dy)||1,v=330*(+(e.cfg&&e.cfg.vel_projetil)||1);
-  shots.push({x:sx,y:sy,vx:dx/d*v,vy:dy/d*v,t:0,spr:e.spr&&e.spr.anims.projetil?e.spr:null,owner:e,esq:!!(e.cfg&&e.cfg.projetil_olha_esquerda),gira:!!(e.cfg&&e.cfg.projetil_gira),jog:a.jog})}
-function atualizarInimigo(e,dt,a){
-  if(e.dead>0){if(!e.dying){e.dying=true;e.dieT=0}e.dieT+=dt;e.dead-=dt;if(e.dead<=0){e.hp=e.maxHp;e.dying=false;colocar(e,e.home)}
-    e.vis=e.k==='custom'?temAnim(e,'morrer')&&e.dieT<animLen(e.spr,'morrer'):false;return}
-  e.fl=Math.max(0,e.fl-dt*4);e.tE+=dt;e.cd-=dt;e.andando=false;
-  if(e.kbv){if(e.air)e.vx+=e.kbv*.6;else{const nx=e.x+e.kbv*dt;if(podeAndar(e,nx)){e.x=nx;e.y=chaoInimigo(e,nx)??e.y}}e.kbv*=Math.pow(.004,dt);if(Math.abs(e.kbv)<6)e.kbv=0}
-  const ve=enxerga(e,a),dx=a?a.x-e.x:0,v=e.vel||1;
-  if(ve&&e.semVer>1.5&&temAnim(e,'alerta')&&(e.estado==='patrulha'||e.estado==='virar')){e.face=dx>0?1:-1;mudar(e,'alerta')}
-  if(ve)e.semVer=0;else e.semVer+=dt;
-  if(e.estado==='alerta'){e.face=dx>0?1:-1;if(e.air){e.vx*=Math.pow(.05,dt);e.vy*=Math.pow(.05,dt);moverAr(e,dt)}if(e.tE>=duracao(e,'alerta',.4))mudar(e,e.beh==='perseguir'?'caca':e.beh==='atirar'?'mira':'patrulha');e.vis=noCampo(e,.8);return}
-  switch(e.beh){
-  case'andar':patrulhar(e,dt,70*v);break;
-  case'investir':
-    if(e.estado==='preparar'){if(e.tE>=duracao(e,'preparar',.45)){mudar(e,'atacar');e.vx=e.face*520*v}}
-    else if(e.estado==='atacar'){const nx=e.x+e.vx*dt;if(e.tE<.85&&podeAndar(e,nx)){e.x=nx;e.y=chaoInimigo(e,nx)??e.y}else mudar(e,'recuperar')}
-    else if(e.estado==='recuperar'){if(e.tE>=duracao(e,'recuperar',.55)){e.cd=1.4;mudar(e,'patrulha')}}
-    else if(ve&&e.cd<=0&&Math.abs(a.y-e.y)<130){e.face=dx>0?1:-1;mudar(e,'preparar')}
-    else patrulhar(e,dt,(ve?95:65)*v);break;
-  case'atirar':
-    if(e.estado==='preparar'){e.face=dx>0?1:-1;if(e.air)pairar(e,dt,a);if(e.tE>=duracao(e,'preparar',.4)){e.disparou=false;mudar(e,'atacar')}}
-    else if(e.estado==='atacar'){if(e.air)pairar(e,dt,a);const dur=duracao(e,'atacar',.35);if(!e.disparou&&e.tE>=dur*(+(e.cfg&&e.cfg.disparo)||0)){e.disparou=true;disparar(e,a)}if(e.tE>=dur){e.cd=+(e.cfg&&e.cfg.recarga)||2.2;mudar(e,'mira')}}
-    else if(ve){if(e.estado!=='mira')mudar(e,'mira');e.face=dx>0?1:-1;if(e.air)pairar(e,dt,a);if(e.cd<=0)mudar(e,'preparar')}
-    else{if(e.estado==='mira'&&e.semVer>1.2)mudar(e,'patrulha');if(e.air)pairar(e,dt,null);else if(e.estado!=='mira')patrulhar(e,dt,55*v)}break;
-  case'perseguir':
-    if(e.estado==='atacar'){moverAr(e,dt);if(e.tE>.5){mudar(e,'recuperar');e.vx*=.3;e.vy*=.3}}
-    else if(e.estado==='recuperar'){e.vx*=Math.pow(.05,dt);e.vy*=Math.pow(.05,dt);moverAr(e,dt);if(e.tE>.5){e.cd=1.6;mudar(e,'patrulha')}}
-    else if(e.estado==='preparar'){if(!a){mudar(e,'patrulha');break}e.face=dx>0?1:-1;e.vx*=Math.pow(.02,dt);e.vy*=Math.pow(.02,dt);moverAr(e,dt);
-      if(e.tE>=duracao(e,'preparar',.3)){const tx=a.x,ty=a.y-52,d=Math.hypot(tx-e.x,ty-e.y)||1;e.vx=(tx-e.x)/d*560;e.vy=(ty-e.y)/d*560;mudar(e,'atacar')}}
-    else if(ve||(e.estado==='caca'&&e.semVer<2&&a)){if(e.estado!=='caca')mudar(e,'caca');const tx=a.x,ty=a.y-52;guiar(e,tx,ty,dt,230*v,760);moverAr(e,dt);e.face=dx>0?1:-1;
-      if(temAnim(e,'atacar')&&e.cd<=0&&Math.hypot(tx-e.x,ty-e.y)<240){if(temAnim(e,'preparar'))mudar(e,'preparar');else{const d=Math.hypot(tx-e.x,ty-e.y)||1;e.vx=(tx-e.x)/d*560;e.vy=(ty-e.y)/d*560;mudar(e,'atacar')}}}
-    else{if(e.estado!=='patrulha')mudar(e,'patrulha');flutuarEmCasa(e,dt,v)}break;
-  case'voar':voarPatrulha(e,dt,v);break;
-  case'pular':pular(e,dt,ve?a:null,v);break;
-  case'teto':noTeto(e,dt,ve?a:null);break;
-  case'flutuar':e.x=e.cx+Math.sin(T*.12+e.bob*3)*120;e.y=e.sala.y+e.sala.h*(e.yf||.5)+Math.sin(T*.5+e.bob*2)*26;break;
-  default:if(e.estado==='atacar'){if(e.tE>=duracao(e,'atacar',.5)){e.cd=1.5;mudar(e,'patrulha')}}
-    else if(ve){e.face=dx>0?1:-1;if(e.cd<=0&&temAnim(e,'atacar')&&Math.abs(dx)<170)mudar(e,'atacar')}}
-  e.vis=noCampo(e,.8)}
+/* o comportamento de cada criatura está em js/04c-inimigos.js */
 function noCampo(e,m){return Math.abs(e.x-CAM.x)<VW*m&&Math.abs(e.y-CAM.y)<VH*m}
-function updateEnemies(dt){const a=alvoAtual(),m=MODE==='play'?1.5:1.1;
-  for(const list of ENEMIES)for(const e of list){e.vis=false;const s=e.sala;if(!s)continue;if(Math.abs(s.x+s.w/2-CAM.x)>s.w/2+VW*m||Math.abs(s.y+s.h/2-CAM.y)>s.h/2+VH*m)continue;atualizarInimigo(e,dt,a)}}
-function customBox(e){const f=e.spr.anims[roleOf(e,'andar')].frames[0],s=enemyPx(e),hw=(f.ow||f.w)*s*.4,hh=(f.oh||f.h)*s*.42;return{x:e.x,y:e.air?e.y:e.y-(f.oh||f.h)*s*.5,hw,hh}}
+function customBox(e){const f=e.spr.anims[roleOf(e,'andar')].frames[0],s=enemyPx(e),hw=(f.ow||f.w)*s*.4,hh=(f.oh||f.h)*s*.42,oh=(f.oh||f.h)*s;return{x:e.x,y:e.cabecaBaixo?e.y+oh*.5:e.air?e.y:e.y-oh*.5,hw,hh}}
 function enemyBox(e){if(e.k==='custom')return customBox(e);const ws=SC*.82,[hw,hh,cy]=HB[e.k],c=e.k==='hopper'?20*ws:cy*ws;return{x:e.x,y:e.y-c,hw:hw*ws,hh:hh*ws}}
-function updateShots(dt){for(let k=shots.length-1;k>=0;k--){const b=shots[k];b.t+=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
-  if(b.t>3.2||!WORLD.dentro(b.x,b.y)){shots.splice(k,1);continue}
-  if(b.jog&&MODE==='play'&&PL.inv<=0&&PL.dash<=0&&PL.dead<=0&&Math.abs(b.x-PL.x)<16&&Math.abs(b.y-(PL.y-30))<32){shots.splice(k,1);hurtPlayer(b)}}}
-/* which animation an enemy shows in each state */
-function papelInimigo(e){if(e.dead>0)return roleOf(e,'morrer');
-  switch(e.estado){case'alerta':return'alerta';case'virar':return temAnim(e,'virar')?'virar':roleOf(e,'parado');
-    case'preparar':return temAnim(e,'preparar')?'preparar':temAnim(e,'parado')?'parado':roleOf(e,'andar');
-    case'atacar':return temAnim(e,'atacar')?'atacar':roleOf(e,'andar');
-    case'recuperar':return temAnim(e,'recuperar')?'recuperar':roleOf(e,'parado');
-    case'mira':return temAnim(e,'parado')?'parado':roleOf(e,'andar')}
-  if(e.beh==='parado'||(e.beh==='perseguir'&&e.estado==='patrulha'&&temAnim(e,'parado')))return roleOf(e,'parado');
-  if(!e.air&&e.beh!=='pular'&&!e.andando&&temAnim(e,'parado'))return'parado';
-  return roleOf(e,'andar')}
-
 /* ---------- shared state ---------- */
 let MODE='auto',hitstop=0,paused=false;
 const shake={t:0,a:0},frags=[],trails=[],slashes=[],bursts=[];
@@ -224,14 +150,14 @@ function updateAuto(dt){const s=SC;alvoPasseio=distanciaDaRolagem();const ti=noD
     if(!jmp)L.mode='walk';else{L.mode='crouch';L.ct=.1/sp;L.ax=L.x;L.ay=L.y;L.bx=b.x;L.by=b.y;const D=L.ay-L.by;L.dur=.46+Math.abs(D)/1800;L.hh=D>0?D*.32+34*s:26*s;L.face=L.bx>=L.ax?1:-1;L.dbl=D>110;L.dblDone=false}}
   L.mv=false;
   if(L.mode==='walk'){const b=ROUTE[L.ni],dx=b.x-L.x,st=Math.sign(dx)*Math.min(Math.abs(dx),(sp>1.5?230:150)*s*sp*dt);L.x+=st;const yy=WORLD.chaoPerto(L.x,L.y,40);if(yy!=null)L.y=yy;
-    if(st){L.face=st>0?1:-1;L.ph+=Math.abs(st)*.12/s*1.5;L.mv=true;L.stepT-=dt;if(L.stepT<=0){L.stepT=sp>1.5?.2:.3;sfx('passo',.5)}}if(Math.abs(b.x-L.x)<.5){L.i=L.ni;L.y=b.y;L.mode='idle'}}
+    if(st){L.face=st>0?1:-1;L.ph+=Math.abs(st)*.12/s*1.5;L.mv=true;L.stepT-=dt;if(L.stepT<=0){L.stepT=sp>1.5?.2:.3;if(!passoEmLaco())sfx('passo',.5)}}if(Math.abs(b.x-L.x)<.5){L.i=L.ni;L.y=b.y;L.mode='idle'}}
   else if(L.mode==='crouch'){L.ct-=dt;L.sq+=(.74-L.sq)*Math.min(1,dt*30);if(L.ct<=0){L.mode='jump';L.jt=0;L.sq=1.2;sfx('pulo',.6)}}
   else if(L.mode==='jump'){L.jt=Math.min(1,L.jt+dt*sp/L.dur);const f=L.jt;L.x=lerp(L.ax,L.bx,f);L.y=lerp(L.ay,L.by,f)-4*L.hh*f*(1-f);
     if(L.dbl&&!L.dblDone&&f>.42){L.dblDone=true;L.flut=1;heroAnimName='';spawnFx('efeito_salto_duplo',L.x,L.y-30,L.face);sfx('salto_duplo',.6);if(!customHero())burst(L.x,L.y-24,'#d9cfe6',10,140)}
     if(f>=1){L.i=L.ni;L.mode='idle';L.x=L.bx;L.y=L.by;L.sq=.72;L.landT=.16;sfx('pouso',.6);burst(L.x,L.y,'#cfc6b4',7,70)}}
   L.sq+=(1-L.sq)*Math.min(1,dt*9);L.landT=Math.max(0,L.landT-dt);L.flut=Math.max(0,L.flut-dt*2.2);
   L.F+=((L.mode==='jump'?1:0)-L.F)*Math.min(1,dt*14);L.cd-=dt;L.atk=Math.max(0,L.atk-dt*3.2);
-  if((L.mode==='walk'||L.mode==='idle')&&L.cd<=0)for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly'||e.harmless)continue;const b=enemyBox(e);
+  if((L.mode==='walk'||L.mode==='idle')&&L.cd<=0)for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly'||e.harmless||e.esconde)continue;const b=enemyBox(e);
     if(Math.abs(b.x-L.x)<b.hw+56&&Math.abs(b.y-(L.y-40))<b.hh+46){L.atk=1;L.cd=1.1;L.face=b.x>L.x?1:-1;e.kbv=L.face*260;e.fl=1;heroAnimName='';if(!spawnFx('efeito_golpe',L.x+L.face*40,L.y-32,L.face)&&!customHero())slashes.push({x:L.x,y:L.y,f:L.face,d:0,t:0});burst(b.x,b.y,lcOf(e.sec),16,220);sfx('golpe',.6);sfx('acerto',.5);break}}
   viesAtual+=(viesDoPainel(alvoPasseio.reg)-viesAtual)*Math.min(1,dt*2);
   moverCamera(L.x,L.y,viesAtual,dt,false)}
@@ -243,7 +169,8 @@ function spawnEm(x,y){PL.x=x;PL.y=y;PL.vx=PL.vy=0;PL.on={t:'g'};PL.cp={x,y};PL.o
 function spawnAt(i){const n=spawnPoint(i);spawnEm(n.x,n.y)}
 function teleportTo(i){spawnAt(i);PL.inv=1;moverCamera(PL.x,PL.y,0,0,true)}
 function setMode(m){if(m===MODE)return;MODE=m;document.documentElement.classList.toggle('playing',m==='play');
-  if(m==='play'){if(L.ready)spawnEm(L.x,L.y);else spawnAt(0);PL.on=null;PL.hp=PL.max;PL.inv=1;PL.dead=0;PL.abyss=0;hudGame();showHint(true)}
+  if(typeof pararLoops==='function')pararLoops();
+  if(m==='play'){if(L.ready)spawnEm(L.x,L.y);else spawnAt(0);PL.on=null;PL.hp=PL.max;PL.inv=1;PL.dead=0;PL.abyss=0;hudGame();showHint(true);sfx('espada',.8)}
   else{let best=0,bd=1e9;ROUTE.forEach((n,k)=>{const d=Math.hypot(n.x-PL.x,(n.y-PL.y)*2);if(d<bd){bd=d;best=k}});L.i=L.ni=best;L.mode='idle';L.x=ROUTE[best].x;L.y=ROUTE[best].y;
     window.scrollTo({top:Math.max(0,rolagemDaDistancia(ROUTE[best].s)),behavior:'instant'});showHint(false)}
   updateModeUI()}
@@ -251,13 +178,13 @@ function hurtPlayer(src){if(PL.inv>0||PL.dead>0||PL.dash>0)return;PL.hp--;PL.inv
   /* a flyer that touches the character bounces off instead of sitting on top of it */
   if(src.estado&&src.air){src.vx=-d*300;src.vy=-160;if(src.beh==='perseguir')mudar(src,'recuperar')}
   PL.vx=d*420;PL.vy=-430;PL.on=null;sfx('dano');shake.t=.3;shake.a=7;hitstop=.08;burst(PL.x,PL.y-30,'#ffffff',14,260);hudGame();
-  if(PL.hp<=0){PL.dead=1.8;sfx('morte');burst(PL.x,PL.y-30,lcOf(lastIdx),30,320)}}
+  if(PL.hp<=0){PL.dead=1.8;if(typeof pararLoops==='function')pararLoops();sfx('morte');burst(PL.x,PL.y-30,lcOf(lastIdx),30,320)}}
 function dropFrags(x,y,n){for(let k=0;k<n;k++)frags.push({x,y,vx:(Math.random()-.5)*300,vy:-(250+Math.random()*350),t:0})}
 function playerAttack(){const f=PL.face,d=PL.atkDir;let box;
   if(d<0)box={x:PL.x,y:PL.y-88,hw:36,hh:44};else if(d>0)box={x:PL.x,y:PL.y+28,hw:32,hh:40};else box={x:PL.x+f*40,y:PL.y-32,hw:36,hh:32};
-  heroAnimName='';if(!spawnFx(d<0?'efeito_golpe_cima':d>0?'efeito_golpe_baixo':'efeito_golpe',PL.x+(d===0?f*40:0),PL.y-32+(d<0?-50:d>0?44:0),f,d<0?-Math.PI/2*f:d>0?Math.PI/2*f:0)&&!customHero())slashes.push({x:PL.x,y:PL.y,f,d,t:0});let hit=false;
-  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly')continue;const b=enemyBox(e);if(Math.abs(b.x-box.x)<b.hw+box.hw&&Math.abs(b.y-box.y)<b.hh+box.hh){hit=true;e.hp--;e.fl=1;PL.luz=Math.min(LUZ_MAX,PL.luz+LUZ_POR_ACERTO);const kd=d===0?f:(e.x>PL.x?1:-1);e.kbv=kd*280;if(e.air){e.vx+=kd*220;e.vy-=60}if(!spawnFx('efeito_acerto',b.x,b.y,f))burst(b.x,b.y,lcOf(e.sec),14,240);sfx('acerto');
-    if(e.hp<=0){e.dead=22;e.vx=e.vy=0;burst(b.x,b.y,'#ffffff',26,340);sfx('inimigo_morre');dropFrags(b.x,b.y,3+(Math.random()*3|0))}}}
+  heroAnimName='';if(!spawnFx(d<0?'efeito_golpe_cima':d>0?'efeito_golpe_baixo':'efeito_golpe',PL.x+(d===0?f*40:0),PL.y-32+(d<0?-50:d>0?44:0),f,d<0?-Math.PI/2*f:d>0?Math.PI/2*f:0)&&!customHero())slashes.push({x:PL.x,y:PL.y,f,d,t:0});
+  let hit=golpearInimigos(box,d,f);
+  if(typeof golpearVivos==='function'&&golpearVivos(box,d,f))hit=true;
   if(typeof atacarParedes==='function'&&atacarParedes(box))hit=true;
   if(hit){hitstop=.06;shake.t=.14;shake.a=4;if(d>0){PL.vy=-760;PL.jumps=0}else if(d===0)PL.vx-=f*160}}
 function updatePlay(dt){const k=K;
@@ -266,7 +193,7 @@ function updatePlay(dt){const k=K;
   if(PL.abyss>0){PL.abyss-=dt;PL.y+=50*dt;if(PL.abyss<=0){spawnEm(PL.cp.x,PL.cp.y);PL.inv=1}return}
   const dir=(inp.right?1:0)-(inp.left?1:0);
   if(dashQ>0&&!temPoder('avanco')){dashQ=0;poderBloqueado('avanco')}
-  if(dashQ>0&&PL.dashCD<=0){PL.dash=.17;PL.dashCD=.55;dashQ=0;if(dir)PL.face=dir;sfx('avanco');spawnFx(temPoder('nevoa')?'efeito_passo_nevoa':'efeito_avanco',PL.x,PL.y-30,PL.face)}
+  if(dashQ>0&&PL.dashCD<=0){PL.dash=.17;PL.dashCD=.55;dashQ=0;if(dir)PL.face=dir;sfx(temPoder('nevoa')&&ASSETS.sfx.nevoa?'nevoa':'avanco');spawnFx(temPoder('nevoa')?'efeito_passo_nevoa':'efeito_avanco',PL.x,PL.y-30,PL.face)}
   if(PL.dash>0){PL.dash-=dt;PL.vx=PL.face*780*k;PL.vy=0;PL.trailT-=dt;if(PL.trailT<=0&&!customHero()){PL.trailT=.025;trails.push({x:PL.x,y:PL.y,a:.7})}}
   else{const tgt=dir*320*k,acc=(PL.on?3000:2000)*k;PL.vx=PL.vx<tgt?Math.min(tgt,PL.vx+acc*dt):Math.max(tgt,PL.vx-acc*dt);if(dir&&PL.atk<=0)PL.face=dir;PL.vy=Math.min(PL.vy+2300*k*(PL.vy<0&&!inp.jump?2.1:1)*dt,1250*k)}
   if(jumpQ>0){if(PL.on||PL.coy>0){PL.vy=-980*k;PL.on=null;PL.coy=0;jumpQ=0;PL.sq=1.25;sfx('pulo');burst(PL.x,PL.y,'#cfc6b4',6,60)}
@@ -281,14 +208,14 @@ function updatePlay(dt){const k=K;
   if(nx!==PL.x&&!corpoLivre(nx,PL.y)){let ok=false;if(PL.on)for(const up of[6,12,18,24])if(corpoLivre(nx,PL.y-up)){PL.y-=up;ok=true;break}if(!ok){PL.wall=Math.sign(PL.vx);nx=PL.x;PL.vx=0;if(PL.dash>0)PL.dash=0}}
   PL.x=nx;const py=PL.y;let ny=PL.y+PL.vy*dt;
   if(PL.on){const s=surfaceAt(PL.on,PL.x,PL.y);if(s!=null&&Math.abs(s-PL.y)<28&&PL.vy>=0){ny=s;PL.vy=0}else{PL.on=null;PL.coy=.1}}
-  if(!PL.on&&PL.vy>=0){const hit=findLanding(PL.x,py,ny);if(hit){ny=hit.y;const hard=PL.vy>700;PL.on=hit.on;PL.vy=0;PL.jumps=0;PL.sq=hard?.68:.82;PL.landT=hard?.2:.12;sfx('pouso',hard?1:.6);burst(PL.x,ny,'#cfc6b4',hard?10:5,hard?110:60);if(hit.on.t==='g')PL.cp={x:PL.x,y:ny}}}
+  if(!PL.on&&PL.vy>=0){const hit=findLanding(PL.x,py,ny);if(hit){ny=hit.y;const hard=PL.vy>700;PL.on=hit.on;PL.vy=0;PL.jumps=0;PL.sq=hard?.68:.82;PL.landT=hard?.2:.12;if(PL.quedaSom){PL.quedaSom=false;sfx('queda_impacto');shake.t=.2;shake.a=6}else sfx(hard&&ASSETS.sfx.pouso_forte?'pouso_forte':'pouso',hard?1:.6);burst(PL.x,ny,'#cfc6b4',hard?10:5,hard?110:60);if(hit.on.t==='g')PL.cp={x:PL.x,y:ny}}}
   /* ceiling: the head bumps */
   if(PL.vy<0&&!(WORLD.dentro(PL.x-MEIA+3,ny-ALT)&&WORLD.dentro(PL.x+MEIA-3,ny-ALT))){ny=py;PL.vy=0}
   PL.y=ny;
   if(WORLD.dentro(PL.x,PL.y-40))PL.ok={x:PL.x,y:PL.y};else if(PL.y<WORLD.limites.y1&&PL.ok){PL.x=PL.ok.x;PL.y=PL.ok.y;PL.vx=PL.vy=0}
-  if(PL.on&&Math.abs(PL.vx)>40){PL.ph+=Math.abs(PL.vx)*dt*.12/SC*1.5;PL.stepT-=dt;if(PL.stepT<=0){PL.stepT=.26;sfx('passo')}}
+  if(PL.on&&Math.abs(PL.vx)>40){PL.ph+=Math.abs(PL.vx)*dt*.12/SC*1.5;PL.stepT-=dt;if(PL.stepT<=0){PL.stepT=.26;if(!passoEmLaco())sfx('passo')}}
   if(PL.y>WORLD.limites.y1+120){PL.abyss=2.2;sfx('morte',.6);toast('O viajante tocou a luz do fundo. A jornada recomeça na borda.')}
-  if(PL.inv<=0&&PL.dash<=0)outer:for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.k==='jelly'||e.harmless)continue;const b=enemyBox(e);if(Math.abs(b.x-PL.x)<b.hw+11&&Math.abs(b.y-(PL.y-24))<b.hh+24){hurtPlayer(e);break outer}}
+  if(PL.inv<=0&&PL.dash<=0)contatoInimigos();
   PL.F+=((PL.on?0:1)-PL.F)*Math.min(1,dt*14);
   moverCamera(PL.x,PL.y,0,dt,false)}
 function updateFrags(dt){for(let k=frags.length-1;k>=0;k--){const f=frags[k];f.t+=dt;const dx=PL.x-f.x,dy=PL.y-26-f.y,d=Math.hypot(dx,dy)||1;
@@ -347,16 +274,15 @@ function drawWorld(dt,ox,oy){const lc=lcOf(lastIdx),ws=SC*.82,Z=ZOOM*FD,TX=FW*FD
   const onScreen=Math.abs(H.x-CAM.x)<VW*.7&&Math.abs(H.y-CAM.y)<VH*.75,mostra=onScreen&&!H.hide&&HERO_PRONTO;
   /* shadows on the floor */
   fc.save();fc.setTransform(Z,0,0,Z,TX,TY);fc.globalCompositeOperation='source-over';fc.globalAlpha=1;
-  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.air)continue;const g=e.noChao===false?chaoInimigo(e,e.x):e.y;if(g==null)continue;const w=e.k==='custom'?enemyBox(e).hw*2.6:50,f=clamp(1-(g-e.y)/400,.3,1);fc.globalAlpha=f;sombra(e.x,g+3,w*f)}
+  for(const list of ENEMIES)for(const e of list){if(!e.vis||e.dead>0||e.air||e.esconde||e.cabecaBaixo)continue;const g=e.noChao===false?chaoInimigo(e,e.x):e.y;if(g==null)continue;const w=e.k==='custom'?enemyBox(e).hw*2.6:50,f=clamp(1-(g-e.y)/400,.3,1);fc.globalAlpha=f;sombra(e.x,g+3,w*f)}
   if(onScreen&&HERO_PRONTO&&!(MODE==='play'&&PL.abyss>0)){const g=WORLD.chaoAbaixo(H.x,H.y-4,H.y+520);if(g){const f=clamp(1-(g.y-H.y)/520,.25,1);fc.globalAlpha=f;sombra(H.x,g.y+3,72*f)}}
   fc.restore();
   /* placas, páginas e relíquias (js/04b-segredos.js) */
+  if(typeof desenharVivos==='function')desenharVivos(Z,TX,TY);
   if(typeof desenharCoisas==='function')desenharCoisas(Z,TX,TY);
   /* enemies */
   for(const list of ENEMIES)for(const e of list){if(!e.vis)continue;
-    if(e.k==='custom'){const role=papelInimigo(e);if(role!==e.anim){e.anim=role;e.animT0=T}const t=ROLE_ONCE[role]?T-e.animT0:T+e.bob,ah=alturaInimigo(e);
-      if(e.beh==='teto'){ac2.strokeStyle='rgba(207,210,190,.4)';ac2.lineWidth=1.6;ac2.beginPath();ac2.moveTo(e.x,e.top-60);ac2.lineTo(e.x,e.y-ah*.3);ac2.stroke()}
-      drawSprite(ac2,e.spr,role,t,e.x,e.y,e.face,enemyPx(e)*e.spr.refH,e.fl,e.air);somaCaixa(bS,e.x,e.air?e.y:e.y-ah/2,ah*1.6,ah*1.2);continue}
+    if(e.k==='custom'){const q=desenharInimigo(e);if(q)somaCaixa(bS,q[0],q[1],q[2],q[3]);continue}
     const sy=e.y,ph=T*6+e.bob*9,spr=ASSETS.enemy[e.k];
     if(spr&&spr.anims){const yy=e.k==='flyer'||e.k==='dropper'||e.k==='jelly'?sy+24*ws:sy,alvo=spr.cfg.ink===false?ac2:ac;drawSprite(alvo,spr,'parado',T+e.bob,e.x,yy,e.face,48*K,e.fl);if(e.k==='dropper'){alvo.strokeStyle='rgba(207,210,190,.35)';alvo.beginPath();alvo.moveTo(e.x,e.top);alvo.lineTo(e.x,sy-10*ws);alvo.stroke()}somaCaixa(alvo===ac?bT:bS,e.x,sy-30,110,110);continue}
     if(e.k==='crawler')eCrawler(ac,e.x,sy,ws,e.face,ph,e.P,e.fl);else if(e.k==='flyer')eFlyer(ac,e.x,sy,ws,e.face,e.P,e.fl,T+e.bob);
@@ -370,7 +296,7 @@ function drawWorld(dt,ox,oy){const lc=lcOf(lastIdx),ws=SC*.82,Z=ZOOM*FD,TX=FW*FD
     if(spr&&spr.anims){glowOn=!!spr.cfg.glow;const alvo=spr.cfg.ink===false?ac2:ac;drawSprite(alvo,spr,an,T-heroAnimT0,H.x,H.y,H.face,84*K,0);somaCaixa(alvo===ac?bT:bS,H.x,H.y-50,110,120)}
     else{drawLume(ac,H.x,H.y,SC,H.face,H.ph,H.mv,H.F,H.atk,T,lc,H.sq,H.flut);somaCaixa(bT,H.x,H.y-50,110,120)}}
   /* projectiles drawn along their flight (a javelin flies point first) */
-  for(const b of shots){if(!b.spr)continue;const cfg=b.spr.cfg||{},ang=b.gira?b.t*14*Math.sign(b.vx||1):Math.atan2(b.vy,b.vx)+(b.esq?Math.PI:0);ac2.save();ac2.translate(b.x,b.y);ac2.rotate(ang);drawSprite(ac2,b.spr,'projetil',b.t,0,0,cfg.flip?-1:1,enemyPx(b.owner)*b.spr.refH,0,true);ac2.restore();somaCaixa(bS,b.x,b.y,260,260)}
+  desenharTirosSprite(bS);
   const qT=caixaTela(bT,Z,TX,TY,W,Hc,28),qS=caixaTela(bS,Z,TX,TY,W,Hc,10);
   inkComposite(qT);
   if(qS){ac2.setTransform(1,0,0,1,0,0);ac2.globalCompositeOperation='source-atop';ac2.globalAlpha=.17;ac2.fillStyle=corAmbiente();ac2.fillRect(qS.x,qS.y,qS.w,qS.h);ac2.globalAlpha=1;ac2.globalCompositeOperation='source-over';
@@ -378,7 +304,7 @@ function drawWorld(dt,ox,oy){const lc=lcOf(lastIdx),ws=SC*.82,Z=ZOOM*FD,TX=FW*FD
   caixaTintaAntes=qT;caixaSprAntes=qS;
   /* effects */
   fc.save();fc.setTransform(Z,0,0,Z,TX,TY);
-  for(const b of shots){if(b.spr)continue;fc.fillStyle='#2a2430';fc.beginPath();fc.arc(b.x,b.y,6,0,TAU);fc.fill();fc.strokeStyle='#e8e0cf';fc.lineWidth=1.4;fc.stroke()}
+  desenharEfeitosInimigos();
   if(mostra&&glowOn){const dark=TEMA[clamp(lastIdx,0,TEMA.length-1)]===6?1:0;dotAt(lc,H.x,H.y-46,(150+dark*120)*K,.09+dark*.1)}
   for(let k=sfxSprites.length-1;k>=0;k--){const e=sfxSprites[k];e.t+=dt;if(!ASSETS.player||e.t>e.len+.02){sfxSprites.splice(k,1);continue}fc.save();fc.translate(e.x,e.y);fc.rotate(e.rot);drawSprite(fc,ASSETS.player,e.a,e.t,0,0,e.face,84*K,0,true);fc.restore()}
   for(let k=slashes.length-1;k>=0;k--){const s=slashes[k];s.t+=dt;if(s.t>.18){slashes.splice(k,1);continue}drawSlash(s,lc)}
@@ -397,6 +323,7 @@ function game(dt){if(!ROUTE.length)return 0;
   const gdt=(paused&&MODE==='play')||hitstop>0?0:dt;hitstop=Math.max(0,hitstop-dt);
   if(MODE==='play')updatePlay(gdt);else updateAuto(gdt);
   if(typeof atualizarCoisas==='function')atualizarCoisas(gdt);
+  if(typeof atualizarVivos==='function')atualizarVivos(gdt);
   updateEnemies(gdt);updateShots(gdt);
   if(MODE==='play')updateFrags(gdt);
   const hx=MODE==='play'?PL.x:L.x,hy=MODE==='play'?PL.y:L.y,sala=WORLD.salaEm(hx,hy-40);if(sala)visitadas.add(sala.id);

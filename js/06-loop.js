@@ -19,6 +19,7 @@ function frame(now){
   fc.globalAlpha=1;fc.globalCompositeOperation='source-over';
   drawGame();fc.globalAlpha=1;fc.globalCompositeOperation='source-over';
   hudDesenhar(dt);
+  musicaJogo(dt);sonsDoPersonagem();
   if((miniT+=dt)>.12){miniT=0;desenharMinimapa(MODE==='play'?PL.x:L.x,hy,cur)}
   requestAnimationFrame(frame)}
 

@@ -52,12 +52,12 @@ function drawCover(tr){const c=$('pcover').getContext('2d'),W=96,t=tr.tema!=null
   c.fillStyle='#0b0910';c.beginPath();c.arc(48,56,13,0,TAU);c.fill();c.fillStyle='#ffbf5e';c.beginPath();c.arc(43,56,2.4,0,TAU);c.arc(53,56,2.4,0,TAU);c.fill();
   if(!tr.builtin){c.fillStyle='rgba(0,0,0,.5)';c.fillRect(0,W-22,W,22);c.fillStyle='#e8e0cf';c.font='12px serif';c.fillText('sua faixa',8,W-7)}}
 function renderTrackList(){const ol=$('ptracks');ol.innerHTML='';MUS.list.forEach((t,k)=>{const li=document.createElement('li'),b=document.createElement('button');b.type='button';if(k===MUS.idx)b.className='on';
-  b.innerHTML=`<span class="n">${k===MUS.idx&&MUS.playing?'♪':k+1}</span><span></span><span class="d">${t.builtin?fmt(t.dur):(t.region!=null&&t.region>=0?roman[t.region]:'·')}</span>`;b.children[1].textContent=t.title;b.onclick=()=>musicSelect(k,true);li.appendChild(b);ol.appendChild(li)})}
+  b.innerHTML=`<span class="n">${k===MUS.idx&&MUS.playing?'♪':k+1}</span><span></span><span class="d">${t.builtin?fmt(t.dur):(t.region!=null&&t.region>=0?roman[t.region]:'·')}</span>`;b.children[1].textContent=t.title;b.onclick=()=>{MUS.manual=true;musicSelect(k,true)};li.appendChild(b);ol.appendChild(li)})}
 function uiPlayer(){const tr=curTrack();if(!tr)return;$('ptitle').textContent=tr.title;$('partist').textContent=tr.builtin?`Trilha original · ${NOME_SITE}`:(tr.region>=0?`Sua faixa · ${secs[tr.region].dataset.name}`:tr.tema!=null?`Sua faixa · tema ${TEMA_IDS[tr.tema]}`:'Sua faixa');
   $('pplay').innerHTML=MUS.playing?ICON.pause:ICON.play;$('pplay').setAttribute('aria-label',MUS.playing?'Pausar':'Tocar');$('pmute').innerHTML=SET.muted?ICON.mute:ICON.vol;$('pmute').setAttribute('aria-label',SET.muted?'Ativar som da música':'Silenciar música');
   $('pfollow').setAttribute('aria-pressed',SET.follow);$('pvol').value=Math.round(SET.vol*100);drawCover(tr);renderTrackList()}
 let seeking=false;
-$('pplay').onclick=()=>musicToggle();$('pnext').onclick=()=>musicNext();$('pprev').onclick=()=>musicPrev();
+$('pplay').onclick=()=>musicToggle();$('pnext').onclick=()=>{MUS.manual=true;musicNext()};$('pprev').onclick=()=>{MUS.manual=true;musicPrev()};
 $('pseek').addEventListener('input',()=>{seeking=true;$('pcur').textContent=fmt($('pseek').value/1000*musicDur())});
 $('pseek').addEventListener('change',()=>{seeking=false;musicSeek($('pseek').value/1000*musicDur())});
 $('pvol').addEventListener('input',()=>{setMusicVol($('pvol').value/100);if(SET.muted){setMuted(false);uiPlayer()}});
@@ -191,8 +191,8 @@ pasta:['Pasta recursos',`<h4>Colocar arquivos sem configurar nada</h4>
 <tr><td>personagem/</td><td>uma pasta por animação (idle/, run/…) ou a lista <code>files</code> do <code>settings.json</code></td><td>.png</td></tr>
 <tr><td>inimigos/</td><td><code>inimigos.json</code> + uma pasta por inimigo; ou besouro, mosca, saltador, aranha, sentinela, pendente, agua-viva</td><td>.png .webp</td></tr>
 <tr><td>fundos/</td><td>o id da área (humanas, matematica…) ou o nome do tema (cinzaraiz…fosso)</td><td>.jpg .png .webp</td></tr>
-<tr><td>sons/</td><td>pulo, salto-duplo, pouso, passo, golpe, acerto, dano, coleta, avanco, morte, inimigo-morre</td><td>.ogg .mp3 .wav</td></tr>
-<tr><td>musicas/</td><td>o id da área ou o nome do tema; extra-1 até extra-5</td><td>.mp3 .ogg .m4a</td></tr></table></div>
+<tr><td>sons/</td><td>pulo, salto-duplo, pouso, passo, golpe, acerto, dano, coleta, avanco, morte, inimigo-morre; ou os nomes do pacote do personagem (<code>hero_jump.wav</code>…) em qualquer subpasta; vozes das criaturas em <code>sons/inimigos/&lt;pasta&gt;/&lt;evento&gt;.wav</code></td><td>.ogg .mp3 .wav</td></tr>
+<tr><td>musicas/</td><td>qualquer nome (todas entram no player); cada área pega a faixa de nome parecido (Dirtmouth, City of Tears…) ou o que estiver em <code>musicas.json</code>; o id da área ou o tema também valem</td><td>.mp3 .ogg .m4a</td></tr></table></div>
 <h4>Inimigos: onde aparecem</h4>
 <p>Em <code>inimigos.json</code>, o campo <code>regioes</code> aceita o id da área (<code>"humanas": 2</code>), o nome do tema (<code>"cidadela": 1</code>, vale para todas as áreas com esse tema) ou o número da seção no mapa (1 = início).</p>
 <h4>Personagem</h4>
@@ -211,7 +211,7 @@ personagem:['Personagem',`<h4>Folha de teste (Oficina)</h4>
 <li>Tamanho 1 deixa o quadro com cerca de 84 px de altura numa tela de 1280 px.</li>
 <li>Para arte em pixel, marque "Pixel art".</li></ul>`],
 inimigos:['Inimigos',`<h4>Os inimigos do dono</h4>
-<p>Ficam em <code>recursos/inimigos/inimigos.json</code>: pasta, áreas, comportamento (andar, pular, investir, atirar, parado, voar, perseguir, flutuar, teto) e as animações por papel (andar, parado, virar, alerta, preparar, atacar, recuperar, morrer, projetil). Se as animações olham para lados diferentes, <code>olha_esquerda</code> pode ser por papel: <code>{ "padrao": true, "atacar": false }</code>. Eles percebem o jogador dentro do <code>alcance</code> e com linha de visão, viram para ele antes de atacar e, no Passeio, reagem sem machucar. A lista completa está em <code>recursos/LEIA-ME.md</code>.</p>
+<p>Ficam em <code>recursos/inimigos/inimigos.json</code>: pasta, áreas, comportamento e as animações por papel. Comportamentos: andar, vagar, investir, guarda, duelista, emboscar, saltitar, perseguir, quicar, mergulhar, teto, aranha, atirar, mae, rastejar, laser, concha, ogro, esporo, nuvem, flutuar (e os antigos pular, parado, voar). Papéis: andar, parado, correr, virar, alerta, preparar, atacar, recuperar, esquivar, pular, defender, defender_cima, preparar2, atacar2, recuperar2, preparar_cima, atacar_cima, recuperar_cima, escondido, surgir, sumir, fugir, explodir, ferido, dormir, acordar, fechar, fechado, abrir, descer, trabalhar, nuvem, morrer, morrer_ar, projetil, projetil_fim. Um papel pode juntar duas pastas: <code>"atacar": ["Attack (Part 1)", "Attack (Part 2)"]</code>. Se as animações olham para lados diferentes, <code>olha_esquerda</code> pode ser por papel: <code>{ "padrao": true, "atacar": false }</code>. Eles percebem o jogador dentro do <code>alcance</code> e com linha de visão, viram para ele antes de atacar e, no Passeio, reagem sem machucar. A lista completa está em <code>recursos/LEIA-ME.md</code>.</p>
 <h4>As criaturas desenhadas em código</h4>
 <p>Aparecem onde ainda não há inimigos do dono (com <code>"substituir_originais": true</code>, somem das áreas que já têm).</p>
 <div class="tw"><table><tr><th>Tipo</th><th>Tema</th><th>Comportamento</th></tr>
@@ -227,7 +227,8 @@ fundos:['Fundos',`<h4>Como os fundos se encaixam</h4>
 <ul><li>Tamanho sugerido: perto de <b>2400 × 1400 px</b> (paisagem). Ela aparece pelas aberturas das salas, por trás da rocha.</li>
 <li><b>Cobrir</b> preenche tudo e corta as sobras. <b>Conter</b> mostra a imagem inteira.</li>
 <li><b>Substituir</b> troca o fundo pintado. <b>Sobrepor</b> mistura por cima, com a opacidade escolhida.</li></ul>`],
-sons:['Sons',`<h4>Os onze eventos</h4>
+sons:['Sons',`<h4>Os eventos</h4>
+<p>Sem arquivos com esses nomes, o site usa os do pacote do personagem que estiverem em <code>recursos/sons/</code> (<code>hero_jump.wav</code>, <code>hero_dash.wav</code>, <code>hero_run_footsteps_stone.wav</code>…) e sintetiza o resto, inclusive as vozes das criaturas e os sons do cenário (vasos, lanternas, folhas). A tabela completa está em <code>recursos/LEIA-ME.md</code>.</p>
 <div class="tw"><table><tr><th>Evento</th><th>Quando toca</th></tr>
 <tr><td>Pulo</td><td>ao sair do chão</td></tr><tr><td>Salto duplo</td><td>no segundo pulo</td></tr><tr><td>Pouso</td><td>ao tocar o chão</td></tr><tr><td>Passo</td><td>a cada passo correndo</td></tr>
 <tr><td>Golpe</td><td>ao atacar</td></tr><tr><td>Acerto</td><td>quando o golpe acerta</td></tr><tr><td>Dano</td><td>quando o personagem é atingido</td></tr><tr><td>Coleta</td><td>ao pegar um fragmento de luz</td></tr>
@@ -237,10 +238,11 @@ sons:['Sons',`<h4>Os onze eventos</h4>
 musica:['Música',`<h4>O player</h4>
 <ul><li>Tocar, pausar, voltar, avançar, barra de posição, volume, silenciar e lista de faixas.</li>
 <li>No Passeio, a música é uma playlist: toca em sequência e não troca sozinha.</li>
-<li>O ícone de alfinete liga "acompanhar área": cada área toca a sua faixa.</li></ul>
+<li>O ícone de alfinete liga "acompanhar área": cada área toca a sua faixa.</li>
+<li>No modo Jogo a música sempre acompanha a área e troca devagar. Perto de uma briga entra a versão de combate da faixa ("… (Action)", se existir); nas salas secretas, a faixa "Dream".</li></ul>
 <p>Os navegadores só permitem som depois de um clique ou tecla, por isso a música começa no seu primeiro toque na página.</p>
 <h4>Suas músicas</h4>
-<p>Coloque em <code>recursos/musicas/</code> com o id da área (por exemplo <code>humanas.mp3</code>) ou o nome do tema. Pela Oficina, dá para testar faixas só neste navegador.</p>`],
+<p>Coloque em <code>recursos/musicas/</code> com qualquer nome: todas entram no player. A faixa de cada área vem do nome do arquivo (<code>humanas.mp3</code>), de <code>musicas/musicas.json</code> ou da tabela de nomes parecidos do LEIA-ME. Pela Oficina, dá para testar faixas só neste navegador.</p>`],
 controles:['Controles',`<h4>Passeio</h4>
 <p>O site rola normalmente. O personagem anda, pula entre as plataformas, desce pelas fendas e golpeia criaturas sozinho, acompanhando a rolagem. O mapa à direita leva a cada área.</p>
 <h4>Jogo</h4>

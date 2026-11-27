@@ -96,10 +96,10 @@ const curTrack=()=>MUS.list[MUS.idx];
 function musicTime(){const tr=curTrack();if(!tr)return 0;if(!MUS.playing)return MUS.pos;if(tr.builtin)return Math.max(0,MUS.startPos+(AU.C.currentTime-MUS.startCtx));return tr.el?tr.el.currentTime:0}
 function musicDur(tr=curTrack()){return tr?(tr.builtin?tr.dur:(tr.el&&isFinite(tr.el.duration)?tr.el.duration:0)):0}
 function stopEngine(){if(MUS.timer){clearInterval(MUS.timer);MUS.timer=null}if(MUS.bus){killBus(MUS.bus);MUS.bus=null}MUS.list.forEach(t=>{if(t.el&&!t.el.paused)t.el.pause()})}
-function connectEl(tr){if(tr.src||!AU.C)return;try{tr.src=AU.C.createMediaElementSource(tr.el);tr.src.connect(AU.music)}catch(e){}tr.el.onended=()=>{if(curTrack()!==tr)return;if(SET.follow&&(tr.region>=0||tr.tema!=null))musicSeek(0,true);else musicNext()}}
+function connectEl(tr){if(tr.src||!AU.C)return;try{tr.src=AU.C.createMediaElementSource(tr.el);tr.g=AU.C.createGain();tr.src.connect(tr.g);tr.g.connect(AU.music)}catch(e){}tr.el.onended=()=>{if(curTrack()!==tr)return;if(SET.follow&&(tr.region>=0||tr.tema!=null))musicSeek(0,true);else musicNext()}}
 function musicPlay(){const C=audioInit();if(!C)return;if(C.state==='suspended')C.resume();const tr=curTrack();if(!tr)return;stopEngine();MUS.playing=true;MUS.started=true;
   if(tr.builtin){MUS.bus=newBus();MUS.startCtx=C.currentTime+.05;MUS.startPos=MUS.pos;MUS.step=Math.ceil(MUS.pos/tr.stepDur);(tr.beds||[]).forEach(k=>bed(MUS.bus,k,C.currentTime));MUS.timer=setInterval(musicTick,40);musicTick()}
-  else{connectEl(tr);try{tr.el.currentTime=MUS.pos}catch(e){}tr.el.play().catch(()=>{})}
+  else{connectEl(tr);if(tr.g){tr.g.gain.cancelScheduledValues(C.currentTime);tr.g.gain.setValueAtTime(1,C.currentTime)}try{tr.el.currentTime=MUS.pos}catch(e){}tr.el.play().catch(()=>{})}
   uiPlayer()}
 function musicPause(){if(!MUS.playing)return;MUS.pos=musicTime();MUS.playing=false;stopEngine();uiPlayer()}
 function musicToggle(){MUS.playing?musicPause():musicPlay()}
@@ -111,11 +111,13 @@ function musicTick(){const tr=curTrack();if(!tr||!tr.builtin||!MUS.playing)retur
   if(now>=tr.dur){if(SET.follow)musicSeek(0,true);else musicNext();return}
   while(MUS.step*tr.stepDur<now+.35&&MUS.step<tr.totalSteps){const when=MUS.startCtx+(MUS.step*tr.stepDur-MUS.startPos);if(when>=C.currentTime-.02){try{tr.step(MUS.step,Math.max(when,C.currentTime),MUS.bus)}catch(e){}}MUS.step++}}
 /* track for section i: the owner's track for that area first, then any track of its theme */
-function faixaDaArea(i){const c=MUS.list.map((t,k)=>[t,k]),a=c.find(([t])=>t.region===i)||c.find(([t])=>!t.builtin&&t.tema===TEMA[i])||c.find(([t])=>t.tema===TEMA[i]);return a?a[1]:-1}
-function musicRegion(i){if(!SET.follow||!MUS.started)return;const k=faixaDaArea(i);if(k>=0&&k!==MUS.idx)musicSelect(k,MUS.playing)}
+function faixaDaArea(i){const c=MUS.list.map((t,k)=>[t,k]),a=c.find(([t])=>t.region===i||(t.areas&&t.areas.includes(i)))||c.find(([t])=>!t.builtin&&t.tema===TEMA[i])||c.find(([t])=>t.tema===TEMA[i]);return a?a[1]:-1}
+/* no modo Jogo a música sempre acompanha a área (e troca devagar, sem corte); no Passeio, só com o alfinete ligado */
+const musicaSegue=()=>SET.follow||MODE==='play';
+function musicRegion(i){if(!musicaSegue()||!MUS.started)return;MUS.manual=false;const k=typeof faixaDesejada==='function'?faixaDesejada(i):faixaDaArea(i);if(k>=0&&k!==MUS.idx){if(typeof musicCross==='function')musicCross(k);else musicSelect(k,MUS.playing)}}
 function setMusicVol(v){SET.vol=v;saveSet();if(AU.music)AU.music.gain.setTargetAtTime(SET.muted?0:v,AU.C.currentTime,.05)}
 function setMuted(m){SET.muted=m;saveSet();if(AU.music)AU.music.gain.setTargetAtTime(m?0:SET.vol,AU.C.currentTime,.05)}
-function audioWake(e){const C=audioInit();if(!C)return;if(C.state==='suspended')C.resume();if(!MUS.started&&SET.autoplay&&!(e&&e.target&&e.target.closest&&e.target.closest('.pbar,.panel'))){MUS.started=true;if(SET.follow){const k=faixaDaArea(Math.max(0,lastIdx));if(k>=0){MUS.idx=k;MUS.pos=0}}musicPlay();toast('Tocando: '+curTrack().title)}}
+function audioWake(e){const C=audioInit();if(!C)return;if(C.state==='suspended')C.resume();if(!MUS.started&&SET.autoplay&&!(e&&e.target&&e.target.closest&&e.target.closest('.pbar,.panel'))){MUS.started=true;if(musicaSegue()){const k=typeof faixaDesejada==='function'?faixaDesejada(Math.max(0,lastIdx)):faixaDaArea(Math.max(0,lastIdx));if(k>=0){MUS.idx=k;MUS.pos=0}}musicPlay();toast('Tocando: '+curTrack().title)}}
 
 /* synthesized sound effects (original) */
 function sfxOut(v,rev){const g=AU.C.createGain();g.gain.value=v;g.connect(AU.sfx);if(rev)g.connect(AU.sfxRev);return g}
