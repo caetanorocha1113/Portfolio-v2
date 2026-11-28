@@ -21,10 +21,44 @@
   };
   const FLOREIO = '<svg class="flourish" viewBox="0 0 300 18" aria-hidden="true"><path d="M0 9 H122 M178 9 H300" stroke="currentColor" stroke-width="1"/><path d="M150 1 L158 9 L150 17 L142 9 Z" fill="none" stroke="currentColor"/><circle cx="150" cy="9" r="2" fill="currentColor"/><path d="M122 9 q8 -8 14 0 M178 9 q-8 -8 -14 0" fill="none" stroke="currentColor"/></svg>';
 
+  /* a versão vem do endereço deste script no index.html (js/00b-conteudo.js?v=…) e vai para os scripts do motor:
+     depois de uma atualização, o navegador não mistura arquivos novos com antigos guardados no cache */
+  const VERSAO = (() => { try { return new URL(document.currentScript.src).searchParams.get('v') || ''; } catch (e) { return ''; } })();
+  const comVersao = src => VERSAO ? src + '?v=' + encodeURIComponent(VERSAO) : src;
+
   let pronto;
   const promessa = new Promise(r => { pronto = r; });
   let fontesOk;
-  const C = window.CONTEUDO = { dados: null, pronto: promessa, areas: [], secoes: [], fontes: {}, fontesProntas: new Promise(r => { fontesOk = r; }) };
+  const C = window.CONTEUDO = { dados: null, pronto: promessa, areas: [], secoes: [], fontes: {}, fontesProntas: new Promise(r => { fontesOk = r; }), versao: VERSAO, comVersao };
+
+  /* ---------- erros do motor ----------
+     Os erros de qualquer script ficam guardados; se o motor não começar, ou se uma parte visível dele falhar
+     (o cenário, o jogo…), aparece um aviso com o erro, para a tela nunca ficar preta sem explicação. */
+  const ERROS = [];
+  addEventListener('error', e => {
+    if (!e || !e.message) return;
+    const arq = (e.filename || '').split('/').pop().split('?')[0];
+    ERROS.push(e.message + (arq ? ' · ' + arq + ':' + e.lineno : ''));
+  });
+  let avisoFeito = false;
+  function avisoMotor(motivo) {
+    if (avisoFeito) return;
+    avisoFeito = true;
+    const detalhe = [motivo, ...ERROS.slice(0, 3)].filter(Boolean).join('\n');
+    const caixa = el('div', { class: 'aviso-motor', role: 'alert' },
+      el('p', null, el('b', null, 'O cenário não carregou direito.'), ' Recarregue a página sem o cache (Ctrl + Shift + R). Se continuar, mande um print deste aviso.'),
+      detalhe ? el('pre', null, detalhe) : null,
+      el('div', { class: 'aviso-acoes' },
+        el('button', { type: 'button', onclick() { location.reload(); } }, 'Recarregar'),
+        el('button', { type: 'button', class: 'aviso-x', 'aria-label': 'Fechar o aviso', onclick() { caixa.remove(); } }, '×')));
+    document.body.append(caixa);
+  }
+  /* partes do quadro que, falhando, deixam a tela vazia (js/06-loop.js e js/09-inicio.js chamam aqui) */
+  const VISIVEIS = ['jogo', 'vista', 'cenário', 'efeitos', 'personagens', 'motor'];
+  C.erroMotor = (parte, e) => {
+    ERROS.unshift(parte + ': ' + ((e && e.message) || e));
+    if (VISIVEIS.includes(parte)) avisoMotor('');
+  };
 
   /* ---------- utilidades ---------- */
   function romano(n) {
@@ -215,9 +249,9 @@
     return svg;
   }
 
-  /* destaques do mapa: as atividades marcadas com "destaque", de todas as matérias, numa lista curta no início */
+  /* destaques do mapa: as atividades marcadas com "destaque", de todas as matérias (o submenu Destaques do início) */
   function destaquesDoMapa(d) {
-    const L = d.areas.flatMap((a, i) => a.atividades.filter(t => t.destaque).map(t => ({ a, t, i }))).slice(0, 5);
+    const L = d.areas.flatMap((a, i) => a.atividades.filter(t => t.destaque).map(t => ({ a, t, i }))).slice(0, 8);
     if (!L.length) return null;
     return el('div', { class: 'destaques' }, el('p', { class: 'eyebrow' }, 'Destaques do mapa'),
       el('ol', { class: 'trilha' }, L.map(({ a, t, i }, k) => {
@@ -227,32 +261,75 @@
         return li;
       })));
   }
+
+  /* ---------- o início: um menu, como a tela de título de um jogo ----------
+     O título (a abertura pousa nele), e embaixo as regiões do mapa como itens. Ao passar o mouse (ou com o
+     foco do teclado), dois traços de pena se desenham dos lados do item e a legenda embaixo diz o que há lá;
+     parada, a legenda mostra o resumo do perfil. Destaques e Mapa abrem no lugar do menu, com "Voltar". */
+  const PENAS = ['M64 12C52 6 41 18 29 11S10 8 4 13', 'M64 12C53 18 42 6 30 12S11 16 4 11', 'M64 12C51 7 43 17 30 10S12 9 4 12'];
+  const pena = (lado, k) => el('span', { class: 'mi-pena mi-pena-' + lado, 'aria-hidden': 'true', html:
+    '<svg viewBox="0 0 84 24"><path class="mi-traco" pathLength="1" d="' + PENAS[k % PENAS.length] + '"/><path class="mi-gota" d="M70 12l5-5 5 5-5 5z"/><circle class="mi-ponto" cx="5" cy="12" r="1.7"/></svg>' });
+  const comE = l => l.length < 2 ? l.join('') : l.slice(0, -1).join(', ') + ' e ' + l[l.length - 1];
+  const qtd = (n, um, varios) => n + ' ' + (n === 1 ? um : varios);
   function montarInicio(d, n) {
-    const p = d.perfil, s = d.site, primeira = d.areas[0];
+    const p = d.perfil, s = d.site;
     const sec = secao('inicio', d._temas.inicio, 'Início', d._temas.variantes[0], 'hero', 0);
-    const foto = p.foto ? el('img', { class: 'hero-foto', src: p.foto, alt: 'Foto de ' + texto(p.nome), width: 160, height: 160, decoding: 'async' }) : null;
-    const desenho = C.mundo ? el('figure', { class: 'mapa-mundo' }, mapaDoMundo(C.mundo, d), el('figcaption', null, 'O mapa. Clique numa região para ir até ela.')) : null;
-    const mapa = el('nav', { class: 'atlas-mapa', 'aria-label': 'Mapa das matérias' },
-      el('ol', null, d.areas.map((a, i) => el('li', null,
-        el('a', { href: '#' + a.id, style: '--accent:' + girarCor(ACENTO[a.tema], d._temas.variantes[i + 1]) },
-          el('span', { class: 'am-n' }, romano(i + 2)),
-          el('span', { class: 'am-m' }, texto(a.materia)),
-          el('span', { class: 'am-t' }, texto(a.titulo_area)))))));
+    const resumo = texto(p.resumo).trim();
+    const legenda = el('p', { class: 'mi-legenda' }, comMarcadores(resumo));
+    const mostrar = t => { legenda.textContent = ''; legenda.append(t ? t : comMarcadores(resumo)); legenda.classList.toggle('dica', !!t); };
+    /* os itens: as matérias, a Trajetória (se houver) e Sobre e contato, na ordem do mapa */
+    const itens = d.areas.map((a, i) => ({ href: '#' + a.id, rotulo: texto(a.materia), cor: girarCor(ACENTO[a.tema] || '#e8d3a2', d._temas.variantes[i + 1]),
+      dica: romano(i + 2) + ' · ' + qtd(a.atividades.length, 'atividade', 'atividades') + (a.disciplinas.length ? ' · ' + comE(a.disciplinas) : '') }));
+    let k = d.areas.length;
+    if (d.trajetoria) { const t = d.trajetoria; itens.push({ href: '#trajetoria', rotulo: 'Trajetória', cor: girarCor(ACENTO[t.tema] || '#e8d3a2', d._temas.variantes[k + 1]), dica: romano(k + 2) + ' · ' + (primeiraFrase(t.descricao, 130) || 'Do 1º ao 3º ano: conquistas e habilidades') }); k++; }
+    itens.push({ href: '#sobre', rotulo: 'Sobre e contato', cor: girarCor(ACENTO[d._temas.final] || '#e8d3a2', d._temas.variantes[d._temas.variantes.length - 1]), dica: romano(k + 2) + ' · Quem atravessou o mapa, e como falar com ele' });
+    const lista = el('ol', { class: 'mi-lista' }, itens.map((it, j) => el('li', null,
+      el('a', { class: 'mi-item', href: it.href, style: '--accent:' + it.cor, 'data-dica': it.dica },
+        pena('e', j), el('span', { class: 'mi-rot' }, it.rotulo), el('span', { class: 'sr' }, ' — ' + it.dica), pena('d', j + 1)))));
+    /* as vistas: o menu e os dois submenus */
+    const raiz = el('div', { class: 'menu-inicio' });
+    const vistas = {};
+    const abrir = (nome, quem) => {
+      for (const [k2, v] of Object.entries(vistas)) v.hidden = k2 !== nome;
+      raiz.dataset.vista = nome;
+      const alvo = nome === 'menu' ? (quem || lista.querySelector('a')) : vistas[nome].querySelector('.mi-voltar');
+      if (alvo) alvo.focus({ preventScroll: true });
+    };
+    const extra = (rotulo, dica, onclick, cls, id) => el('button', { type: 'button', class: 'mi-extra' + (cls ? ' ' + cls : ''), id: id || null, 'data-dica': dica, onclick }, rotulo);
+    const voltar = quem => el('button', { type: 'button', class: 'mi-voltar', onclick: () => abrir('menu', quem) }, el('span', { 'aria-hidden': 'true' }, '←'), ' Voltar ao menu');
+    const dest = destaquesDoMapa(d), desenho = C.mundo ? el('figure', { class: 'mapa-mundo' }, mapaDoMundo(C.mundo, d), el('figcaption', null, 'O mapa. Clique numa região para ir até ela.')) : null;
+    const bDest = dest ? extra('Destaques', 'As atividades marcadas como destaque, de todas as matérias', () => abrir('destaques')) : null;
+    const bMapa = desenho ? extra('Mapa', 'O mapa desenhado das regiões: clique numa delas para ir até lá', () => abrir('mapa'), 'so-largo') : null;
+    const extras = el('div', { class: 'mi-extras' },
+      [bDest, bMapa,
+        extra('Jogar', 'Atravessar o mapa jogando: cada região é uma matéria', () => { const b = document.getElementById('mPlay'); if (b) b.click(); }, 'mi-jogar', 'btnJogar'),
+        extra('Rever abertura', 'Ver de novo a abertura do Atlas', () => window.ABERTURA && window.ABERTURA.tocar(true), null, 'btnAbertura')].filter(Boolean));
+    vistas.menu = el('nav', { class: 'mi-vista mi-principal', 'aria-label': 'Menu do portfólio' }, lista, legenda, extras);
+    if (dest) { vistas.destaques = el('div', { class: 'mi-vista mi-sub', hidden: true }, dest, voltar(bDest)); }
+    if (desenho) { vistas.mapa = el('div', { class: 'mi-vista mi-sub mi-mapa', hidden: true }, desenho, voltar(bMapa)); }
+    raiz.append(...Object.values(vistas));
+    raiz.dataset.vista = 'menu';
+    /* a legenda acompanha o mouse e o foco; setas para cima e para baixo andam pelo menu; Esc volta */
+    const comDica = '.mi-item, .mi-extra';
+    vistas.menu.addEventListener('pointerover', e => { const a = e.target.closest(comDica); if (a) mostrar(a.dataset.dica); });
+    vistas.menu.addEventListener('pointerleave', () => { const f = document.activeElement; mostrar(f && vistas.menu.contains(f) && f.matches(comDica) ? f.dataset.dica : ''); });
+    vistas.menu.addEventListener('focusin', e => { if (e.target.matches(comDica)) mostrar(e.target.dataset.dica); });
+    vistas.menu.addEventListener('focusout', e => { if (!vistas.menu.contains(e.relatedTarget)) mostrar(''); });
+    raiz.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && raiz.dataset.vista !== 'menu') { e.preventDefault(); abrir('menu', raiz.dataset.vista === 'mapa' ? bMapa : bDest); return; }
+      if ((e.key !== 'ArrowDown' && e.key !== 'ArrowUp') || raiz.dataset.vista !== 'menu') return;
+      const alvos = [...vistas.menu.querySelectorAll(comDica)].filter(b => b.offsetParent), i = alvos.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      alvos[(i + (e.key === 'ArrowDown' ? 1 : alvos.length - 1)) % alvos.length].focus({ preventScroll: true });
+    });
     const copy = el('div', { class: 'copy c' },
       el('p', { class: 'eyebrow' }, 'Crônica de uma jornada'),
       el('h1', { id: 't-inicio' }, texto(s.nome || 'Portfólio')),
       el('div', { html: FLOREIO, class: 'floreio' }),
       el('p', { class: 'hero-sub' }, texto(s.subtitulo || ('Portfólio de ' + texto(p.nome)))),
       p.titulo ? el('p', { class: 'hero-titulo' }, comMarcadores(p.titulo)) : null,
-      foto,
-      p.resumo ? el('p', { class: 'lede' }, comMarcadores(p.resumo)) : null,
-      el('div', { class: 'hero-acoes' },
-        primeira ? el('a', { class: 'botao', href: '#' + primeira.id }, 'Ver matérias') : null,
-        el('button', { type: 'button', class: 'botao fantasma', id: 'btnJogar', onclick: () => { const b = document.getElementById('mPlay'); if (b) b.click(); } }, 'Jogar'),
-        el('button', { type: 'button', class: 'botao-texto', id: 'btnAbertura', onclick: () => window.ABERTURA && window.ABERTURA.tocar(true) }, 'Rever abertura')),
-      destaquesDoMapa(d),
-      desenho,
-      mapa,
+      raiz,
       el('div', { class: 'cue', 'aria-hidden': 'true' }, 'Role para começar a jornada', el('i')));
     sec.append(copy);
     return sec;
@@ -665,10 +742,29 @@
   function carregarMotor() {
     for (const src of MOTOR) {
       const s = document.createElement('script');
-      s.src = src;
+      s.src = comVersao(src);
       s.async = false; /* mantém a ordem numérica */
+      s.onerror = () => { ERROS.unshift('não carregou: ' + src); avisoMotor(''); };
       document.body.append(s);
     }
+    vigiarMotor();
+  }
+  /* vigia: o motor precisa ficar pronto em até 15 s, e o laço precisa andar enquanto a página está à vista */
+  function vigiarMotor() {
+    const raiz = document.documentElement, inicio = performance.now();
+    let antes = -1, parado = 0;
+    const id = setInterval(() => {
+      if (avisoFeito) { clearInterval(id); return; }
+      if (document.hidden || raiz.classList.contains('abertura-cobrindo')) { parado = 0; return; }
+      if (!raiz.classList.contains('motor-pronto')) {
+        if (performance.now() - inicio > 15000) avisoMotor('o motor não terminou de carregar');
+        return;
+      }
+      const q = typeof QUADROS === 'number' ? QUADROS : -1;
+      parado = q === antes ? parado + 1 : 0;
+      antes = q;
+      if (parado >= 2) avisoMotor('o desenho parou');
+    }, 4000);
   }
 
   function mostrarErro(e) {
@@ -722,10 +818,11 @@
     C.painelArea = j => { const sec = montarArea(dados, dados.areas[j], j, '-jogo'), copy = sec.querySelector('.copy'); copy.style.setProperty('--accent', sec.style.getPropertyValue('--accent')); copy.classList.remove('l', 'r'); copy.classList.add('visto', 'no-jogo'); return copy; };
     montar(dados);
     pronto(dados);
-    rota(true);
-    vigiarAltura();
+    try { rota(true); } catch (e) { console.warn('Portfólio: endereço', e); }
+    try { vigiarAltura(); } catch (e) { console.warn('Portfólio: altura', e); }
     /* o motor carrega já, por trás do escuro inicial; a abertura começa quando ele termina a primeira pintura */
     if (C.mundo) carregarMotor();
+    else avisoMotor('o mapa do mundo (js/00a-mundo.js) não carregou');
   }
   iniciar();
 })();

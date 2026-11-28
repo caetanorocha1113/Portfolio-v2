@@ -2,7 +2,7 @@
 
 Portfólio escolar apresentado como uma jornada por um mapa. Cada área do mapa é uma matéria, com as atividades, os projetos e os trabalhos dela.
 
-- **Mapa**: o mundo é um mapa 2D de salas, corredores e poços, como num metroidvania. Cada matéria é uma região; o caminho vai para os lados e para baixo. O início mostra o mapa desenhado, e um minimapa no canto mostra onde o personagem está.
+- **Mapa**: o mundo é um mapa 2D de salas, corredores e poços, como num metroidvania. Cada matéria é uma região; o caminho vai para os lados e para baixo. O início é um menu, como a tela de título de um jogo: as regiões viram itens (com a legenda do que há em cada uma), e Destaques e Mapa (o mapa desenhado) abrem no lugar dele. Um minimapa no canto mostra onde o personagem está.
 - **Passeio**: o portfólio se lê rolando a página. Ao fundo, atrás do texto, o personagem atravessa o mapa sozinho (a rolagem vira distância no caminho) e a música toca como uma playlist.
 - **Jogo**: plataforma com teclado ou toque, explorando livremente o mesmo mapa. A história, os Guardiões de cada área e a trilha da jornada estão em construção.
 - **Conteúdo**: tudo o que se lê vem de [`conteudo/portfolio.json`](conteudo/portfolio.json). Mudar o arquivo muda o site. Veja [`conteudo/LEIA-ME.md`](conteudo/LEIA-ME.md).

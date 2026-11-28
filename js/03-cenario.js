@@ -23,7 +23,7 @@ let PINTOR=null,PINTOR_F=null,PINTORES=[],emVoo=0,fundoEmVoo=0,vezPintor=0;
 /* blocos guardados: menos em celular (cada bloco pintado ocupa alguns MB) */
 const MAX_BLOCOS=matchMedia('(pointer:coarse)').matches?26:44;
 function criarPintor(){try{if(typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined'||location.protocol==='file:')return null;
-    const w=new Worker('js/02c-pintor.js');w.onmessage=recebePintor;w.onerror=e=>{console.warn('Portfólio: pintor indisponível, pintando na página',e.message||e);PINTOR=PINTOR_F=null;PINTORES=[];emVoo=fundoEmVoo=0;blocos.forEach(b=>{b.pedido=false});fundos.forEach(f=>{f.pedido=false})};
+    const w=new Worker(CONTEUDO.comVersao?CONTEUDO.comVersao('js/02c-pintor.js'):'js/02c-pintor.js');w.onmessage=recebePintor;w.onerror=e=>{console.warn('Portfólio: pintor indisponível, pintando na página',e.message||e);PINTOR=PINTOR_F=null;PINTORES=[];emVoo=fundoEmVoo=0;blocos.forEach(b=>{b.pedido=false});fundos.forEach(f=>{f.pedido=false})};
     w.postMessage({tipo:'mundo',regioes:REGS.map(g=>({id:g.id,nome:g.nome,tema:g.tema,variante:g.variante})),semente:7});return w}catch(e){return null}}
 function recebePintor(e){const m=e.data;
   if(m.tipo==='bloco'){emVoo=Math.max(0,emVoo-1);const[k,id]=m.chave.split('#'),b=blocos.get(k);if(b&&b.id==id&&Math.abs(m.rs-RS)<.001){b.img=m.bmp;b.pronto=true;b.rapido=null}else if(m.bmp.close)m.bmp.close()}

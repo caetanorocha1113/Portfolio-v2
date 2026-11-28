@@ -4,7 +4,8 @@
    mesma semente e gera exatamente o mesmo mapa de js/00a-mundo.js.
    Mensagens: {tipo:'mundo'|'segredos'|'imagem'|'bloco'|'fundo'} → responde {tipo:'bloco'|'fundo'|'erro'}. */
 self.window = self;
-importScripts('01-base.js', '02-regioes.js', '00a-mundo.js', '02b-salas.js', '02d-enfeites.js');
+/* a mesma versão da página (js/02c-pintor.js?v=…): o pintor nunca usa arquivos antigos do cache */
+importScripts(...['01-base.js', '02-regioes.js', '00a-mundo.js', '02b-salas.js', '02d-enfeites.js'].map(f => f + self.location.search));
 let M = null, VAR = [];
 const FUNDOS_DONO = {};
 const perto = (X, Y, S, m) => M.salas.filter(s => !salaFechada(s) && s.x - m < X + S && s.x + s.w + m > X && s.y - m < Y + S && s.y + s.h + m > Y);

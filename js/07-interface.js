@@ -106,6 +106,7 @@ const GUIDE={
 comeco:['Começo',`<h4>O que é este site</h4>
 <p>Um portfólio escolar em forma de mapa. Cada área do mapa é uma matéria, com as atividades, os projetos e os trabalhos dela. Quem visita lê tudo rolando a página; o jogo é uma camada extra.</p>
 <ul><li><b>Conteúdo</b>: vem de <code>conteudo/portfolio.json</code>. Mudar o arquivo muda o site (veja a aba "Conteúdo").</li>
+<li><b>Início</b>: um menu, como a tela de título de um jogo. Cada região é um item; ao passar o mouse, a legenda diz quantas atividades e quais disciplinas há nela (parada, mostra o <code>resumo</code> do perfil). Destaques e Mapa abrem no lugar do menu.</li>
 <li><b>Cenários</b>: um mapa 2D de salas, corredores e poços, como num metroidvania. Cada área é uma região do mapa e escolhe um dos oito temas pintados em código. O minimapa do canto mostra onde o personagem está.</li>
 <li><b>Personagem, inimigos, fontes, sons e músicas</b>: vêm da pasta <code>recursos/</code> (veja a aba "Pasta recursos").</li></ul>
 <h4>Dois modos</h4>
@@ -124,7 +125,7 @@ conteudo:['Conteúdo',`<h4>O arquivo <code>conteudo/portfolio.json</code></h4>
 <p>Tudo o que se lê no site sai dele: nome, apresentação, matérias, atividades, sobre e contato. A quantidade de áreas é a quantidade de matérias.</p>
 <pre>{
   "site":   { "nome": "…", "subtitulo": "Portfólio de …" },
-  "perfil": { "nome": "…", "titulo": "…", "resumo": "…", "foto": "conteudo/imagens/foto.jpg",
+  "perfil": { "nome": "…", "titulo": "…", "resumo": "…",
               "links": [{ "rotulo": "GitHub", "url": "https://…" }],
               "contato": { "email": "…", "cidade": "…", "formulario": "https://formspree.io/f/…" } },
   "areas": [ { "id": "humanas", "materia": "Humanas", "titulo_area": "…",
@@ -154,7 +155,7 @@ conteudo:['Conteúdo',`<h4>O arquivo <code>conteudo/portfolio.json</code></h4>
 <h4>Temas</h4>
 <p><code>cinzaraiz</code>, <code>galerias</code>, <code>sendas</code>, <code>brejo</code>, <code>cidadela</code>, <code>minas</code>, <code>ninho</code>, <code>fosso</code>. Dois ou mais matérias podem usar o mesmo tema: o site muda a cor automaticamente. O início e o fim usam <code>tema_inicio</code> e <code>tema_final</code> em <code>site</code>.</p>
 <h4>Abertura</h4>
-<p>Em <code>abertura</code>, <code>falas</code> são os textos que aparecem e <code>mostrar</code> pode ser <code>sempre</code>, <code>uma_vez_por_sessao</code> ou <code>nunca</code>. O botão "Rever abertura" no início toca de novo.</p>`],
+<p>Em <code>abertura</code>, <code>falas</code> são os textos que aparecem e <code>mostrar</code> pode ser <code>sempre</code>, <code>uma_vez_por_sessao</code> ou <code>nunca</code>. "Rever abertura", no menu do início, toca de novo.</p>`],
 pasta:['Pasta recursos',`<h4>Colocar arquivos sem configurar nada</h4>
 <p>Publicado (GitHub Pages) ou rodando no seu computador, o site procura arquivos com nomes fixos dentro de <code>recursos/</code>. O índice <code>recursos/indice.json</code>, gerado sozinho pelo GitHub, diz o que existe; a lista no fim desta aba mostra o que foi encontrado e o que falta.</p>
 <div class="tw"><table><tr><th>Pasta</th><th>Nomes dos arquivos</th><th>Formatos</th></tr>

@@ -32,14 +32,14 @@ Tudo o que está entre colchetes, como `[e-mail]` ou `[ano / semestre]`, aparece
 - `disciplina`: a matéria dentro da área (História, Química, Probabilidade…). No Técnico, é a **submatéria** (IoT, Banco de Dados…). Pode ser uma lista quando a atividade vale para duas: `["Desenvolvimento de Sistemas", "Programação de Aplicativos"]`.
 - `trimestre`: `1`, `2` ou `3`. Aparece na lista ("1º tri") e no detalhe. Sem trimestre, aparece a `data` (`"2025-03"` vira "mar. de 2025").
 - `tipo`: `projeto`, `trabalho`, `prova`, `apresentação` ou `outro`.
-- `destaque`: aparece primeiro na área, com selo, e em **Destaques do mapa**, no início.
+- `destaque`: aparece primeiro na área, com selo, e em **Destaques**, no menu do início.
 - A primeira imagem vira a miniatura da atividade na lista da área (e aparece no detalhe). Sem imagem, a miniatura usa a capa do vídeo do YouTube (se o `embed` for um vídeo) ou o desenho do tipo.
 - Imagens também podem ter legenda: `{ "src": "conteudo/…/foto.jpg", "legenda": "…" }`.
 - `embed`: o trabalho para ver dentro do site, sem sair da página. Aceita vídeo do YouTube, apresentação do Canva (o endereço de "Incorporar", que termina em `/view?embed`, ou o de visualização), documento ou apresentação do Google Docs, mural do Padlet (`padlet.com/embed/…`) ou um PDF. O detalhe mostra o botão "Assistir aqui" / "Ver a apresentação aqui" / "Ler aqui", e o quadro só carrega quando a pessoa clica. Os links curtos do Canva (`canva.link/…`) não abrem dentro do site: deixe-os em `links`.
 - `habilidades`: as competências e habilidades trabalhadas. Começando com o código (`C3`, `H15 – …`), o resumo fechado mostra só os códigos (C3 · H15 · H16) e o texto abre com um clique. Sem código, o resumo diz quantas são.
 - `materiais` (lista) e `codigo` (texto, com `\n` nas quebras de linha): para atividades de montagem, como as de Arduino. Aparecem como **Montagem** e **Código** (com o botão Copiar).
 - Cada atividade tem endereço próprio, por exemplo `#humanas/projeto-1`. Dá para mandar o link direto.
-- Pastas: `conteudo/imagens/` (a foto), `conteudo/arquivos/` (o currículo) e `conteudo/atividades/<id>/` (imagens e arquivos de cada atividade). Para imagens grandes, `.webp` ou `.jpg` com até 1600 px de largura deixam o site leve.
+- Pastas: `conteudo/arquivos/` (o currículo) e `conteudo/atividades/<id>/` (imagens e arquivos de cada atividade). Para imagens grandes, `.webp` ou `.jpg` com até 1600 px de largura deixam o site leve.
 
 ## Áreas (matérias)
 
@@ -67,11 +67,13 @@ O bloco `trajetoria` cria uma área a mais no mapa, depois das matérias: a estr
 ```
 
 - `tipo` da conquista: `certificado`, `premio`, `olimpiada`, `curso` ou `outro` (muda o desenho).
-- As atividades com `"destaque": true` também aparecem em **Destaques do mapa**, no início.
+- As atividades com `"destaque": true` também aparecem em **Destaques**, no menu do início.
 
 ## Perfil e contato
 
-`perfil` tem o nome, o título, o resumo (aparece no início), a `foto` (`conteudo/imagens/…`, quadrada) e os `links` (GitHub, LinkedIn, currículo, versões antigas do portfólio…), que aparecem em Sobre e contato.
+`perfil` tem o nome, o título, o `resumo` e os `links` (GitHub, LinkedIn, currículo, versões antigas do portfólio…), que aparecem em Sobre e contato.
+
+O início é um menu: as matérias, a Trajetória e Sobre e contato, na ordem do mapa. Ao passar o mouse num item, a legenda embaixo diz quantas atividades e quais disciplinas há nele; parada, a legenda mostra o `resumo`. Embaixo ficam Destaques, Mapa (o mapa desenhado; some no celular), Jogar e Rever abertura.
 
 `perfil.contato` tem `cidade`, `email` e `formulario`. Com `formulario` (o endereço de um serviço que recebe formulários, como o Formspree: `https://formspree.io/f/…`), Sobre e contato mostra um formulário com nome, e-mail e mensagem, que envia sem sair da página; aí o e-mail só aparece se estiver preenchido. Sem `formulario`, aparece o e-mail com o botão Copiar.
 

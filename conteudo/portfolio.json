@@ -11,7 +11,7 @@
     "nome": "Caetano Rocha de Oliveira",
     "titulo": "3º ano do ensino médio integrado ao técnico de sistemas · SESI-SENAI",
     "resumo": "Estudante do 3º ano do ensino médio integrado ao técnico em Desenvolvimento de Sistemas, em Florianópolis. Sou de exatas, me interesso por TI, matemática e história, e quero seguir carreira em programação e tecnologia.",
-    "foto": "conteudo/imagens/caetano.jpg",
+    "foto": "",
     "links": [
       { "rotulo": "GitHub", "url": "https://github.com/caetanorocha1113" },
       { "rotulo": "LinkedIn", "url": "https://bit.ly/linkedin-caetano" },
@@ -20,7 +20,7 @@
       { "rotulo": "Portfólio V2 (Google Sites)", "url": "https://sites.google.com/estudante.sesisenai.org.br/portfoliocaetano/in%C3%ADcio" }
     ],
     "contato": {
-      "email": "",
+      "email": "onateac31@gmail.com",
       "cidade": "Florianópolis, SC",
       "formulario": "https://formspree.io/f/xlgaapyw"
     }
