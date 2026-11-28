@@ -92,6 +92,28 @@
     if (typeof item === 'string') return { src: item, legenda: '' };
     return item.src ? { src: item.src, legenda: texto(item.legenda || item.alt) } : null;
   }
+  /* disciplina de uma atividade (no Técnico, a submatéria): um nome ou uma lista */
+  const disciplinasDe = t => lista(t.disciplina != null ? t.disciplina : t.submateria).map(texto).filter(s => s.trim());
+  const trimestreDe = v => { const n = parseInt(v, 10); return n >= 1 && n <= 4 ? n : 0; };
+  const limpas = v => lista(v).map(texto).filter(s => s.trim());
+  /* o trabalho embutido na página (aparece só quando a pessoa pede): YouTube, Canva, Google Docs, Padlet ou PDF */
+  function embedDe(u) {
+    u = texto(u).trim();
+    if (!u) return null;
+    let m;
+    if ((m = u.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/))) return { tipo: 'video', origem: 'YouTube', id: m[1], src: 'https://www.youtube.com/embed/' + m[1] };
+    if ((m = u.match(/canva\.com\/design\/([^/?#]+)\/([^/?#]+)\/(?:view|edit|watch)/))) return { tipo: 'slides', origem: 'Canva', src: `https://www.canva.com/design/${m[1]}/${m[2]}/view?embed` };
+    if ((m = u.match(/docs\.google\.com\/(document|presentation|spreadsheets)\/d\/([\w-]+)/))) return { tipo: m[1] === 'presentation' ? 'slides' : 'doc', origem: 'Google Docs', src: `https://docs.google.com/${m[1]}/d/${m[2]}/${m[1] === 'presentation' ? 'embed' : 'preview'}` };
+    if (/padlet\.com\//.test(u)) return { tipo: 'mural', origem: 'Padlet', src: u };
+    if (/\.pdf($|[?#])/i.test(u)) return { tipo: 'doc', origem: 'PDF', src: u };
+    return { tipo: 'outro', origem: (u.match(/^https?:\/\/(?:www\.)?([^/]+)/) || [])[1] || '', src: u };
+  }
+  /* miniatura: a primeira imagem; sem imagem, a capa do vídeo do YouTube (se houver) */
+  function miniaturaDe(atv) {
+    if (atv.imagens[0]) return atv.imagens[0].src;
+    if (atv.embed && atv.embed.tipo === 'video') return 'https://i.ytimg.com/vi/' + atv.embed.id + '/hqdefault.jpg';
+    return '';
+  }
 
   /* ---------- dados ---------- */
   function normalizar(d) {
@@ -115,11 +137,18 @@
         while (vistos[tid]) tid += '-' + (k + 1);
         vistos[tid] = 1;
         const tipo = slug(t.tipo) === 'apresentacao' ? 'apresentação' : (TIPOS[t.tipo] ? t.tipo : 'outro');
-        return { ...t, id: tid, tipo, imagens: lista(t.imagens).map(imagemDe).filter(Boolean), links: lista(t.links).filter(l => l && (l.rotulo || l.url)), tags: lista(t.tags) };
+        return { ...t, id: tid, tipo, disciplinas: disciplinasDe(t), trimestre: trimestreDe(t.trimestre),
+          habilidades: limpas(t.habilidades), materiais: limpas(t.materiais), codigo: texto(t.codigo).replace(/\s+$/, ''), embed: embedDe(t.embed),
+          imagens: lista(t.imagens).map(imagemDe).filter(Boolean), links: lista(t.links).filter(l => l && (l.rotulo || l.url)), tags: lista(t.tags) };
       });
       /* destaques primeiro, mantendo a ordem do arquivo dentro de cada grupo */
       atividades.sort((x, y) => (y.destaque ? 1 : 0) - (x.destaque ? 1 : 0));
-      return { ...a, id, tema, atividades, competencias: lista(a.competencias), jogo: a.jogo || {} };
+      /* disciplinas da área (no Técnico, "submaterias"): a ordem do arquivo, mais as que só aparecem nas atividades */
+      const sub = lista(a.submaterias).length > 0;
+      const disciplinas = limpas(sub ? a.submaterias : a.disciplinas);
+      for (const t of atividades) for (const n of t.disciplinas) if (!disciplinas.includes(n)) disciplinas.push(n);
+      return { ...a, id, tema, atividades, disciplinas, rotuloDisc: sub ? ['submatéria', 'submatérias'] : ['disciplina', 'disciplinas'],
+        competencias: lista(a.competencias), jogo: a.jogo || {} };
     });
     /* trajetória (opcional): linha do tempo dos anos, conquistas e habilidades, numa área própria do mapa */
     if (d.trajetoria && typeof d.trajetoria === 'object') {
@@ -194,7 +223,7 @@
       el('ol', { class: 'trilha' }, L.map(({ a, t, i }, k) => {
         const li = itemTrilha(a, t, 0, 9);
         li.style.setProperty('--accent', girarCor(ACENTO[a.tema] || '#e8d3a2', d._temas.variantes[i + 1]));
-        const meta = li.querySelector('.tr-meta'); if (meta) meta.firstChild.textContent = romano(i + 2) + ' · ' + texto(a.materia) + ' · ' + (TIPOS[t.tipo] || 'Outro');
+        const meta = li.querySelector('.tr-meta'); if (meta) meta.firstChild.textContent = romano(i + 2) + ' · ' + texto(a.materia) + ' · ' + (t.disciplinas[0] || TIPOS[t.tipo] || 'Outro');
         return li;
       })));
   }
@@ -248,12 +277,15 @@
   }
   /* uma atividade na trilha da área: linha curta; mostra o resumo ao passar o mouse e tudo quando o registro abre */
   function itemTrilha(area, atv, k, visiveis) {
-    const meta = [romano(k + 1), TIPOS[atv.tipo] || 'Outro'];
-    if (atv.data) meta.push(dataBonita(atv.data));
-    const img = atv.imagens[0], ic = ICONE_TIPO[atv.tipo] || ICONE_TIPO.outro;
-    const mini = img ? el('span', { class: 'tr-mini' }, el('img', { src: img.src, alt: '', loading: 'lazy', decoding: 'async' }))
-      : el('span', { class: 'tr-mini tr-mini-arte', html: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + ic + '"/></svg>' });
-    return el('li', { class: 'tr-item' + (k >= visiveis ? ' alem' : '') + (atv.destaque ? ' destaque' : ''), style: '--i:' + k },
+    /* na linha: a disciplina (ou o tipo) e o trimestre (ou a data) */
+    const d = atv.disciplinas, meta = [romano(k + 1), d.length ? d[0] + (d.length > 1 ? ' +' + (d.length - 1) : '') : (TIPOS[atv.tipo] || 'Outro')];
+    if (atv.trimestre) meta.push(atv.trimestre + 'º tri');
+    else if (atv.data) meta.push(dataBonita(atv.data));
+    const src = miniaturaDe(atv), ic = ICONE_TIPO[atv.tipo] || ICONE_TIPO.outro;
+    const arte = () => el('span', { class: 'tr-mini tr-mini-arte', html: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + ic + '"/></svg>' });
+    /* se a miniatura não carregar (sem internet, vídeo removido), volta o desenho do tipo */
+    const mini = src ? el('span', { class: 'tr-mini' }, el('img', { src, alt: '', loading: 'lazy', decoding: 'async', onerror() { const s = this.parentNode; if (s && s.parentNode) s.replaceWith(arte()); } })) : arte();
+    return el('li', { class: 'tr-item' + (k >= visiveis ? ' alem' : '') + (atv.destaque ? ' destaque' : ''), style: '--i:' + k, 'data-disc': d.join('|') || null },
       el('a', { class: 'tr-a', href: '#' + area.id + '/' + atv.id, 'data-area': area.id, 'data-atv': atv.id },
         mini,
         el('span', { class: 'tr-txt' },
@@ -287,15 +319,29 @@
         a.competencias.length ? el('ul', { class: 'comp', 'aria-label': 'Competências' }, a.competencias.map(c => el('li', null, comMarcadores(c)))) : null));
     const botao = el('button', { type: 'button', class: 'abrir-area', 'aria-expanded': 'false', 'aria-controls': idMais, onclick: () => alternar() },
       el('span', { class: 'ab-txt' }, 'Abrir registro'), el('span', { class: 'ab-ic', html: CHEVRON }));
+    /* filtro por disciplina (no Técnico, por submatéria): um clique mostra só as atividades dela; outro clique volta a todas */
+    const discs = a.disciplinas || [], [um, varios] = a.rotuloDisc || ['disciplina', 'disciplinas'];
+    let filtroAtual = '';
+    const filtro = discs.length > 1 && total ? el('div', { class: 'filtro', role: 'group', 'aria-label': 'Filtrar por ' + um },
+      [['', 'Todas', total], ...discs.map(x => [x, x, a.atividades.filter(t => t.disciplinas.includes(x)).length])].map(([v, rot, q]) =>
+        el('button', { type: 'button', class: 'filtro-b', 'data-v': v, 'aria-pressed': v ? 'false' : 'true', disabled: q ? null : true, onclick: () => filtrar(v) },
+          el('span', null, rot), el('span', { class: 'filtro-n' }, String(q))))) : null;
+    function filtrar(v) {
+      filtroAtual = v && v !== filtroAtual ? v : '';
+      filtro.querySelectorAll('.filtro-b').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === filtroAtual)));
+      trilha.classList.toggle('filtrada', !!filtroAtual);
+      trilha.querySelectorAll('.tr-item').forEach(li => li.classList.toggle('fora', !!filtroAtual && !(li.dataset.disc || '').split('|').includes(filtroAtual)));
+    }
     const partes = [
       el('p', { class: 'eyebrow' }, `Área ${romano(n)}`, a.titulo_area ? ' · ' : '', a.titulo_area ? comMarcadores(a.titulo_area) : null),
       el('h2', { id: 't-' + a.id + sufixo }, texto(a.materia), a.periodo ? el('small', null, comMarcadores(a.periodo)) : null),
       el('div', { class: 'orn', html: ORNAMENTO }),
       resumo ? el('p', { class: 'area-resumo' }, comMarcadores(resumo)) : null,
       el('ul', { class: 'area-num', 'aria-label': 'Resumo da área' }, num(total, 'atividade', 'atividades'),
+        discs.length > 1 ? num(discs.length, um, varios) : null,
         a.competencias.length ? num(a.competencias.length, 'competência', 'competências') : null,
         destaques ? num(destaques, 'destaque', 'destaques') : null),
-      mais, trilha, botao].filter(Boolean);
+      mais, filtro, trilha, botao].filter(Boolean);
     partes.forEach((p, k) => p.style.setProperty('--i', k));
     const copy = el('div', { class: 'copy painel-area ' + lado }, partes);
     mais.inert = true;
@@ -378,12 +424,40 @@
     return caixa;
   }
 
+  /* formulário de contato (Formspree ou outro serviço que recebe POST): envia sem sair da página;
+     sem JavaScript de rede, o envio normal do formulário continua funcionando */
+  function formContato(url) {
+    const st = el('p', { class: 'fc-status', role: 'status', 'aria-live': 'polite' });
+    const campo = (rot, filho, cls) => el('label', { class: 'fc-campo' + (cls ? ' ' + cls : '') }, el('span', null, rot), filho);
+    const f = el('form', { class: 'form-contato', action: url, method: 'POST' },
+      campo('Seu nome', el('input', { type: 'text', name: 'nome', required: true, autocomplete: 'name', maxlength: '120' })),
+      campo('Seu e-mail', el('input', { type: 'email', name: 'email', required: true, autocomplete: 'email', maxlength: '200' })),
+      campo('Mensagem', el('textarea', { name: 'mensagem', rows: '4', required: true, maxlength: '4000' }), 'fc-msg'),
+      el('input', { type: 'text', name: '_gotcha', tabindex: '-1', autocomplete: 'off', class: 'fc-isca', 'aria-hidden': 'true' }),
+      el('div', { class: 'fc-acoes' }, el('button', { type: 'submit', class: 'botao' }, 'Enviar mensagem'), st));
+    f.addEventListener('submit', async ev => {
+      if (!window.fetch || !window.FormData) return;
+      ev.preventDefault();
+      const b = f.querySelector('button[type="submit"]');
+      b.disabled = true; st.textContent = 'Enviando…'; st.className = 'fc-status';
+      try {
+        const r = await fetch(url, { method: 'POST', body: new FormData(f), headers: { Accept: 'application/json' } });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        f.reset(); st.textContent = 'Mensagem enviada. Obrigado!'; st.className = 'fc-status ok';
+      } catch (e) {
+        st.textContent = 'Não consegui enviar agora. Tente de novo daqui a pouco.'; st.className = 'fc-status erro';
+      }
+      b.disabled = false;
+    });
+    return f;
+  }
   function montarFinal(d, total) {
     const p = d.perfil, ct = p.contato, n = total;
     const sec = secao('sobre', d._temas.final, 'Sobre e contato', d._temas.variantes[d._temas.variantes.length - 1], 'final', (n - 1) * 380);
     const aviso = el('span', { class: 'aviso', role: 'status', 'aria-live': 'polite' });
     const email = texto(ct.email);
     const emailReal = email && !soMarcador(email) && email.includes('@');
+    const form = texto(ct.formulario).trim();
     const links = lista(p.links).filter(l => l && (l.rotulo || l.url));
     const copy = el('div', { class: 'copy painel-final r' },
       el('p', { class: 'eyebrow' }, 'Fim do mapa'),
@@ -391,10 +465,12 @@
       sobreResumido(d.sobre || '[Texto sobre você.]'),
       el('h3', { class: 'sub' }, 'Contato'),
       el('dl', { class: 'contato' },
-        el('div', null, el('dt', null, 'E-mail'), el('dd', null,
+        /* com formulário, o e-mail só aparece se estiver preenchido */
+        emailReal || !form ? el('div', null, el('dt', null, 'E-mail'), el('dd', null,
           emailReal ? el('a', { href: 'mailto:' + email }, email) : comMarcadores(email || '[e-mail]'),
-          emailReal ? el('button', { type: 'button', class: 'botao-texto', onclick: () => copiar(email, aviso) }, 'Copiar') : null, aviso)),
+          emailReal ? el('button', { type: 'button', class: 'botao-texto', onclick: () => copiar(email, aviso) }, 'Copiar') : null, aviso)) : null,
         ct.cidade ? el('div', null, el('dt', null, 'Cidade'), el('dd', null, comMarcadores(ct.cidade))) : null),
+      form ? formContato(form) : null,
       links.length ? el('ul', { class: 'links' }, links.map(l => el('li', null,
         l.url ? el('a', { href: l.url, target: ehExterno(l.url) ? '_blank' : null, rel: ehExterno(l.url) ? 'noopener' : null }, comMarcadores(l.rotulo || l.url)) : comMarcadores(l.rotulo)))) : null,
       el('button', { class: 'ascend', id: 'ascend', type: 'button', onclick: () => { if (!document.documentElement.classList.contains('playing')) window.scrollTo({ top: 0, behavior: reduzido() ? 'auto' : 'smooth' }); } }, 'Voltar ao início'),
@@ -442,6 +518,51 @@
   }
 
   /* ---------- detalhe da atividade ---------- */
+  const ROTULO_VER = { video: 'Assistir aqui', slides: 'Ver a apresentação aqui', doc: 'Ler aqui', mural: 'Ver o mural aqui', outro: 'Ver aqui' };
+  const ICONE_VER = {
+    video: 'M8 5.5v13l11-6.5z',
+    slides: 'M3 4h18v12H3zM12 16v4M8 20h8',
+    doc: 'M6 2h9l5 5v15H6zM15 2v5h5M9 12h8M9 16h8',
+    mural: 'M3 4h8v7H3zM13 4h8v4h-8zM13 10h8v10h-8zM3 13h8v7H3z',
+    outro: 'M14 3h7v7M21 3l-9 9M19 14v7H3V5h7'
+  };
+  /* o trabalho embutido: só carrega quando a pessoa clica (o detalhe abre rápido e nada de fora carrega sem pedir) */
+  function visualizador(atv) {
+    const e = atv.embed, fundo = miniaturaDe(atv);
+    const caixa = el('div', { class: 'det-ver det-ver-' + e.tipo });
+    const botao = el('button', { type: 'button', class: 'det-ver-b', onclick: () => {
+      const fr = el('iframe', { src: e.src, title: texto(atv.titulo) + (e.origem ? ' (' + e.origem + ')' : ''), allow: 'autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write', allowfullscreen: true, referrerpolicy: 'strict-origin-when-cross-origin' });
+      caixa.textContent = '';
+      caixa.classList.add('carregado');
+      caixa.append(fr);
+      fr.focus({ preventScroll: true });
+    } },
+      fundo ? el('img', { class: 'det-ver-fundo', src: fundo, alt: '', loading: 'lazy', decoding: 'async', onerror() { this.remove(); } }) : null,
+      el('span', { class: 'det-ver-ic', 'aria-hidden': 'true', html: '<svg viewBox="0 0 24 24"><path d="' + (ICONE_VER[e.tipo] || ICONE_VER.outro) + '"/></svg>' }),
+      el('span', { class: 'det-ver-t' }, ROTULO_VER[e.tipo] || ROTULO_VER.outro),
+      e.origem ? el('small', null, 'abre o ' + e.origem + ' dentro da página') : null);
+    caixa.append(botao);
+    return caixa;
+  }
+  function blocoCodigo(c) {
+    const aviso = el('span', { class: 'aviso', role: 'status', 'aria-live': 'polite' });
+    return el('div', { class: 'det-bloco det-codigo' },
+      el('div', { class: 'det-bloco-cab' }, el('h3', null, 'Código'),
+        el('button', { type: 'button', class: 'botao-texto', onclick: () => copiar(c, aviso) }, 'Copiar'), aviso),
+      el('pre', { tabindex: '0', 'aria-label': 'Código' }, el('code', null, c)));
+  }
+  /* habilidades: fechadas, com os códigos (C3 · H15 …) no resumo; abrem com o texto de cada uma */
+  const CODIGO_HAB = /^\s*([CH]\s?\d{1,2})\b\s*[–—:-]?\s*/i;
+  function blocoHabilidades(hs) {
+    const cods = hs.map(h => (h.match(CODIGO_HAB) || [])[1]).filter(Boolean).map(c => c.replace(/\s+/g, '').toUpperCase());
+    const resumo = cods.length === hs.length ? cods.join(' · ') : hs.length + (hs.length === 1 ? ' habilidade' : ' habilidades');
+    return el('details', { class: 'det-bloco det-hab' },
+      el('summary', null, el('span', { class: 'det-hab-t' }, 'Habilidades trabalhadas'), el('span', { class: 'det-hab-c' }, resumo)),
+      el('ul', { class: 'det-lista' }, hs.map(h => {
+        const m = h.match(CODIGO_HAB);
+        return el('li', null, m ? [el('b', null, m[1].replace(/\s+/g, '').toUpperCase()), h.slice(m[0].length) ? ' ' + h.slice(m[0].length) : ''] : comMarcadores(h));
+      })));
+  }
   const det = () => document.getElementById('detalhe');
   let quemAbriu = null, abertoEm = null;
   function acharAtividade(areaId, atvId) {
@@ -454,7 +575,8 @@
     const r = acharAtividade(areaId, atvId);
     if (!r) { fecharDetalhe(false); return; }
     const { area, atv, k } = r, corpo = document.getElementById('detCorpo');
-    const meta = [texto(area.materia), TIPOS[atv.tipo] || 'Outro'];
+    const meta = [texto(area.materia), ...atv.disciplinas, TIPOS[atv.tipo] || 'Outro'];
+    if (atv.trimestre) meta.push(atv.trimestre + 'º trimestre');
     if (atv.data) meta.push(dataBonita(atv.data));
     const ant = area.atividades[k - 1], prox = area.atividades[k + 1];
     const aviso = el('span', { class: 'aviso', role: 'status', 'aria-live': 'polite' });
@@ -470,6 +592,10 @@
           el('a', { href: im.src, target: '_blank', rel: 'noopener' }, el('img', { src: im.src, alt: im.legenda || `${texto(atv.titulo)}, imagem ${j + 1}`, loading: 'lazy', decoding: 'async' })),
           im.legenda ? el('figcaption', null, im.legenda) : null))) : null,
       el('div', { class: 'det-texto' }, paragrafos(atv.descricao || atv.resumo || '[Texto completo da atividade.]')),
+      atv.embed ? visualizador(atv) : null,
+      atv.materiais.length ? el('div', { class: 'det-bloco' }, el('h3', null, 'Montagem'), el('ul', { class: 'det-lista' }, atv.materiais.map(m => el('li', null, comMarcadores(m))))) : null,
+      atv.codigo ? blocoCodigo(atv.codigo) : null,
+      atv.habilidades.length ? blocoHabilidades(atv.habilidades) : null,
       atv.links.length ? el('div', { class: 'det-arquivos' }, el('h3', null, 'Arquivos e links'),
         el('ul', null, atv.links.map(l => el('li', null, l.url
           ? el('a', { href: l.url, target: '_blank', rel: 'noopener' }, comMarcadores(l.rotulo || l.url))
@@ -483,6 +609,7 @@
     if (m.hidden) { quemAbriu = document.activeElement; m.hidden = false; document.documentElement.classList.add('detalhe-aberto'); }
     abertoEm = area.id;
     m.querySelector('.detalhe').scrollTop = 0;
+    m.scrollTop = 0; /* quem rola é o fundo do painel: ao ir para a próxima atividade, volta ao topo */
     m.querySelector('.detalhe').focus({ preventScroll: true });
   }
   function fecharDetalhe(mudarEndereco) {

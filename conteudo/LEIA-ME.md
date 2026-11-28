@@ -14,27 +14,38 @@ Tudo o que está entre colchetes, como `[e-mail]` ou `[ano / semestre]`, aparece
 {
   "id": "projeto-1",
   "titulo": "Nome da atividade",
+  "disciplina": "História",
+  "trimestre": 1,
   "tipo": "projeto",
-  "data": "2025-03",
+  "data": "",
   "resumo": "Uma frase: aparece na lista da área ao passar o mouse e inteira com o registro aberto.",
   "descricao": "Texto completo.\n\nUma linha em branco separa parágrafos.",
-  "imagens": ["conteudo/atividades/projeto-1/capa.jpg"],
+  "imagens": ["conteudo/atividades/projeto-1/capa.webp"],
+  "embed": "https://www.canva.com/design/…/view?embed",
   "links": [{ "rotulo": "Ver arquivo", "url": "conteudo/atividades/projeto-1/arquivo.pdf" }],
-  "tags": ["grupo", "pesquisa"],
+  "habilidades": ["C3", "H15 – Reconhecer os movimentos sociais…"],
+  "tags": ["em grupo"],
   "destaque": true
 }
 ```
 
+- `disciplina`: a matéria dentro da área (História, Química, Probabilidade…). No Técnico, é a **submatéria** (IoT, Banco de Dados…). Pode ser uma lista quando a atividade vale para duas: `["Desenvolvimento de Sistemas", "Programação de Aplicativos"]`.
+- `trimestre`: `1`, `2` ou `3`. Aparece na lista ("1º tri") e no detalhe. Sem trimestre, aparece a `data` (`"2025-03"` vira "mar. de 2025").
 - `tipo`: `projeto`, `trabalho`, `prova`, `apresentação` ou `outro`.
-- `destaque`: aparece primeiro na área, com selo.
-- A primeira imagem vira a miniatura da atividade na lista da área (e aparece no detalhe). Sem imagem, a miniatura ganha o desenho do tipo.
+- `destaque`: aparece primeiro na área, com selo, e em **Destaques do mapa**, no início.
+- A primeira imagem vira a miniatura da atividade na lista da área (e aparece no detalhe). Sem imagem, a miniatura usa a capa do vídeo do YouTube (se o `embed` for um vídeo) ou o desenho do tipo.
 - Imagens também podem ter legenda: `{ "src": "conteudo/…/foto.jpg", "legenda": "…" }`.
+- `embed`: o trabalho para ver dentro do site, sem sair da página. Aceita vídeo do YouTube, apresentação do Canva (o endereço de "Incorporar", que termina em `/view?embed`, ou o de visualização), documento ou apresentação do Google Docs, mural do Padlet (`padlet.com/embed/…`) ou um PDF. O detalhe mostra o botão "Assistir aqui" / "Ver a apresentação aqui" / "Ler aqui", e o quadro só carrega quando a pessoa clica. Os links curtos do Canva (`canva.link/…`) não abrem dentro do site: deixe-os em `links`.
+- `habilidades`: as competências e habilidades trabalhadas. Começando com o código (`C3`, `H15 – …`), o resumo fechado mostra só os códigos (C3 · H15 · H16) e o texto abre com um clique. Sem código, o resumo diz quantas são.
+- `materiais` (lista) e `codigo` (texto, com `\n` nas quebras de linha): para atividades de montagem, como as de Arduino. Aparecem como **Montagem** e **Código** (com o botão Copiar).
 - Cada atividade tem endereço próprio, por exemplo `#humanas/projeto-1`. Dá para mandar o link direto.
-- Sugestão de pastas: `conteudo/imagens/` (foto) e `conteudo/atividades/<id>/` (imagens e arquivos de cada atividade).
+- Pastas: `conteudo/imagens/` (a foto), `conteudo/arquivos/` (o currículo) e `conteudo/atividades/<id>/` (imagens e arquivos de cada atividade). Para imagens grandes, `.webp` ou `.jpg` com até 1600 px de largura deixam o site leve.
 
 ## Áreas (matérias)
 
 Cada área tem `id`, `materia`, `titulo_area` (o nome no mapa), `periodo`, `descricao`, `competencias`, `tema` e `atividades`. A ordem do arquivo é a ordem do mapa.
+
+`disciplinas` (opcional) é a lista das matérias dentro da área, na ordem em que aparecem no filtro: acima da lista de atividades, um botão por disciplina mostra só as atividades dela (outro clique volta a todas). No Técnico, use `submaterias` no lugar de `disciplinas`: o filtro e a contagem passam a dizer "submatérias". Uma disciplina que aparece numa atividade e não está na lista entra no fim, sozinha.
 
 Cada área aparece **resumida**: o nome, a primeira frase de `descricao`, a contagem de atividades, competências e destaques, e a lista curta das atividades (até `site.atividades_visiveis`; as outras aparecem como "+ N atividades"). O botão **Abrir registro** mostra a descrição inteira, as competências e o resumo e a miniatura de cada atividade. Clicar numa atividade abre o detalhe completo. Em Sobre, o primeiro parágrafo aparece e o resto abre com **Ler tudo**. O bloco `jogo` guarda o que o modo Jogo usa (texto de abertura da área, chefe, poder, músicas).
 
@@ -57,6 +68,12 @@ O bloco `trajetoria` cria uma área a mais no mapa, depois das matérias: a estr
 
 - `tipo` da conquista: `certificado`, `premio`, `olimpiada`, `curso` ou `outro` (muda o desenho).
 - As atividades com `"destaque": true` também aparecem em **Destaques do mapa**, no início.
+
+## Perfil e contato
+
+`perfil` tem o nome, o título, o resumo (aparece no início), a `foto` (`conteudo/imagens/…`, quadrada) e os `links` (GitHub, LinkedIn, currículo, versões antigas do portfólio…), que aparecem em Sobre e contato.
+
+`perfil.contato` tem `cidade`, `email` e `formulario`. Com `formulario` (o endereço de um serviço que recebe formulários, como o Formspree: `https://formspree.io/f/…`), Sobre e contato mostra um formulário com nome, e-mail e mensagem, que envia sem sair da página; aí o e-mail só aparece se estiver preenchido. Sem `formulario`, aparece o e-mail com o botão Copiar.
 
 ## Segredos (opcional)
 

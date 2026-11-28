@@ -125,21 +125,28 @@ conteudo:['Conteúdo',`<h4>O arquivo <code>conteudo/portfolio.json</code></h4>
   "site":   { "nome": "…", "subtitulo": "Portfólio de …" },
   "perfil": { "nome": "…", "titulo": "…", "resumo": "…", "foto": "conteudo/imagens/foto.jpg",
               "links": [{ "rotulo": "GitHub", "url": "https://…" }],
-              "contato": { "email": "…", "cidade": "…" } },
+              "contato": { "email": "…", "cidade": "…", "formulario": "https://formspree.io/f/…" } },
   "areas": [ { "id": "humanas", "materia": "Humanas", "titulo_area": "…",
                "periodo": "…", "descricao": "…", "competencias": ["…"],
+               "disciplinas": ["História", "Geografia"],
                "tema": "cidadela", "atividades": [ … ], "jogo": { … } } ],
   "sobre": "…"
 }</pre>
 <h4>Cada atividade</h4>
-<pre>{ "id": "projeto-1", "titulo": "…", "tipo": "projeto",
-  "data": "2025-03", "resumo": "uma frase", "descricao": "texto completo",
-  "imagens": ["conteudo/atividades/projeto-1/capa.jpg"],
+<pre>{ "id": "projeto-1", "titulo": "…", "disciplina": "História",
+  "trimestre": 1, "tipo": "projeto", "resumo": "uma frase", "descricao": "texto completo",
+  "imagens": ["conteudo/atividades/projeto-1/capa.webp"],
+  "embed": "https://www.youtube.com/watch?v=…",
   "links": [{ "rotulo": "Ver arquivo", "url": "conteudo/atividades/projeto-1/arquivo.pdf" }],
-  "tags": ["…"], "destaque": true }</pre>
-<ul><li><code>tipo</code>: projeto, trabalho, prova, apresentação ou outro.</li>
+  "habilidades": ["C3", "H15 – …"], "tags": ["…"], "destaque": true }</pre>
+<ul><li><code>disciplina</code>: a matéria dentro da área; no Técnico, a submatéria (a área usa <code>submaterias</code> no lugar de <code>disciplinas</code>). Acima da lista, um botão por disciplina filtra as atividades.</li>
+<li><code>trimestre</code>: 1, 2 ou 3 (sem ele, aparece a <code>data</code>, como <code>"2025-03"</code>).</li>
+<li><code>tipo</code>: projeto, trabalho, prova, apresentação ou outro.</li>
 <li><code>destaque</code>: aparece primeiro, com selo.</li>
-<li>A 1ª imagem vira a miniatura da atividade na lista da área. Sem imagem, a miniatura ganha o desenho do tipo.</li><li>Cada área aparece resumida (primeira frase da descrição, contagens e lista curta); <b>Abrir registro</b> mostra tudo. <code>site.atividades_visiveis</code> diz quantas atividades aparecem antes do "+ N".</li>
+<li><code>embed</code>: o trabalho dentro do site (YouTube, Canva, Google Docs, Padlet ou PDF). Só carrega quando a pessoa clica em "Ver aqui".</li>
+<li><code>habilidades</code>: fechadas, mostram só os códigos (C3 · H15); o texto abre com um clique. Para Arduino e parecidos, <code>materiais</code> e <code>codigo</code> viram Montagem e Código.</li>
+<li>A 1ª imagem vira a miniatura da atividade na lista da área. Sem imagem, a miniatura usa a capa do vídeo (se houver) ou o desenho do tipo.</li>
+<li>Com <code>contato.formulario</code> (Formspree ou parecido), Sobre e contato mostra um formulário que envia sem sair da página.</li><li>Cada área aparece resumida (primeira frase da descrição, contagens e lista curta); <b>Abrir registro</b> mostra tudo. <code>site.atividades_visiveis</code> diz quantas atividades aparecem antes do "+ N".</li>
 <li>Na <code>descricao</code>, uma linha em branco (<code>\\n\\n</code>) separa parágrafos.</li>
 <li>Cada atividade tem endereço próprio: <code>#humanas/projeto-1</code>. Dá para mandar o link direto.</li>
 <li>Texto entre colchetes, como <code>[e-mail]</code>, aparece destacado: é o que ainda falta preencher.</li></ul>

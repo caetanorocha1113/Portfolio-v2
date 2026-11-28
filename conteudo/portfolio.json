@@ -10,13 +10,20 @@
   "perfil": {
     "nome": "Caetano Rocha de Oliveira",
     "titulo": "3º ano do ensino médio integrado ao técnico de sistemas · SESI-SENAI",
-    "resumo": "[2 a 3 frases de apresentação.]",
-    "foto": "",
+    "resumo": "Estudante do 3º ano do ensino médio integrado ao técnico em Desenvolvimento de Sistemas, em Florianópolis. Sou de exatas, me interesso por TI, matemática e história, e quero seguir carreira em programação e tecnologia.",
+    "foto": "conteudo/imagens/caetano.jpg",
     "links": [
-      { "rotulo": "[GitHub]", "url": "" },
-      { "rotulo": "[LinkedIn ou outro link]", "url": "" }
+      { "rotulo": "GitHub", "url": "https://github.com/caetanorocha1113" },
+      { "rotulo": "LinkedIn", "url": "https://bit.ly/linkedin-caetano" },
+      { "rotulo": "Currículo (PDF)", "url": "conteudo/arquivos/curriculo-caetano.pdf" },
+      { "rotulo": "Portfólio V1 (Canva)", "url": "https://canva.link/9tkqr28n6bclp3m" },
+      { "rotulo": "Portfólio V2 (Google Sites)", "url": "https://sites.google.com/estudante.sesisenai.org.br/portfoliocaetano/in%C3%ADcio" }
     ],
-    "contato": { "email": "[e-mail]", "cidade": "[cidade]" }
+    "contato": {
+      "email": "",
+      "cidade": "Florianópolis, SC",
+      "formulario": "https://formspree.io/f/xlgaapyw"
+    }
   },
   "abertura": {
     "mostrar": "sempre",
@@ -31,62 +38,133 @@
       "id": "humanas",
       "materia": "Humanas",
       "titulo_area": "Cidadela das Eras",
-      "periodo": "[ano / semestre]",
-      "descricao": "[O que foi estudado em Humanas, em 2 a 4 frases.]",
-      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "periodo": "3º ano · 2026",
+      "descricao": "Áreas do conhecimento que estudam o ser humano, suas interações sociais, cultura, história, comportamento e produções.\n\nAs atividades passam por História, Geografia e Filosofia: um mapa da 2ª Revolução Industrial, um jornal de época, dossiês e análises de filmes.",
+      "competencias": ["Mapas e linhas do tempo", "Análise de fontes históricas", "Geopolítica", "Cinema, mídia e história"],
+      "disciplinas": ["História", "Geografia", "Filosofia"],
       "tema": "cidadela",
       "atividades": [
         {
-          "id": "exemplo-1",
-          "titulo": "[Título da atividade]",
-          "tipo": "projeto",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo. Aqui entram o que foi pedido, o que foi feito e o que foi aprendido.]\n\n[Um segundo parágrafo, se precisar.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": true,
-          "exemplo": true
-        },
-        {
-          "id": "exemplo-2",
-          "titulo": "[Título da atividade]",
+          "id": "mapa-2a-revolucao-industrial",
+          "titulo": "Mapa da 2ª Revolução Industrial",
+          "disciplina": "História",
+          "trimestre": 1,
           "tipo": "trabalho",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "resumo": "Uma linha do tempo num mapa sobre a difusão das tecnologias da 2ª Revolução Industrial.",
+          "descricao": "A atividade teve como objetivo criar uma linha do tempo sobre a difusão das tecnologias da 2ª Revolução Industrial usando um mapa. Relacionei esse avanço com o neocolonialismo e os conflitos da época, o que ajudou a entender melhor o contexto histórico.",
+          "imagens": [{ "src": "conteudo/atividades/mapa-2a-revolucao-industrial/mapa.webp", "legenda": "O mapa com a linha do tempo, no Padlet" }],
+          "embed": "https://padlet.com/embed/baf2k838id9fs453",
+          "links": [{ "rotulo": "Abrir no Padlet", "url": "https://padlet.com/larissa_kussler/mapa-2-revolucao-industrial-baf2k838id9fs453" }],
+          "habilidades": [
+            "C3",
+            "H15 – Reconhecer os movimentos sociais e sua representação da coletividade como elemento de transformação da realidade social, política, econômica e cultural.",
+            "H16 – Compreender a relação entre ciência, tecnologia e sociedade e os efeitos dessa relação no contexto social, político e econômico.",
+            "H20 – Implementar ações de proteção ou recuperação ambiental com base em princípios, leis e iniciativas de desenvolvimento sustentável."
+          ],
+          "tags": []
         },
         {
-          "id": "exemplo-3",
-          "titulo": "[Título da atividade]",
-          "tipo": "trabalho",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
-        },
-        {
-          "id": "exemplo-4",
-          "titulo": "[Título da atividade]",
+          "id": "geopolitica-do-vietna",
+          "titulo": "Análise geopolítica do Vietnã",
+          "disciplina": "Geografia",
+          "trimestre": 1,
           "tipo": "apresentação",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "resumo": "Uma apresentação em grupo sobre a realidade do Vietnã e a sua posição no cenário mundial.",
+          "descricao": "A atividade teve como objetivo introduzir o estudo de geopolítica por meio de jogos e da criação de uma apresentação sobre um país. Em grupo de quatro pessoas, escolhi o Vietnã e pesquisei dados atualizados sobre suas características, analisando sua realidade e posição no cenário mundial.\n\nIsso me ajudou a entender melhor as diferenças entre os países e o conceito de geopolítica.",
+          "imagens": ["conteudo/atividades/geopolitica-do-vietna/apresentacao.webp"],
+          "embed": "https://www.canva.com/design/DAHBNAWmoK0/VES-Gmj2A5FO09XGHQq4ew/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/avtd48fa6dqkxpn" }],
+          "habilidades": [
+            "C1 – Compreender processos históricos, sociais e geográficos nos diversos aspectos da vida em sociedade.",
+            "H1 – Reconhecer o processo de formação do indivíduo nos aspectos históricos, geográficos, sociais e filosóficos.",
+            "H2 – Compreender o processo de socialização do indivíduo, considerando os princípios do pensamento e da lógica.",
+            "H3 – Compreender as relações de poder entre os diversos grupos sociais.",
+            "H4 – Compreender mudanças e permanências ao longo do tempo na constituição da sociedade.",
+            "H5 – Analisar criticamente os aspectos políticos, econômicos e sociais relacionados à formação da sociedade no Brasil e no mundo."
+          ],
+          "tags": ["em grupo"]
+        },
+        {
+          "id": "jornal-a-grande-guerra",
+          "titulo": "A Grande Guerra: jornal de época",
+          "disciplina": "História",
+          "trimestre": 1,
+          "tipo": "projeto",
+          "resumo": "Um jornal de época sobre a Primeira Guerra Mundial, escrito do ponto de vista da Alemanha.",
+          "descricao": "A atividade teve como objetivo analisar os meios de comunicação no início do século XX por meio da criação de um jornal de época. Produzi reportagens com base na Primeira Guerra Mundial a partir da perspectiva da Alemanha, considerando o contexto político e social.\n\nIsso me ajudou a entender como o ponto de vista influencia a forma como as notícias são apresentadas.",
+          "imagens": [
+            { "src": "conteudo/atividades/jornal-a-grande-guerra/capa.webp", "legenda": "A primeira página" },
+            { "src": "conteudo/atividades/jornal-a-grande-guerra/pagina.webp", "legenda": "O jornal inteiro" }
+          ],
+          "links": [{ "rotulo": "Ler o jornal (PDF)", "url": "conteudo/atividades/jornal-a-grande-guerra/a-grande-guerra-alemanha.pdf" }],
+          "habilidades": [
+            "C3",
+            "C6",
+            "H15 – Reconhecer os movimentos sociais e sua representação da coletividade como elemento de transformação da realidade social, política, econômica e cultural.",
+            "H16 – Compreender a relação entre ciência, tecnologia e sociedade e os efeitos dessa relação no contexto social, político e econômico.",
+            "H20 – Implementar ações de proteção ou recuperação ambiental com base em princípios, leis e iniciativas de desenvolvimento sustentável.",
+            "H39 – Relacionar o papel das instituições sociais às soluções para problemas políticos, econômicos, sociais e ambientais no contexto da sociedade brasileira."
+          ],
+          "tags": [],
+          "destaque": true
+        },
+        {
+          "id": "dossie-pearl-harbor",
+          "titulo": "Dossiê histórico: o ataque a Pearl Harbor",
+          "disciplina": "História",
+          "trimestre": 2,
+          "tipo": "trabalho",
+          "resumo": "Uma pesquisa sobre o ataque a Pearl Harbor, com uma fonte primária da época.",
+          "descricao": "Nesta atividade, pesquisei o ataque japonês a Pearl Harbor, analisando seu contexto, os principais acontecimentos e suas consequências para a Segunda Guerra Mundial. Também trabalhei com uma fonte primária da época para compreender como o ataque foi representado naquele momento.\n\nA atividade ajudou a entender melhor os motivos e impactos desse acontecimento histórico.",
+          "imagens": ["conteudo/atividades/dossie-pearl-harbor/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHOSff5yjk/fp1Em5TxI6Zq87eHLcRUww/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/uu462dakiqt53gp" }],
+          "habilidades": [
+            "C2",
+            "C4",
+            "H10 – Compreender as transformações no mundo do trabalho, geradas por mudanças na ordem econômica.",
+            "H22 – Analisar, na perspectiva humana e social, as principais características e dinâmicas dos fluxos da sociedade.",
+            "H26 – Comparar pontos de vista e ações sobre práticas do indivíduo ou grupo social em diferentes contextos.",
+            "H27 – Analisar hipóteses e questões ambientais, sociais, econômicas, políticas e culturais, a partir de leituras e debates."
+          ],
+          "tags": []
+        },
+        {
+          "id": "e-isto-um-homem",
+          "titulo": "É isto um homem? Holocausto e desumanização",
+          "disciplina": "Filosofia",
+          "trimestre": 2,
+          "tipo": "trabalho",
+          "resumo": "Uma pesquisa sobre a desumanização de dependentes químicos, à luz das reflexões de Primo Levi.",
+          "descricao": "Pesquisa sobre a desumanização de pessoas dependentes químicas, analisando como o preconceito, os estereótipos e a exclusão social podem retirar sua individualidade e dignidade, relacionando a situação às reflexões de Primo Levi.",
+          "imagens": ["conteudo/atividades/e-isto-um-homem/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHM7yx6ixU/DNJsuSXqxZvWF2iizVPTtw/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/z4ugrgbpcv609b8" }],
+          "habilidades": [
+            "H27 – Analisar hipóteses e questões ambientais, sociais, econômicas, políticas e culturais, a partir de leituras e debates.",
+            "H26 – Comparar pontos de vista e ações sobre práticas do indivíduo ou grupo social em diferentes contextos.",
+            "H22 – Analisar, na perspectiva humana e social, as principais características e dinâmicas dos fluxos da sociedade.",
+            "H10 – Compreender as transformações no mundo do trabalho, geradas por mudanças na ordem econômica."
+          ],
+          "tags": ["em grupo"]
+        },
+        {
+          "id": "cinema-e-totalitarismo",
+          "titulo": "Cinema e totalitarismo",
+          "disciplina": "História",
+          "trimestre": 2,
+          "tipo": "trabalho",
+          "resumo": "As características do totalitarismo, analisadas no filme Vingadores.",
+          "descricao": "Nesta atividade, analisei o conceito de totalitarismo e suas principais características, relacionando-as ao filme Vingadores. A partir da história, identifiquei elementos como controle, liderança, repressão e manipulação das massas.\n\nFoi uma forma diferente de entender como práticas totalitárias podem ser representadas em obras de ficção.",
+          "imagens": ["conteudo/atividades/cinema-e-totalitarismo/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHJusOTTvk/u23y8lyTRUiTrRMkT4ELTA/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/11qan3k3rwanrsn" }],
+          "habilidades": [
+            "H26 – Comparar pontos de vista e ações sobre práticas do indivíduo ou grupo social em diferentes contextos.",
+            "H22 – Analisar, na perspectiva humana e social, as principais características e dinâmicas dos fluxos da sociedade.",
+            "H10 – Compreender as transformações no mundo do trabalho, geradas por mudanças na ordem econômica."
+          ],
+          "tags": []
         }
       ],
       "jogo": {
@@ -101,62 +179,70 @@
       "id": "matematica",
       "materia": "Matemática",
       "titulo_area": "Minas do Número",
-      "periodo": "[ano / semestre]",
-      "descricao": "[O que foi estudado em Matemática, em 2 a 4 frases.]",
-      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "periodo": "3º ano · 2026",
+      "descricao": "Raciocínio lógico, geometria avançada, estatística e a linguagem universal dos números.\n\nProbabilidade e estatística aplicadas a um filme, a um jogo de tabuleiro criado pela turma e a uma pesquisa feita com os estudantes.",
+      "competencias": ["Probabilidade e análise combinatória", "Estatística: coleta, tabelas e gráficos", "Matemática aplicada a jogos e filmes"],
+      "disciplinas": ["Probabilidade", "Estatística"],
       "tema": "minas",
       "atividades": [
         {
-          "id": "exemplo-1",
-          "titulo": "[Título da atividade]",
-          "tipo": "prova",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": true,
-          "exemplo": true
-        },
-        {
-          "id": "exemplo-2",
-          "titulo": "[Título da atividade]",
+          "id": "quebrando-a-banca",
+          "titulo": "Quebrando a Banca",
+          "disciplina": "Probabilidade",
+          "trimestre": 1,
           "tipo": "trabalho",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "resumo": "Probabilidade e estatística no filme Quebrando a Banca.",
+          "descricao": "A atividade teve como objetivo analisar o filme Quebrando a Banca relacionando-o com conceitos matemáticos, principalmente probabilidade e estatística. Ao responder as questões, identifiquei como o uso da contagem de cartas envolve raciocínio lógico e previsão de resultados.\n\nTambém refleti sobre como a matemática pode ser aplicada em situações reais e até em roteiros de filmes. Isso me ajudou a perceber a utilidade da probabilidade no dia a dia de forma mais prática.",
+          "imagens": ["conteudo/atividades/quebrando-a-banca/atividade.webp"],
+          "embed": "https://docs.google.com/document/d/19wvdq1Ir4ORYG4QBFOC0_CIy7qcxpyJ2ORNwWio_Z7M/preview",
+          "links": [{ "rotulo": "Abrir no Google Docs", "url": "https://docs.google.com/document/d/19wvdq1Ir4ORYG4QBFOC0_CIy7qcxpyJ2ORNwWio_Z7M/edit?usp=sharing" }],
+          "habilidades": [
+            "C5 – Aplicar o pensamento probabilístico para quantificar e fazer previsões em situações aplicadas a diferentes áreas do conhecimento e da vida cotidiana.",
+            "H30 – Identificar dados, regularidades e relações numa situação que envolva o raciocínio combinatório, utilizando os processos de contagem.",
+            "H31 – Reconhecer fenômenos e eventos (naturais, científicos, tecnológicos e/ou sociais) de caráter aleatório, compreendendo o significado e a importância da probabilidade como meio de prever resultados."
+          ],
+          "tags": []
         },
         {
-          "id": "exemplo-3",
-          "titulo": "[Título da atividade]",
-          "tipo": "prova",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "id": "criando-a-banca",
+          "titulo": "Criando a Banca da Matemática",
+          "disciplina": "Probabilidade",
+          "trimestre": 1,
+          "tipo": "projeto",
+          "resumo": "Um jogo inspirado no War, com tema de Star Wars, feito com análise combinatória e probabilidade.",
+          "descricao": "A atividade teve como objetivo criar um jogo utilizando conceitos de análise combinatória e probabilidade. Meu grupo desenvolveu um jogo inspirado no War, com temática de Star Wars, aplicando estratégias baseadas em chances e contagem.\n\nDurante a criação e testes, consegui entender melhor como a probabilidade influencia decisões e resultados. Isso ajudou a ver a matemática de forma mais prática e aplicada.",
+          "imagens": ["conteudo/atividades/criando-a-banca/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHHq2I-uX4/P__BXht6Fycf4WfJD792Vg/view?embed",
+          "links": [
+            { "rotulo": "Jogar no site", "url": "https://war-starwars-matematica.netlify.app/" },
+            { "rotulo": "Abrir no Canva", "url": "https://canva.link/nbo4g194f8qu963" }
+          ],
+          "habilidades": [
+            "C5 – Aplicar o pensamento probabilístico para quantificar e fazer previsões em situações aplicadas a diferentes áreas do conhecimento e da vida cotidiana.",
+            "H30 – Identificar dados, regularidades e relações numa situação que envolva o raciocínio combinatório, utilizando os processos de contagem.",
+            "H31 – Reconhecer fenômenos e eventos (naturais, científicos, tecnológicos e/ou sociais) de caráter aleatório, compreendendo o significado e a importância da probabilidade como meio de prever resultados."
+          ],
+          "tags": ["em grupo", "jogo"],
+          "destaque": true
         },
         {
-          "id": "exemplo-4",
-          "titulo": "[Título da atividade]",
-          "tipo": "trabalho",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "id": "apresentacao-estatistica",
+          "titulo": "AV1 do 2º trimestre: apresentação estatística",
+          "disciplina": "Estatística",
+          "trimestre": 2,
+          "tipo": "apresentação",
+          "resumo": "Uma pesquisa estatística com estudantes, dos dados do formulário até a manchete.",
+          "descricao": "Nesta atividade, realizamos uma pesquisa estatística com estudantes, coletando dados por meio de um formulário. Depois, organizamos os resultados em tabelas e gráficos e analisamos os dados para criar uma manchete baseada nas informações encontradas.\n\nA atividade ajudou a compreender melhor a estatística e como os dados podem ser usados para chegar a conclusões.",
+          "imagens": ["conteudo/atividades/apresentacao-estatistica/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHNoBGaAek/cz6AzZsSSKXPUffwrXp9aA/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/x3uqr4uovvbktp2" }],
+          "habilidades": [
+            "C4 – Analisar e investigar dados e informações de natureza científica e social, articulando diferentes áreas do conhecimento, compreendendo representações gráficas e uso de modelos matemáticos, realizando inferências, previsões e tendências, para tomadas de decisão.",
+            "H27 – Compreender informações estatísticas provenientes de naturezas distintas (social, econômica, política ou científica) e formular juízos com base nessas informações.",
+            "H28 – Calcular medidas de tendência central e de dispersão de um conjunto de dados para aplicá-las e analisá-las em situações diversas no contexto das ciências, das tecnologias, das atividades pessoais e profissionais.",
+            "H29 – Construir tabelas e gráficos com recursos tecnológicos que permitam simplificar cálculos, facilitar a leitura e a compreensão das informações, para análise da realidade."
+          ],
+          "tags": ["em grupo"]
         }
       ],
       "jogo": {
@@ -171,62 +257,96 @@
       "id": "linguagens",
       "materia": "Linguagens",
       "titulo_area": "Galerias das Vozes",
-      "periodo": "[ano / semestre]",
-      "descricao": "[O que foi estudado em Linguagens, em 2 a 4 frases.]",
-      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "periodo": "3º ano · 2026",
+      "descricao": "Explorando a comunicação, a literatura, as artes e os idiomas do nosso mundo.\n\nLiteratura, Língua Portuguesa, Inglês e Redação, em vídeos, num jogo, num manifesto e em textos.",
+      "competencias": ["Análise literária", "Vídeo e manifesto", "Escrita em inglês", "Redação dissertativo-argumentativa"],
+      "disciplinas": ["Literatura", "Língua Portuguesa", "Inglês", "Redação"],
       "tema": "galerias",
       "atividades": [
         {
-          "id": "exemplo-1",
-          "titulo": "[Título da atividade]",
+          "id": "paixao-segundo-gh",
+          "titulo": "Análise da obra A Paixão Segundo G.H.",
+          "disciplina": "Literatura",
+          "trimestre": 1,
           "tipo": "apresentação",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": true,
-          "exemplo": true
+          "resumo": "Um vídeo em grupo sobre a ética da experiência de G.H., no livro de Clarice Lispector.",
+          "descricao": "A atividade teve como objetivo analisar a obra A Paixão Segundo G.H. a partir de diferentes áreas do conhecimento. Meu grupo trabalhou com o eixo de Ética/Filosofia Moral e produziu um vídeo explicando se a experiência de G.H. pode ser considerada certa ou errada, relacionando com conceitos como moral social, relativismo e liberdade.\n\nIsso me ajudou a entender como a obra questiona os limites do que é considerado aceitável na sociedade.",
+          "imagens": ["conteudo/atividades/paixao-segundo-gh/capa.jpg"],
+          "embed": "https://www.youtube.com/embed/v1jptYC5Mwo",
+          "links": [
+            { "rotulo": "Ver no YouTube", "url": "https://youtu.be/v1jptYC5Mwo" },
+            { "rotulo": "Mapa mental (Canva)", "url": "https://canva.link/lzh9ftnjcheu91h" }
+          ],
+          "habilidades": [
+            "H4 – Reconhecer a pluralidade de manifestações artísticas e culturais como forma de integração entre pessoas e entre diferentes grupos sociais e étnicos.",
+            "H22 – Produzir textos técnicos de acordo com uma estrutura estabelecida."
+          ],
+          "tags": ["em grupo", "vídeo"]
         },
         {
-          "id": "exemplo-2",
-          "titulo": "[Título da atividade]",
+          "id": "game-literario",
+          "titulo": "Game literário: o Realismo",
+          "disciplina": "Língua Portuguesa",
+          "trimestre": 1,
+          "tipo": "projeto",
+          "resumo": "Um jogo no Wordwall, feito em grupo, para revisar o Realismo.",
+          "descricao": "A atividade teve como objetivo revisar as escolas literárias por meio da criação de um jogo digital. Meu grupo trabalhou com o Realismo, pesquisando suas características, contexto histórico, autores e obras. Depois, organizamos as informações e criamos um jogo no Wordwall com perguntas e explicações.\n\nIsso me ajudou a entender melhor o conteúdo de forma mais dinâmica e interativa.",
+          "imagens": ["conteudo/atividades/game-literario/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHB31eK4C0/IxbRqi24bWV-9AUkbmof2Q/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/gkunchr9xp8k6a6" }],
+          "habilidades": [
+            "H15 – Produzir trabalhos individuais e coletivos, explorando materiais e técnicas ligados ao universo das composições artísticas e de práticas corporais."
+          ],
+          "tags": ["em grupo", "jogo"]
+        },
+        {
+          "id": "manifesto-do-fio-sintetico",
+          "titulo": "Manifesto do Fio Sintético ou A Morte da Autenticidade",
+          "disciplina": "Literatura",
+          "trimestre": 2,
+          "tipo": "projeto",
+          "resumo": "Um videomanifesto em grupo sobre a perda da autenticidade na sociedade atual.",
+          "descricao": "Nesta atividade, produzi em grupo um videomanifesto chamado “Manifesto do Fio Sintético ou A Morte da Autenticidade”, abordando a perda da autenticidade e a padronização na sociedade atual. Trabalhamos com argumentos, criatividade, linguagem crítica e características dos manifestos modernistas.\n\nFoi uma atividade interessante, pois permitiu abordar um tema atual de uma forma diferente e criativa.",
+          "imagens": ["conteudo/atividades/manifesto-do-fio-sintetico/capa.webp"],
+          "embed": "https://www.youtube.com/embed/qAJnfij0c48",
+          "links": [{ "rotulo": "Ver no YouTube", "url": "https://www.youtube.com/watch?v=qAJnfij0c48" }],
+          "habilidades": [
+            "H3 – Identificar o tema principal, os subtemas e finalidades dos textos.",
+            "H24 – Produzir textos escritos de domínio acadêmico e educacional."
+          ],
+          "tags": ["em grupo", "vídeo"],
+          "destaque": true
+        },
+        {
+          "id": "ingles-que-tipo-de-arte",
+          "titulo": "Inglês: “Que tipo de arte você consome?”",
+          "disciplina": "Inglês",
+          "trimestre": 2,
           "tipo": "trabalho",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "resumo": "Um texto em inglês sobre Christopher Nolan, Interstellar e Stairway to Heaven.",
+          "descricao": "A atividade teve como objetivo produzir um texto em inglês sobre meu artista, filme e música favoritos. Escolhi Christopher Nolan, Interstellar e Stairway to Heaven, apresentando suas características, histórias e motivos pelos quais são importantes para mim. Também pratiquei o uso do Simple Past e a interpretação de informações em inglês.\n\nFoi uma atividade interessante, pois pude relacionar o aprendizado da língua com meus próprios interesses.",
+          "imagens": ["conteudo/atividades/ingles-que-tipo-de-arte/capa.webp"],
+          "embed": "https://docs.google.com/document/d/1wNLnNNBDgeY64xTGCGDgEW1TyOBhGeD7e5tqLK8WEGM/preview",
+          "links": [{ "rotulo": "Abrir no Google Docs", "url": "https://docs.google.com/document/d/1wNLnNNBDgeY64xTGCGDgEW1TyOBhGeD7e5tqLK8WEGM/edit?usp=sharing" }],
+          "habilidades": [
+            "H25 – Interpretar textos em Língua Estrangeira Moderna (Inglês)."
+          ],
+          "tags": []
         },
         {
-          "id": "exemplo-3",
-          "titulo": "[Título da atividade]",
-          "tipo": "apresentação",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
-        },
-        {
-          "id": "exemplo-4",
-          "titulo": "[Título da atividade]",
+          "id": "redacao-red1000",
+          "titulo": "Redação do RED1000",
+          "disciplina": "Redação",
+          "trimestre": 2,
           "tipo": "trabalho",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
-          "imagens": [],
+          "resumo": "Uma redação no modelo ENEM sobre os perigos do autodiagnóstico de transtornos mentais nas redes sociais.",
+          "descricao": "Nesta atividade, produzi uma redação no modelo ENEM sobre os perigos do autodiagnóstico de transtornos mentais nas redes sociais. Trabalhei a argumentação, a organização das ideias e a proposta de intervenção, seguindo a estrutura da redação dissertativo-argumentativa.\n\nA atividade foi importante para praticar a escrita e desenvolver uma visão mais crítica sobre o tema.",
+          "imagens": [{ "src": "conteudo/atividades/redacao-red1000/nota.webp", "legenda": "A nota no RED1000" }],
           "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "habilidades": [
+            "H22 – Produzir textos técnicos de acordo com uma estrutura estabelecida."
+          ],
+          "tags": []
         }
       ],
       "jogo": {
@@ -241,62 +361,133 @@
       "id": "natureza",
       "materia": "Natureza",
       "titulo_area": "Sendas Vivas",
-      "periodo": "[ano / semestre]",
-      "descricao": "[O que foi estudado em Natureza, em 2 a 4 frases.]",
-      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "periodo": "3º ano · 2026",
+      "descricao": "Investigando as leis da física, as reações químicas e os mistérios da vida biológica.\n\nBiologia, Química, Física e Biofísica, entre um experimento, relatórios, um painel científico, uma cartilha e até um meme.",
+      "competencias": ["Experimento e relatório científico", "Energia e transformações químicas", "Evolução, ambiente e saúde", "Comunicação científica"],
+      "disciplinas": ["Biologia", "Química", "Física", "Biofísica"],
       "tema": "sendas",
       "atividades": [
         {
-          "id": "exemplo-1",
-          "titulo": "[Título da atividade]",
+          "id": "meme-evolucionismo",
+          "titulo": "Meme sobre evolucionismo",
+          "disciplina": "Biologia",
+          "trimestre": 1,
+          "tipo": "trabalho",
+          "resumo": "Um meme sobre a relação entre dinossauros e aves para explicar a evolução das espécies.",
+          "descricao": "A atividade teve como objetivo estudar as ideias evolucionistas por meio da criação de um meme. Produzi uma imagem mostrando a relação entre dinossauros e aves, destacando o conceito de ancestralidade e evolução ao longo do tempo. Usei o humor para contrastar o comportamento de um predador antigo com o das aves atuais, reforçando a ideia de adaptação e mudança das espécies.\n\nIsso me ajudou a entender melhor como a evolução acontece e como características são transformadas ao longo das gerações.",
+          "imagens": ["conteudo/atividades/meme-evolucionismo/meme.webp"],
+          "links": [],
+          "habilidades": [
+            "C3 – Determinar os impactos das ações humanas nos ambientes, identificando suas causas e propondo soluções para a sua redução.",
+            "H15 – Comparar propostas de intervenção ambiental aplicando conhecimentos científicos e tecnológicos, observando os riscos e benefícios de sua implementação.",
+            "H18 – Identificar situações de risco ambiental na cidade onde reside."
+          ],
+          "tags": []
+        },
+        {
+          "id": "combustao-e-dependencia-energetica",
+          "titulo": "Combustão e o problema da dependência energética",
+          "disciplina": "Química",
+          "trimestre": 1,
+          "tipo": "apresentação",
+          "resumo": "Por que ainda usamos combustíveis fósseis: poder calorífico, eficiência e economia.",
+          "descricao": "A atividade teve como objetivo analisar por que ainda usamos combustíveis fósseis, focando no poder calorífico e na eficiência. Meu grupo comparou diferentes combustíveis e entendeu que os fósseis ainda são muito usados por liberarem mais energia. Também analisamos que a escolha não é só científica, mas também econômica.\n\nIsso me ajudou a entender melhor a relação entre energia, consumo e impacto ambiental.",
+          "imagens": ["conteudo/atividades/combustao-e-dependencia-energetica/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHE8hNJVcQ/xuWPmiQMAqVdrltf6kQhvQ/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/oi8ydnfgptx8dv2" }],
+          "habilidades": [
+            "C1 – Compreender as ciências naturais e as tecnologias como construções humanas associadas à cultura dos povos e suas visões de mundo.",
+            "H1 – Interpretar informações apresentadas em diferentes linguagens usadas nas Ciências, como texto discursivo, gráficos, tabelas, relações matemáticas, diagramas ou representação simbólica.",
+            "C2 – Aplicar os conceitos fundamentais e estruturas procedimentais das Ciências da Natureza na explicação de fenômenos cotidianos, bem como dominar processos e práticas da investigação científica.",
+            "H9 – Explicar os conceitos de energia, matéria, vida e transformação para explicar fenômenos naturais e procedimentos tecnológicos.",
+            "H11 – Empregar procedimentos e práticas de observação, levantamento de hipótese, experimentação, coleta de dados e conclusões para resolução de problemas relacionados às Ciências da Natureza."
+          ],
+          "tags": ["em grupo"]
+        },
+        {
+          "id": "relatorio-eletricidade",
+          "titulo": "Relatório da atividade prática: disputa de eletricidade",
+          "disciplina": "Física",
+          "trimestre": 1,
+          "tipo": "trabalho",
+          "resumo": "Um experimento de eletrização por atrito, com um cano e uma bolinha de alumínio.",
+          "descricao": "A atividade teve como objetivo observar a eletricidade por atrito. Esfreguei um cano para gerar carga elétrica e encostei em uma bolinha de alumínio, fazendo ela se mover.\n\nIsso me ajudou a entender como ocorre a eletrização e a interação entre cargas elétricas de forma prática.",
+          "imagens": ["conteudo/atividades/relatorio-eletricidade/relatorio.webp"],
+          "embed": "https://docs.google.com/document/d/13-bfhHMnxCeVQcyQGVaA8uIYJM_4LS9ehxT1M7GDfLo/preview",
+          "links": [{ "rotulo": "Abrir no Google Docs", "url": "https://docs.google.com/document/d/13-bfhHMnxCeVQcyQGVaA8uIYJM_4LS9ehxT1M7GDfLo/edit?usp=sharing" }],
+          "habilidades": [
+            "C1 – Compreender as ciências naturais e as tecnologias como construções humanas associadas à cultura dos povos e suas visões de mundo.",
+            "H1 – Interpretar informações apresentadas em diferentes linguagens usadas nas Ciências, como texto discursivo, gráficos, tabelas, relações matemáticas, diagramas ou representação simbólica.",
+            "C2 – Aplicar os conceitos fundamentais e estruturas procedimentais das Ciências da Natureza na explicação de fenômenos cotidianos, bem como dominar processos e práticas da investigação científica.",
+            "H7 – Compreender os conceitos relacionados à Química nos seus diferentes ramos: Físico-química, Química orgânica e Química Geral.",
+            "H9 – Explicar os conceitos de energia, matéria, vida e transformação para explicar fenômenos naturais e procedimentos tecnológicos.",
+            "H11 – Empregar procedimentos e práticas de observação, levantamento de hipótese, experimentação, coleta de dados e conclusões para resolução de problemas relacionados às Ciências da Natureza.",
+            "H12 – Relacionar informações para construir modelos em ciência e tecnologia."
+          ],
+          "tags": ["experimento"]
+        },
+        {
+          "id": "saude-em-foco",
+          "titulo": "Projeto Saúde em Foco",
+          "disciplina": "Biologia",
+          "trimestre": 2,
           "tipo": "projeto",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": true,
-          "exemplo": true
+          "resumo": "Um painel científico, feito em grupo, sobre a relação entre meio ambiente e saúde.",
+          "descricao": "Nesta atividade, participei da criação de um painel científico sobre a relação entre meio ambiente e saúde. Meu grupo ficou responsável pela introdução, apresentando os principais temas que seriam abordados no painel.\n\nA atividade trabalhou pesquisa, organização de informações, comunicação científica e trabalho em equipe.",
+          "imagens": ["conteudo/atividades/saude-em-foco/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHS3GD8mM0/HvKUWHn2I7Kw5evb75D1qA/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/8z0a7mekmoduthu" }],
+          "habilidades": [
+            "C2 – Aplicar os conceitos fundamentais e estruturas procedimentais das Ciências da Natureza na explicação de fenômenos cotidianos, bem como dominar processos e práticas da investigação científica.",
+            "H11 – Empregar procedimentos e práticas de observação, coleta de dados e conclusões para resolução de problemas relacionados às Ciências da Natureza.",
+            "C3 – Determinar os impactos das ações humanas nos ambientes, identificando suas causas e propondo soluções para a sua redução.",
+            "H15 – Comparar propostas de intervenção ambiental aplicando conhecimentos científicos e tecnológicos, observando os riscos e benefícios de sua implementação.",
+            "H18 – Identificar situações de risco ambiental na cidade onde reside.",
+            "C4 – Compreender o funcionamento dos organismos vivos em geral e o ser humano em especial, considerando suas relações com o ambiente em que vivem, abordando aspectos físicos e socioculturais.",
+            "H23 – Formular propostas de alcance individual ou coletivo, utilizando como critérios a preservação e a promoção da saúde individual e coletiva."
+          ],
+          "tags": ["em grupo"],
+          "destaque": true
         },
         {
-          "id": "exemplo-2",
-          "titulo": "[Título da atividade]",
-          "tipo": "outro",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "id": "estequiometria-na-industria",
+          "titulo": "Estequiometria na indústria",
+          "disciplina": "Química",
+          "trimestre": 2,
+          "tipo": "trabalho",
+          "resumo": "A produção de biodiesel pela transesterificação e o seu papel na energia sustentável.",
+          "descricao": "Nesta atividade, pesquisei sobre a produção de biodiesel, estudando a reação de transesterificação e sua aplicação na produção de energia sustentável. Também analisei aspectos como estequiometria, impactos ambientais e a importância do biodiesel para a redução da dependência do petróleo.\n\nA atividade ajudou a entender como a Química está presente em processos industriais e questões ambientais.",
+          "imagens": ["conteudo/atividades/estequiometria-na-industria/capa.webp"],
+          "embed": "https://www.canva.com/design/DAHNSroYS9w/qss_ZcUwbdT_1t5MJp44Zg/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/2vzoomnug15scky" }],
+          "habilidades": [
+            "C2 – Aplicar os conceitos fundamentais e estruturas procedimentais das Ciências da Natureza na explicação de fenômenos cotidianos, bem como dominar processos e práticas da investigação científica.",
+            "H6 – Compreender os conceitos relacionados à Física em seus diferentes ramos: Astronomia, Mecânica, Acústica, Óptica, Termologia, Calorimetria, Ondulatória, Eletricidade, Magnetismo e Física Moderna e Nuclear.",
+            "H7 – Compreender os conceitos relacionados à Química nos seus diferentes ramos: Físico-química, Química orgânica e Química Geral.",
+            "H9 – Explicar os conceitos de energia, matéria, vida e transformação para explicar fenômenos naturais e procedimentos tecnológicos."
+          ],
+          "tags": ["em grupo"]
         },
         {
-          "id": "exemplo-3",
-          "titulo": "[Título da atividade]",
-          "tipo": "projeto",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "id": "eletricidade-e-o-corpo-humano",
+          "titulo": "Eletricidade e o corpo humano",
+          "disciplina": "Biofísica",
+          "trimestre": 2,
+          "tipo": "trabalho",
+          "resumo": "Uma cartilha ilustrada sobre os efeitos da eletricidade no corpo humano.",
+          "descricao": "Nesta atividade, produzi uma cartilha sobre os efeitos da eletricidade no corpo humano, abordando os riscos de choques elétricos, formas de prevenção e aplicações da eletricidade na saúde. Também organizei informações de forma simples e ilustrada para facilitar a compreensão.\n\nFoi uma atividade importante para entender melhor os cuidados com a eletricidade no dia a dia.",
           "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
-        },
-        {
-          "id": "exemplo-4",
-          "titulo": "[Título da atividade]",
-          "tipo": "prova",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "links": [{ "rotulo": "[Link da cartilha]", "url": "" }],
+          "habilidades": [
+            "C1 – Compreender as ciências naturais e as tecnologias como construções humanas associadas à cultura dos povos e suas visões de mundo.",
+            "H3 – Inferir significado de termos técnico-científicos em textos de instrumentação ou de divulgação científica.",
+            "H4 – Identificar, em textos, diagramas, gráficos, imagens e tabelas, informações relevantes para compreender um fenômeno ou conceito relacionado às Ciências da Natureza.",
+            "C2 – Aplicar os conceitos fundamentais e estruturas procedimentais das Ciências da Natureza na explicação de fenômenos cotidianos, bem como dominar processos e práticas da investigação científica.",
+            "H12 – Relacionar informações para construir modelos em ciência e tecnologia.",
+            "C4 – Compreender o funcionamento dos organismos vivos em geral e o ser humano em especial, considerando suas relações com o ambiente em que vivem, abordando aspectos físicos e socioculturais.",
+            "H23 – Formular propostas de alcance individual ou coletivo, utilizando como critérios a preservação e a promoção da saúde individual e coletiva."
+          ],
+          "tags": []
         }
       ],
       "jogo": {
@@ -311,62 +502,139 @@
       "id": "tecnico",
       "materia": "Técnico em Sistemas",
       "titulo_area": "A Grande Teia",
-      "periodo": "[ano / semestre]",
-      "descricao": "[O que foi estudado no técnico, em 2 a 4 frases. As submatérias podem virar áreas próprias depois.]",
-      "competencias": ["[competência 1]", "[competência 2]", "[competência 3]"],
+      "periodo": "3º ano · 2026",
+      "descricao": "O curso técnico em Desenvolvimento de Sistemas, em cinco submatérias.\n\nModelagem de Sistemas, IoT, Banco de Dados, Desenvolvimento de Sistemas e Programação de Aplicativos: do primeiro LED aceso num Arduino até o Grand Prix SENAI, passando por uma empresa fictícia, um sistema para os ônibus de Florianópolis e um gateway de pagamento.",
+      "competencias": ["Modelagem e requisitos de sistemas", "Arduino e automação", "Node.js, React e SQLite", "Inovação e pitch"],
+      "submaterias": ["Modelagem de Sistemas", "IoT", "Banco de Dados", "Desenvolvimento de Sistemas", "Programação de Aplicativos"],
       "tema": "ninho",
       "atividades": [
         {
-          "id": "exemplo-1",
-          "titulo": "[Título da atividade]",
+          "id": "rvt-energia",
+          "titulo": "S.A.: a empresa fictícia RVT Energia",
+          "disciplina": "Modelagem de Sistemas",
+          "trimestre": 1,
           "tipo": "projeto",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
+          "resumo": "Uma empresa fictícia de energia solar: identidade visual, regras de negócio, requisitos e caso de uso.",
+          "descricao": "Nesta atividade, em grupo, desenvolvi a proposta de uma empresa fictícia chamada RVT Energia, voltada para energia solar, criando sua identidade visual, público-alvo, regras de negócio, requisitos do sistema e diagrama de caso de uso.\n\nA atividade envolveu conceitos de modelagem de sistemas, organização de informações, lógica de funcionamento de software e trabalho em equipe. Foi uma experiência fundamental para entender como funciona a criação de um sistema na prática e a ligação direta entre tecnologia e necessidades reais do mercado.",
           "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": true,
-          "exemplo": true
+          "embed": "https://www.canva.com/design/DAHEiMlngjI/JHzOzP0tJghXZUUKE24G7g/view?embed",
+          "links": [{ "rotulo": "Abrir no Canva", "url": "https://canva.link/r7h02zaxtsbkz96" }],
+          "tags": ["Identidade visual", "Regras de negócio", "UML", "Requisitos", "em grupo"]
         },
         {
-          "id": "exemplo-2",
-          "titulo": "[Título da atividade]",
+          "id": "automacao-industrial-e-urbana",
+          "titulo": "Automação industrial e urbana",
+          "disciplina": "IoT",
+          "trimestre": 1,
           "tipo": "projeto",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[Exemplo de texto completo.]",
-          "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "resumo": "Uma estufa inteligente e um semáforo automatizado, com Arduino.",
+          "descricao": "Este projeto consistiu no desenvolvimento de dois sistemas de automação utilizando a plataforma Arduino. O primeiro módulo simula uma Estufa Inteligente, onde implementei uma lógica de controle térmico que realiza a leitura constante de um sensor de temperatura. O sistema foi programado para ativar um cooler de resfriamento aos 30 °C e, em caso de superaquecimento crítico (acima de 50 °C), disparar um alarme sonoro via buzzer e um alerta visual com LED vermelho.\n\nO segundo módulo foca na Mobilidade Urbana, através da criação de um semáforo automatizado com temporização precisa via código (5 s verde, 2 s amarelo, 5 s vermelho). A atividade permitiu o domínio da sintaxe em C para hardware, manipulação de portas PWM e compreensão de fluxogramas de automação.",
+          "imagens": [{ "src": "conteudo/atividades/automacao-industrial-e-urbana/circuito.webp", "legenda": "Os circuitos da estufa e do semáforo, no Tinkercad" }],
+          "links": [{ "rotulo": "Documentação técnica (PDF)", "url": "conteudo/atividades/automacao-industrial-e-urbana/atividades-iot.pdf" }],
+          "tags": ["Arduino Uno", "Tinkercad", "Linguagem C", "Eletrônica"]
         },
         {
-          "id": "exemplo-3",
-          "titulo": "[Título da atividade]",
+          "id": "sistema-sente",
+          "titulo": "Sistema Sente",
+          "disciplina": "IoT",
+          "trimestre": 1,
           "tipo": "projeto",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "resumo": "Contagem de passageiros em tempo real contra a superlotação dos ônibus de Florianópolis.",
+          "descricao": "Em colaboração com Larissa Amorim, projetamos o Sente, uma solução de Internet das Coisas voltada para resolver o caos da superlotação no transporte público de Florianópolis. O sistema utiliza sensores de visão computacional Milesight VS13x instalados nas portas dos veículos para realizar a contagem bidirecional (entradas e saídas) de passageiros.\n\nA arquitetura do projeto prevê o envio desses dados via conexão 4G para uma infraestrutura na nuvem, onde o cálculo de ocupação percentual é realizado instantaneamente. O resultado é entregue ao usuário final através de um aplicativo móvel, permitindo que o passageiro saiba se há lugares vagos antes mesmo do ônibus chegar ao ponto, otimizando o fluxo urbano e a gestão das empresas de transporte.",
           "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "embed": "https://www.canva.com/design/DAHBG41dCTQ/BzNPwjlr6x9ZtiTYDz6-mA/view?embed",
+          "links": [
+            { "rotulo": "Documentação (Google Docs)", "url": "https://docs.google.com/document/d/1dgI3ywSscN2zkyqTors1g4Rk1lLBq7sQNY7C1dXFPoM/edit?usp=sharing" },
+            { "rotulo": "Apresentação (Canva)", "url": "https://canva.link/wcm3splwrp3tai2" }
+          ],
+          "tags": ["Milesight IA", "Redes 4G", "Computação em nuvem", "Cidade inteligente", "em dupla"],
+          "destaque": true
         },
         {
-          "id": "exemplo-4",
-          "titulo": "[Título da atividade]",
+          "id": "acender-led",
+          "titulo": "Acender um LED",
+          "disciplina": "IoT",
+          "trimestre": 1,
           "tipo": "trabalho",
-          "data": "",
-          "resumo": "[Exemplo: uma frase que resume a atividade.]",
-          "descricao": "[O que foi pedido, o que foi feito e o que foi aprendido.]",
+          "resumo": "O primeiro circuito: acender um LED por uma porta digital do Arduino.",
+          "descricao": "Realizar o acionamento de um LED utilizando uma porta digital.\n\nEsta prática introdutória permite compreender o uso da função pinMode() para configurar um pino como saída (OUTPUT).",
+          "imagens": [{ "src": "conteudo/atividades/acender-led/montagem.webp", "legenda": "A montagem, no Tinkercad" }],
+          "links": [{ "rotulo": "Documentação (PDF)", "url": "conteudo/atividades/acender-led/acender-led-e-semaforo.pdf" }],
+          "habilidades": [
+            "Configuração de um pino como entrada (INPUT) ou saída (OUTPUT).",
+            "Uso da função digitalWrite() para escrever um valor HIGH (alto) ou LOW (baixo) num pino digital.",
+            "Compreensão de que o valor HIGH equivale a uma tensão de 5 V e o valor LOW a 0 V."
+          ],
+          "materiais": ["1 Arduino UNO", "1 protoboard", "Jumpers coloridos", "1 resistor de 150 Ω", "1 LED", "LED ligado com o anodo (+) na base do resistor e o catodo (−) no 5 V"],
+          "codigo": "void setup()\n{\n  pinMode(8, OUTPUT);\n}\n\nvoid loop()\n{\n  digitalWrite(8, HIGH);\n  delay(1000); // Wait for 1000 millisecond(s)\n  digitalWrite(8, LOW);\n  delay(1000); // Wait for 1000 millisecond(s)\n}",
+          "tags": ["Arduino Uno", "Eletrônica básica", "Saída digital"]
+        },
+        {
+          "id": "semaforo",
+          "titulo": "Semáforo",
+          "disciplina": "IoT",
+          "trimestre": 1,
+          "tipo": "trabalho",
+          "resumo": "Três LEDs acendendo em sequência, controlados pelo tempo.",
+          "descricao": "Montando o semáforo.\n\nEste exercício avança os conceitos anteriores ao introduzir o controle de vários atuadores de forma sequencial.",
+          "imagens": [{ "src": "conteudo/atividades/semaforo/montagem.webp", "legenda": "A montagem, no Tinkercad" }],
+          "links": [{ "rotulo": "Documentação (PDF)", "url": "conteudo/atividades/acender-led/acender-led-e-semaforo.pdf" }],
+          "materiais": ["1 Arduino UNO", "1 protoboard", "Jumpers coloridos", "3 resistores de 150 Ω", "3 LEDs"],
+          "codigo": "// C++ code\n//\nint vermelho = 2;\nint ama = 3;\nint verde = 4;\n\nvoid setup()\n{\n  pinMode(vermelho, OUTPUT);\n  pinMode(ama, OUTPUT);\n  pinMode(verde, OUTPUT);\n}\n\nvoid loop()\n{\n  digitalWrite(vermelho, HIGH);\n  delay(1000); // Wait for 1000 millisecond(s)\n  digitalWrite(vermelho, LOW);\n  delay(1000); // Wait for 1000 millisecond(s)\n\n  digitalWrite(ama, HIGH);\n  delay(1000); // Wait for 1000 millisecond(s)\n  digitalWrite(ama, LOW);\n  delay(1000); // Wait for 1000 millisecond(s)\n\n  digitalWrite(verde, HIGH);\n  delay(1000); // Wait for 1000 millisecond(s)\n  digitalWrite(verde, LOW);\n  delay(1000); // Wait for 1000 millisecond(s)\n}",
+          "tags": ["Arduino Uno", "Temporização (delay)", "Lógica de programação"]
+        },
+        {
+          "id": "led-com-botao",
+          "titulo": "Controle de LED com botão",
+          "disciplina": "IoT",
+          "trimestre": 1,
+          "tipo": "trabalho",
+          "resumo": "Um clique liga, outro desliga: a lógica de alternância (toggle) num botão.",
+          "descricao": "Acionamento de um LED através de um botão (push button) utilizando a lógica de alternância (toggle). Um clique liga o LED e o mantém ligado; um segundo clique o desliga.\n\nEm sistemas do mundo real, muitas vezes queremos que um simples toque em um botão altere e mantenha o estado de um equipamento (como um interruptor inteligente), sem depender de manter o botão pressionado.",
+          "imagens": [{ "src": "conteudo/atividades/led-com-botao/montagem.webp", "legenda": "A montagem, no Tinkercad" }],
+          "embed": "https://www.canva.com/design/DAHS4sNpOQ8/wtvkTIbxizx5CcxbxexTzw/view?embed",
+          "links": [
+            { "rotulo": "Abrir no Canva", "url": "https://www.canva.com/design/DAHS4sNpOQ8/wtvkTIbxizx5CcxbxexTzw/view" },
+            { "rotulo": "Documentação (PDF)", "url": "conteudo/atividades/acender-led/acender-led-e-semaforo.pdf" }
+          ],
+          "materiais": ["1 Arduino UNO", "1 protoboard", "Jumpers coloridos", "1 resistor de 150 Ω (para o LED)", "1 LED", "1 push button (botão de pressão)"],
+          "codigo": "int pushbutton = 12;\nint led = 11;\n\nbool estadoLed = LOW;\nbool ultimoEstadoBotao = HIGH;\n\nvoid setup(){\n  pinMode(pushbutton, INPUT_PULLUP);\n  pinMode(led, OUTPUT);\n  digitalWrite(led, LOW);\n}\n\nvoid loop(){\n  bool estadoBotao = digitalRead(pushbutton);\n  if(ultimoEstadoBotao == HIGH && estadoBotao == LOW){\n    estadoLed = !estadoLed;\n    digitalWrite(led, estadoLed);\n    delay(200);\n  }\n  ultimoEstadoBotao = estadoBotao;\n}",
+          "tags": ["Arduino Uno", "Entrada digital", "Lógica booleana"]
+        },
+        {
+          "id": "grand-prix-senai-2026",
+          "titulo": "Grand Prix SENAI 2026",
+          "disciplina": "Banco de Dados",
+          "trimestre": 1,
+          "tipo": "projeto",
+          "resumo": "Roteirização em tempo real para o desafio da Vale no Porto Ponta da Madeira.",
+          "descricao": "O desafio, proposto pela mineradora Vale: “Como podemos melhorar a roteirização em tempo real para tornar inteligente a conexão entre os veículos operacionais e as equipes de campo nos deslocamentos em toda área operacional do Porto Ponta da Madeira, aumentando a eficiência logística e reduzindo dependência de processos manuais e comunicação informal?”\n\nNesta atividade, participei do Grand Prix SENAI 2026 com a equipe Café, Caos e Confusão, desenvolvendo uma solução tecnológica e de banco de dados para o desafio.\n\nTrabalhamos com conceitos de inovação aberta, automação de processos, logística estruturada e uso de tecnologia para otimizar o roteamento de veículos. A elaboração envolveu Lean Canvas, prototipação e a criação de um pitch focado em viabilidade e eficiência. A experiência reproduziu a dinâmica real do mercado, conectando arquitetura da informação à resolução de problemas operacionais críticos.",
           "imagens": [],
-          "links": [],
-          "tags": ["exemplo"],
-          "destaque": false,
-          "exemplo": true
+          "embed": "https://www.youtube.com/embed/2o7PK2cXa60",
+          "links": [
+            { "rotulo": "Ver o pitch no YouTube", "url": "https://www.youtube.com/watch?v=2o7PK2cXa60" },
+            { "rotulo": "Apresentação (Canva)", "url": "https://canva.link/tpvruvvilddjk7k" },
+            { "rotulo": "Página oficial do Grand Prix", "url": "https://grandprix.decocms.com/gp-senai-2026#submissions" }
+          ],
+          "tags": ["Roteirização em tempo real", "Logística", "Automação de processos", "Lean Canvas", "em equipe"],
+          "destaque": true
+        },
+        {
+          "id": "desafio-bp-promotora",
+          "titulo": "Desafio BP Promotora: gateway de pagamento",
+          "disciplina": ["Desenvolvimento de Sistemas", "Programação de Aplicativos"],
+          "trimestre": 2,
+          "tipo": "projeto",
+          "resumo": "Um gateway de pagamento com cobrança no cartão, taxas, juros por parcela e limite diário.",
+          "descricao": "Nesta atividade, desenvolvi em equipe (equipe Maneuchos) um gateway de pagamento utilizando Node.js, React e SQLite: uma plataforma de cálculo de juros bancários. O projeto simulou um sistema real de pagamentos, envolvendo cobrança por cartão, aplicação de taxas, cálculo de juros por parcela e controle de limite diário.\n\nFoi uma experiência prática para aplicar programação e desenvolvimento web na criação de um sistema funcional.",
+          "imagens": [{ "src": "conteudo/atividades/desafio-bp-promotora/interface.webp", "legenda": "A interface do gateway de pagamento" }],
+          "links": [{ "rotulo": "Repositório no GitHub", "url": "https://github.com/caetanorocha1113/bp-desafio" }],
+          "habilidades": [
+            "H1 – Reconhecer requisitos de qualidade, integridade, usabilidade e segurança da informação.",
+            "H4 – Selecionar linguagem de programação de acordo com os requisitos.",
+            "H6 – Aplicar linguagem de programação por meio de APIs, bibliotecas e frameworks na construção de rotinas de software."
+          ],
+          "tags": ["Node.js", "React", "SQLite", "em equipe"]
         }
       ],
       "jogo": {
@@ -381,49 +649,77 @@
   "trajetoria": {
     "titulo_area": "A Estrada dos Anos",
     "tema": "brejo",
-    "descricao": "[Como foi a caminhada do 1º ao 3º ano, em 2 ou 3 frases: o que mudou, o que você descobriu, para onde quer ir.]",
+    "descricao": "O portfólio mudou junto comigo: a primeira versão foi feita no Canva, a segunda no Google Sites, a terceira já era um site em HTML, CSS e JavaScript, e esta é a quarta.\n\nNo caminho vieram olimpíadas, hackathons, um Modelo ONU e os primeiros projetos de verdade.",
     "anos": [
       {
         "ano": "1º ano",
-        "periodo": "[ano]",
-        "titulo": "[O que marcou o 1º ano]",
-        "texto": "[Os primeiros passos no ensino médio e no técnico: matérias novas, colegas, o primeiro projeto.]"
+        "periodo": "2024",
+        "titulo": "A entrada no técnico",
+        "texto": "O começo do ensino médio integrado ao técnico em Desenvolvimento de Sistemas, no SESI-SENAI de Florianópolis.\n\nNo Hackatec 2024, do SENAI, desenvolvi soluções lógicas em equipe, sob pressão de tempo."
       },
       {
         "ano": "2º ano",
-        "periodo": "[ano]",
+        "periodo": "2025",
         "titulo": "[O que marcou o 2º ano]",
         "texto": "[O que ficou mais sério, os projetos maiores, o que você aprendeu a fazer sozinho.]"
       },
       {
         "ano": "3º ano",
-        "periodo": "[ano]",
-        "titulo": "[O que marcou o 3º ano]",
-        "texto": "[O fim do caminho: o projeto final, o estágio ou o vestibular, os planos para depois.]"
+        "periodo": "2026",
+        "titulo": "Projetos de verdade",
+        "texto": "O Grand Prix SENAI 2026 com a equipe Café, Caos e Confusão, o Modelo ONU da UFSC, o curso de Programação em Python do SENAI, os projetos de IoT com Arduino e o gateway de pagamento do desafio BP Promotora.\n\nA conclusão do curso está prevista para dezembro de 2026."
       }
     ],
     "conquistas": [
       {
-        "titulo": "[Certificado, curso ou olimpíada]",
-        "tipo": "certificado",
+        "titulo": "Medalha de prata na Olimpíada Brasileira de Geografia",
+        "tipo": "olimpiada",
         "data": "",
-        "descricao": "[Onde foi e o que você fez.]",
+        "descricao": "",
         "link": ""
       },
       {
-        "titulo": "[Prêmio, medalha ou apresentação]",
-        "tipo": "premio",
+        "titulo": "Medalha de bronze na Olimpíada Brasileira de Matemática",
+        "tipo": "olimpiada",
         "data": "",
-        "descricao": "[Onde foi e o que você fez.]",
+        "descricao": "",
+        "link": ""
+      },
+      {
+        "titulo": "Grand Prix SENAI 2026",
+        "tipo": "outro",
+        "data": "2026",
+        "descricao": "Solução para o desafio da Vale, com a equipe Café, Caos e Confusão.",
+        "link": "#tecnico/grand-prix-senai-2026"
+      },
+      {
+        "titulo": "SIEM: Modelo ONU (UFSC)",
+        "tipo": "outro",
+        "data": "2026",
+        "descricao": "Simulação de diplomacia com foco na resolução de problemas globais.",
+        "link": ""
+      },
+      {
+        "titulo": "Curso de Programação em Python",
+        "tipo": "curso",
+        "data": "2026-04",
+        "descricao": "SENAI, Florianópolis.",
+        "link": ""
+      },
+      {
+        "titulo": "Hackatec 2024 (SENAI)",
+        "tipo": "outro",
+        "data": "2024",
+        "descricao": "Hackathon: soluções lógicas em equipe, sob pressão de tempo.",
         "link": ""
       }
     ],
     "habilidades": {
-      "tecnicas": ["[Linguagem de programação]", "[Ferramenta]", "[Banco de dados]", "[Outra habilidade técnica]"],
-      "pessoais": ["[Trabalho em equipe]", "[Comunicação]", "[Organização]"]
+      "tecnicas": ["HTML, CSS e JavaScript", "Java", "Python", "Node.js, React e SQLite", "Arduino (C/C++)", "Lógica de programação", "Hardware e software", "Edição de vídeo", "Pacote Office", "Inglês B1+"],
+      "pessoais": ["Trabalho em equipe", "Comunicação assertiva", "Oratória e negociação", "Atenção a detalhes", "Aprendizado rápido e foco", "Inteligência emocional e resiliência"]
     }
   },
-  "sobre": "[Texto livre sobre você: interesses, objetivos, o que gosta de construir.]",
+  "sobre": "Sou um explorador do mundo digital, focado em transformar lógica em interfaces visuais. Atualmente desenvolvendo projetos que unem design criativo e tecnologia, busco sempre a próxima evolução no código.\n\nAcredito que a matemática e a arte são as duas faces da mesma moeda, e meu trabalho reflete essa busca pelo equilíbrio entre estrutura e estética.\n\nNasci em 13 de novembro de 2008, em Florianópolis, e curso o ensino médio técnico integrado na Escola SESI. Sou de exatas e me interesso por TI, matemática e história. Quero seguir carreira em programação ou em outras áreas da tecnologia.",
   "historia": {
     "prologo": "Antes de haver mapas, havia o Atlas: um livro que guardava tudo o que já se aprendeu. Numa noite sem lua, ele se partiu, e cada página caiu sobre o mundo como uma terra isolada, guardada por um Guardião que transformou o saber em enigma. De uma vila esquecida na superfície, um pequeno viajante de máscara pálida parte em silêncio para recuperar as páginas.",
     "final": "Com a última página de volta, o Atlas se fecha e se abre de novo, inteiro. O que ele revela não é um mundo distante: é o caminho percorrido. Cada terra vencida era uma matéria; cada enigma, uma atividade. O mapa inteiro é este portfólio."
