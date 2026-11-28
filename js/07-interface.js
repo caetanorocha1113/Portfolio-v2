@@ -118,6 +118,7 @@ comeco:['Começo',`<h4>O que é este site</h4>
 <tr><td>Personagem</td><td><code>recursos/personagem/</code></td></tr>
 <tr><td>Inimigos</td><td><code>recursos/inimigos/inimigos.json</code></td></tr>
 <tr><td>Fundo de cada área</td><td><code>recursos/fundos/</code></td></tr>
+<tr><td>HUD (medidor de luz e máscaras de vida)</td><td><code>recursos/hud/</code></td></tr>
 <tr><td>Efeitos sonoros e músicas</td><td><code>recursos/sons/</code> e <code>recursos/musicas/</code></td></tr></table></div>`],
 conteudo:['Conteúdo',`<h4>O arquivo <code>conteudo/portfolio.json</code></h4>
 <p>Tudo o que se lê no site sai dele: nome, apresentação, matérias, atividades, sobre e contato. A quantidade de áreas é a quantidade de matérias.</p>
@@ -161,6 +162,7 @@ pasta:['Pasta recursos',`<h4>Colocar arquivos sem configurar nada</h4>
 <tr><td>personagem/</td><td>uma pasta por animação (idle/, run/…) ou a lista <code>files</code> do <code>settings.json</code></td><td>.png</td></tr>
 <tr><td>inimigos/</td><td><code>inimigos.json</code> + uma pasta por inimigo; ou besouro, mosca, saltador, aranha, sentinela, pendente, agua-viva</td><td>.png .webp</td></tr>
 <tr><td>fundos/</td><td>o id da área (humanas, matematica…) ou o nome do tema (cinzaraiz…fosso)</td><td>.jpg .png .webp</td></tr>
+<tr><td>hud/</td><td><code>alma.png</code> (o medidor de luz) e <code>mascara/</code> com uma pasta de quadros por estado: cheia, brilho, cura, vazia, quebrar (a máscara no meio de cada imagem)</td><td>.png .webp</td></tr>
 <tr><td>sons/</td><td>pulo, salto-duplo, pouso, passo, golpe, acerto, dano, coleta, avanco, morte, inimigo-morre; ou os nomes do pacote do personagem (<code>hero_jump.wav</code>…) em qualquer subpasta; vozes das criaturas em <code>sons/inimigos/&lt;pasta&gt;/&lt;evento&gt;.wav</code></td><td>.ogg .mp3 .wav</td></tr>
 <tr><td>musicas/</td><td>qualquer nome (todas entram no player); cada área pega a faixa de nome parecido (Dirtmouth, City of Tears…) ou o que estiver em <code>musicas.json</code>; o id da área ou o tema também valem; as imagens da pasta viram as capas</td><td>.mp3 .ogg .m4a · capas .jpg .png .webp</td></tr></table></div>
 <h4>Inimigos: onde aparecem</h4>

@@ -408,6 +408,24 @@ Tamanho bom para capa: quadrada, entre 300 e 800 px (imagens maiores também fun
 - Formatos: `.mp3` `.ogg` `.m4a`.
 - Para repetir sem emenda, exporte cortado no ponto de loop.
 
+## 7. HUD — `recursos/hud/`
+
+O medidor de luz e as máscaras de vida do modo Jogo. Tudo opcional: sem estes arquivos, o HUD desenha o medidor e as gotas de vida a tinta.
+
+| Arquivo | O que é |
+|---|---|
+| `hud/alma.png` | o medidor de luz das magias: escurecido quando vazio, ele se enche de baixo para cima com a luz. Uma imagem redonda com fundo transparente (o site acha o círculo sozinho) |
+| `hud/mascara/cheia/1.png` | a máscara cheia, parada (sem ela, vale o 1º quadro de `brilho`) |
+| `hud/mascara/brilho/1.png, 2.png…` | o brilho que passa pelas máscaras de vez em quando |
+| `hud/mascara/cura/1.png, 2.png…` | a máscara se refazendo na cura |
+| `hud/mascara/vazia/1.png` | a máscara vazia |
+| `hud/mascara/quebrar/1.png, 2.png…` | a máscara quebrando quando o viajante leva dano (termina vazia) |
+
+- Formatos: `.png` `.webp`, com fundo transparente.
+- Todos os quadros na **mesma escala**, com a máscara **no meio da imagem**: o site desenha cada quadro centrado no lugar da máscara. Quadros maiores (como os de `quebrar`, com os cacos caindo) só precisam de mais espaço transparente em volta.
+- O tamanho na tela sai da altura do quadro de referência (`cheia`, ou o 1º de `brilho`, ou `vazia`).
+- Os quadros que estão aqui foram recortados da folha `fundos/PC _ Computer - Hollow Knight - UI - Masks.png`, e `alma.png` é uma cópia de `fundos/Soul_Meter.png`. As imagens originais continuam em `fundos/`.
+
 ---
 
 ## Testar no computador

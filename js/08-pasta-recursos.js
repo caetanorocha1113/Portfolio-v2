@@ -113,6 +113,7 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
   for(const[file,k]of SFX_FILES)jobs.push((async()=>{const f=await probe('sons/'+file,EXT.som);if(!f)return SOM_PADRAO[k]&&INDEX?null:note('Sons','sons/'+file+'.ogg (ou .mp3 .wav)',null);
     try{ASSETS.sfx[k]=await decodeAudio(f.blob);note('Sons',f.file,true)}catch(e){note('Sons',f.file,false,'não consegui ler o áudio')}})());
   jobs.push(carregarMusicas(note));
+  jobs.push(carregarHud(note));
   await Promise.all(jobs);
   carregarSonsPasta(note).then(()=>renderFolderStatus());
   redistribuirInimigos();
@@ -121,6 +122,21 @@ async function loadFolder(){const note=(grupo,arquivo,ok,nota)=>FOLDER.push({gru
   renderFolderStatus();
   const ok=FOLDER.filter(x=>x.ok).length,bad=FOLDER.filter(x=>x.ok===false).length;console.info('Portfólio · pasta recursos/',FOLDER);
   if(bad)toast(`Pasta recursos: ${bad} arquivo(s) com problema (veja o Guia → Pasta recursos).`)}
+/* ---------- HUD: o medidor de luz (hud/alma.png) e as máscaras de vida (hud/mascara/<estado>/1.png, 2.png…) ----------
+   Estados: cheia (1 quadro, opcional: sem ela vale o 1º do brilho), brilho (o brilho que passa de vez em quando),
+   cura (a máscara se refazendo), vazia (1 quadro) e quebrar (o dano). Todos na mesma escala, com a máscara no meio da imagem. */
+const HUD_ESTADOS=['cheia','brilho','cura','vazia','quebrar'];
+async function imagensDaPasta(dir){const out=[],fs=listDir(dir);
+  if(fs){for(const f of fs){const b=await grab(f);if(b)try{out.push(await blobImg(b))}catch(e){}}return out}
+  for(let i=1;i<60;i++){const f=await probe(dir+'/'+i,EXT.sprite);if(!f)break;try{out.push(await blobImg(f.blob))}catch(e){break}}return out}
+async function carregarHud(note){if(typeof HUD_IMG==='undefined')return;
+  const a=await probe('hud/alma',EXT.sprite);
+  if(a){try{HUD_IMG.alma=await blobImg(a.blob);note('HUD',a.file,true,'o medidor de luz das magias')}catch(e){note('HUD',a.file,false,'não consegui ler a imagem')}}
+  else note('HUD','hud/alma.png',null,'opcional: sem ele, o medidor é desenhado a tinta');
+  const achados=[];
+  await Promise.all(HUD_ESTADOS.map(async est=>{const L=await imagensDaPasta('hud/mascara/'+est);if(L.length){HUD_IMG.mascara[est]=L;achados.push(est+' ('+L.length+')')}}));
+  if(achados.length)note('HUD','hud/mascara/',true,'máscaras de vida: '+achados.join(', '));
+  else note('HUD','hud/mascara/<estado>/1.png',null,'opcional: sem elas, a vida aparece como gotas de tinta')}
 /* ---------- músicas da pasta ----------
    Com o índice, toda faixa de recursos/musicas/ entra na lista do player (cada uma só baixa quando toca).
    Cada área ganha uma faixa: o arquivo com o id da área (humanas.mp3…), o que estiver em musicas.json,

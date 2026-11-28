@@ -37,7 +37,7 @@ Abra http://localhost:8000. Para ver a abertura de novo, use http://localhost:80
 | `js/02c-pintor.js` | pintor em segundo plano (Web Worker): pinta os blocos do mapa e os fundos sem travar o jogo |
 | `js/03-cenario.js` | câmera, blocos pintados do mundo, fundos com parallax, tinta e papel, minimapa, HUD, partículas, criaturas desenhadas |
 | `js/03c-vivos.js` | cenário vivo: plantas que se dobram, lanternas e cipós que balançam, vasos, caixas, livros e cristais que quebram e soltam fragmentos de luz, borboletas que fogem |
-| `js/03b-hud.js` | HUD desenhado a tinta: tinteiro com a luz líquida e a pena, gotas de vida num traço de pena, fragmentos de luz, páginas do Atlas e o nome da área |
+| `js/03b-hud.js` | HUD: o medidor de luz (`recursos/hud/alma.png`) que se enche com a luz das magias, num anel de tinta; as máscaras de vida (`recursos/hud/mascara/`) que quebram, se refazem e brilham, num traço de pena; fragmentos de luz, páginas do Atlas e o nome da área. Sem as imagens, desenha tudo a tinta |
 | `js/04-jogo.js` | colisão com o mapa, modo Passeio (rolagem → caminho), modo Jogo, inimigos (percepção, alerta, preparo, ataque), combate |
 | `js/04c-inimigos.js` | o comportamento de cada criatura (patrulha, emboscada, escudo, mergulho, raio, concha, esporos…), projéteis, raios, nuvens e o dano |
 | `js/04b-segredos.js` | o portfólio dentro do jogo: placa de cada matéria, páginas das atividades, paredes falsas, salas secretas e easter eggs |
